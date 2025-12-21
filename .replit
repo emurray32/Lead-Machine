@@ -29,5 +29,5 @@ args = "python main.py"
 outputType = "console"
 
 [deployment]
-deploymentTarget = "vm"
+deploymentTarget = "scheduled"
 run = ["python", "main.py"]

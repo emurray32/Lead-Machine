@@ -602,34 +602,20 @@ def main() -> None:
     print_banner()
     ensure_directories()
     
-    last_github_check = 0.0
-    last_rss_docs_check = 0.0
-    
-    log("Starting monitoring loop. Press Ctrl+C to stop.")
+    log("Running scheduled monitoring check...")
     
     try:
-        while True:
-            try:
-                last_github_check, last_rss_docs_check = run_monitoring_cycle(
-                    last_github_check, last_rss_docs_check
-                )
-            except Exception as e:
-                log(f"Error in monitoring cycle: {e}", "ERROR")
-            
-            current_time = time.time()
-            next_github = last_github_check + GITHUB_CHECK_INTERVAL - current_time
-            next_rss_docs = last_rss_docs_check + RSS_DOCS_CHECK_INTERVAL - current_time
-            next_check = min(next_github, next_rss_docs)
-            
-            if next_check > 0:
-                next_check_mins = int(next_check / 60)
-                log(f"Sleeping. Next check in approximately {next_check_mins} minutes.")
-            
-            time.sleep(MAIN_LOOP_SLEEP)
-            
-    except KeyboardInterrupt:
-        log("Shutdown requested. Exiting gracefully...")
-        print("\nGoodbye!")
+        github_alerts = check_all_github(TARGETS)
+        rss_alerts = check_all_rss(TARGETS)
+        docs_alerts = check_all_docs(TARGETS)
+        
+        total_alerts = github_alerts + rss_alerts + docs_alerts
+        log(f"Monitoring complete. Total alerts: {total_alerts}")
+        
+    except Exception as e:
+        log(f"Error during monitoring: {e}", "ERROR")
+    
+    log("Check finished. Exiting.")
 
 if __name__ == "__main__":
     main()
