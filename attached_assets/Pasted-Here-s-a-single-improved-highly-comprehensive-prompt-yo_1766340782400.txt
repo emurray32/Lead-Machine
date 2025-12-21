@@ -1,0 +1,54 @@
+Here's a single, improved, highly comprehensive prompt you can copy-paste directly into Replit's AI (or Ghostwriter) to generate the complete unified monitoring app. It's formatted cleanly for easy reading/copying, with more details, better structure, enhanced features (like optional Slack alerts, better error handling, configurable schedules, and easy extension), and a larger sample config.
+Prompt to paste into Replit AI:
+Create a single, robust, unified Python monitoring application for Replit that continuously tracks multiple target companies for early localization/phrase-string intent signals across three integrated sources:
+
+Public GitHub repositories: Monitor specified orgs/repos for new commits containing localization-related keywords in messages.
+Google Play App Store updates: Monitor app changelogs via RSS feeds for mentions of new languages or localization support.
+Public API/Developer Documentation pages: Detect changes in doc pages and scan for new appearances of localization-related keywords (e.g., new endpoints or sections).
+
+The app must run in an infinite loop, perform checks on configurable schedules (GitHub every 6 hours, RSS and docs daily by default), persist state across runs using JSON files and a folder for previous doc texts, handle errors gracefully (skip failed checks, log issues), and output clear, formatted console alerts for any matches. Make it free-tier friendly but ready for "Always On" if upgraded.
+Core features:
+
+Centralized configuration: A single editable TARGETS list of dictionaries, each representing a company with optional fields: company name, github_org, github_repos (list), play_package (for reference), rss_url (full generated RSS URL from tools like rss.app), doc_urls (list of exact URLs to monitor).
+Shared keyword list (customizable): ["i18n", "localization", "translate", "rtl", "pluralization", "language", "locale", "es.json", "fr.json", "de.json", "ar.json", "arabic", "spanish", "french", "german", "korean", "hindi", "japanese", "chinese", "phrase", "strings"]
+GitHub monitoring: Use GitHub API (support optional GITHUB_TOKEN secret for higher rate limits). For each repo, fetch recent commits (up to 20), compare against stored last_seen_sha, alert on new commits where message (lower-cased) contains any keyword. Alert format: "GITHUB ALERT [{company}] {repo}: {short_message} by {author} - {commit_url}"
+Google Play RSS monitoring: Use feedparser. For each RSS URL, parse entries, track seen entry IDs (store last 10 per app). Check newest entry's title + summary for keywords + language indicators (e.g., "added", "support", "now available in"). Alert: "PLAY STORE ALERT [{company}]: New update mentions languages - {title}: {summary} - {link}"
+API/Docs monitoring: Use requests + BeautifulSoup to fetch and extract clean text (soup.get_text()). Compute MD5 hash of text. If hash changed, check new text for keywords. If keywords found (and weren't in previous text, if possible), alert: "DOCS ALERT [{company}]: Possible new localization content in {url}". Store previous text in a "previous_texts" folder named by sanitized company+url.
+Persistence: JSON files - last_commits.json (key: "company/repo" -> sha), seen_rss.json (key: company -> list of entry IDs), doc_hashes.json (key: "company/url" -> hash).
+Alerting: Console prints with timestamps and clear labels. Include optional SLACK_WEBHOOK secret - if set, POST JSON alerts to Slack.
+Scheduling: Single loop with time tracking - run GitHub checks every 6 hours, RSS/docs every 24 hours, full cycle otherwise.
+Error handling: Try/except around each source/check, print warnings but continue. Respect rate limits (sleep on 403 if needed).
+Logging: Print status like "Starting checks... GitHub complete, found X alerts" at start of each cycle.
+Extendable: Comments for future additions (Apple Store, Twitter, etc.).
+
+Required imports: requests, feedparser, bs4 (BeautifulSoup), hashlib, json, os, time, datetime. Assume user will pip install any missing (feedparser, beautifulsoup4).
+Start with this expandable sample config (user will edit/add more):
+TARGETS = [
+{
+"company": "Walmart",
+"github_org": "walmartlabs",
+"github_repos": ["onewalmart-mobile"],
+"play_package": None,
+"rss_url": None,
+"doc_urls": []
+},
+{
+"company": "Spotify",
+"github_org": "spotify",
+"github_repos": ["web-api"],
+"play_package": "com.spotify.music",
+"rss_url": "https://rss.app/feeds/your-generated-spotify-feed.xml",  # User replaces with real
+"doc_urls": ["https://developer.spotify.com/documentation/web-api"]
+},
+{
+"company": "Airbnb",
+"github_org": "airbnb",
+"github_repos": ["javascript"],
+"play_package": "com.airbnb.android",
+"rss_url": None,
+"doc_urls": []
+},
+Add 10+ more placeholders for Netflix, Uber, Shopify, Nike, etc.
+]
+Generate the full, clean, heavily commented, ready-to-run code in main.py. Make it professional and robust.
+(End of prompt — paste everything from "Create a single..." onward into Replit AI. It will generate the complete unified app code. Then just edit the TARGETS with your real companies, RSS URLs, and secrets like GITHUB_TOKEN or SLACK_WEBHOOK.)
