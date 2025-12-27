@@ -8,7 +8,37 @@ import os
 import csv
 import io
 import yaml
-from datetime import datetime
+from datetime import datetime, timezone
+
+def friendly_time(dt):
+    """Convert datetime to friendly format like '2 hours ago' or 'Dec 27'."""
+    if not dt:
+        return ''
+    
+    now = datetime.now()
+    if dt.tzinfo:
+        dt = dt.replace(tzinfo=None)
+    
+    diff = now - dt
+    seconds = diff.total_seconds()
+    
+    if seconds < 0:
+        return 'Just now'
+    elif seconds < 60:
+        return 'Just now'
+    elif seconds < 3600:
+        mins = int(seconds / 60)
+        return f'{mins}m ago'
+    elif seconds < 86400:
+        hours = int(seconds / 3600)
+        return f'{hours}h ago'
+    elif seconds < 172800:
+        return 'Yesterday'
+    elif seconds < 604800:
+        days = int(seconds / 86400)
+        return f'{days}d ago'
+    else:
+        return dt.strftime('%b %d')
 
 try:
     import ai_summary
@@ -59,17 +89,19 @@ def index():
         company=company_filter if company_filter else None
     )
     
+    for alert in alerts:
+        alert['friendly_time'] = friendly_time(alert.get('created_at'))
+    
     companies = storage.get_companies()
     stats = storage.get_alert_stats()
     
-    from datetime import datetime
     return render_template('dashboard.html', 
                          alerts=alerts,
                          companies=companies,
                          stats=stats,
                          current_source=source_filter,
                          current_company=company_filter,
-                         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                         ai_available=AI_AVAILABLE)
 
 @app.route('/api/alerts')
 def api_alerts():

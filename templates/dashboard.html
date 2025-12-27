@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Localization Monitor Dashboard</title>
+    <title>Localization Monitor</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             color: #333;
             line-height: 1.6;
         }
@@ -21,334 +21,329 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem;
-            text-align: center;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
         
         .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
         
-        .header p {
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .header-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        
+        .header-btn:hover {
             opacity: 0.9;
         }
         
-        .stats-container {
+        .btn-admin {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .btn-export {
+            background: white;
+            color: #667eea;
+        }
+        
+        .stats-row {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            padding: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
+            padding: 1rem;
             background: white;
-            padding: 1rem 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-            min-width: 120px;
+            border-bottom: 1px solid #e9ecef;
         }
         
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
+        .stat {
+            text-align: center;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .stat-num {
+            font-size: 1.75rem;
+            font-weight: 700;
             color: #667eea;
         }
         
         .stat-label {
-            font-size: 0.85rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: #888;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 1rem;
+            padding: 1.5rem 1rem;
         }
         
         .filters {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .filters label {
-            font-weight: 500;
-            color: #555;
         }
         
         .filters select {
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
+            padding: 0.6rem 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.9rem;
             background: white;
+            min-width: 140px;
         }
         
         .filters button {
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 1.25rem;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        .filters button:hover {
-            background: #5a6fd6;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
         
         .filters .reset-btn {
-            background: #888;
-        }
-        
-        .export-buttons {
-            margin-left: auto;
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .export-btn {
-            padding: 0.5rem 1rem;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
+            background: #6c757d;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
         }
         
-        .export-btn:hover {
-            background: #218838;
-        }
-        
-        .export-btn.json {
-            background: #17a2b8;
-        }
-        
-        .export-btn.json:hover {
-            background: #138496;
-        }
-        
-        .alerts-table {
+        .alert-card {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: box-shadow 0.2s;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .alert-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        th {
-            background: #f8f9fa;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid #e9ecef;
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
         }
         
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-            vertical-align: top;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
+        .alert-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
         
         .source-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .source-github {
-            background: #24292e;
-            color: white;
-        }
-        
-        .source-rss {
-            background: #f78422;
-            color: white;
-        }
-        
-        .source-playstore {
-            background: #01875f;
-            color: white;
+            background: #f0f0f0;
+            color: #333;
         }
         
         .source-docs {
-            background: #0366d6;
-            color: white;
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .source-playstore {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
         
         .company-name {
             font-weight: 600;
             color: #333;
+            font-size: 1rem;
         }
         
-        .alert-title {
-            color: #333;
-            margin-bottom: 0.25rem;
-        }
-        
-        .alert-message {
-            font-size: 0.9rem;
-            color: #666;
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .keywords {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem;
-        }
-        
-        .keyword-chip {
-            background: #e9ecef;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            color: #555;
-        }
-        
-        .alert-link {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        
-        .alert-link:hover {
-            text-decoration: underline;
-        }
-        
-        .timestamp {
+        .alert-time {
             font-size: 0.85rem;
             color: #888;
         }
         
-        .no-alerts {
-            text-align: center;
-            padding: 3rem;
-            color: #888;
+        .alert-content {
+            margin-bottom: 0.75rem;
         }
         
-        .refresh-info {
-            text-align: center;
-            padding: 1rem;
-            color: #888;
-            font-size: 0.9rem;
+        .alert-title {
+            font-size: 0.95rem;
+            color: #444;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-message {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .alert-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.9rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .action-link:hover {
+            background: #5a67d8;
         }
         
         .explain-btn {
-            padding: 0.4rem 0.8rem;
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            border: none;
+            padding: 0.5rem 0.9rem;
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #667eea;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            transition: transform 0.1s, box-shadow 0.2s;
+            transition: all 0.2s;
         }
         
         .explain-btn:hover {
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
-        }
-        
-        .explain-btn:active {
-            transform: scale(0.95);
+            background: #667eea;
+            color: white;
         }
         
         .explain-btn:disabled {
-            background: #6c757d;
+            opacity: 0.6;
             cursor: wait;
         }
         
-        @media (max-width: 768px) {
-            .filters {
+        .ai-summary {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.6;
+            border-left: 3px solid #667eea;
+        }
+        
+        .ai-summary.error {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        
+        .no-alerts {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #888;
+        }
+        
+        .no-alerts h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+        
+        @media (max-width: 600px) {
+            .header {
                 flex-direction: column;
+                text-align: center;
             }
             
-            table {
-                font-size: 0.9rem;
+            .stats-row {
+                flex-wrap: wrap;
             }
             
-            th, td {
-                padding: 0.75rem 0.5rem;
+            .stat {
+                padding: 0.5rem 1rem;
             }
             
-            .alert-message {
-                max-width: 200px;
+            .alert-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .alert-time {
+                order: -1;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Localization Monitor Dashboard</h1>
-        <p>Tracking localization signals across GitHub, Play Store, and Documentation</p>
-        <div style="margin-top: 12px;">
-            <a href="/admin" style="color: white; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; text-decoration: none;">Admin Panel</a>
+        <h1>Localization Monitor</h1>
+        <div class="header-actions">
+            <a href="/admin" class="header-btn btn-admin">Admin</a>
+            <a href="/export/csv" class="header-btn btn-export">Export</a>
         </div>
     </div>
     
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-number">{{ stats.total or 0 }}</div>
-            <div class="stat-label">Total Alerts</div>
+    <div class="stats-row">
+        <div class="stat">
+            <div class="stat-num">{{ stats.total }}</div>
+            <div class="stat-label">Total</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ stats.github_count or 0 }}</div>
+        <div class="stat">
+            <div class="stat-num">{{ stats.github_count }}</div>
             <div class="stat-label">GitHub</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ stats.playstore_count or 0 }}</div>
+        <div class="stat">
+            <div class="stat-num">{{ stats.playstore_count }}</div>
             <div class="stat-label">Play Store</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">{{ stats.docs_count or 0 }}</div>
-            <div class="stat-label">Documentation</div>
+        <div class="stat">
+            <div class="stat-num">{{ stats.docs_count }}</div>
+            <div class="stat-label">Docs</div>
         </div>
     </div>
     
     <div class="container">
-        <form class="filters" method="GET">
-            <label for="source">Source:</label>
-            <select name="source" id="source">
+        <form class="filters" method="get" action="/">
+            <select name="source">
                 <option value="">All Sources</option>
                 <option value="github" {% if current_source == 'github' %}selected{% endif %}>GitHub</option>
                 <option value="playstore" {% if current_source == 'playstore' %}selected{% endif %}>Play Store</option>
                 <option value="docs" {% if current_source == 'docs' %}selected{% endif %}>Documentation</option>
             </select>
             
-            <label for="company">Company:</label>
-            <select name="company" id="company">
+            <select name="company">
                 <option value="">All Companies</option>
                 {% for company in companies %}
                 <option value="{{ company }}" {% if current_company == company %}selected{% endif %}>{{ company }}</option>
@@ -356,84 +351,53 @@
             </select>
             
             <button type="submit">Filter</button>
-            <a href="/" class="reset-btn" style="padding: 0.5rem 1.5rem; background: #888; color: white; border-radius: 4px; text-decoration: none;">Reset</a>
-            
-            <div class="export-buttons">
-                <a href="/export/csv{% if current_source or current_company %}?{% if current_source %}source={{ current_source }}{% endif %}{% if current_source and current_company %}&{% endif %}{% if current_company %}company={{ current_company }}{% endif %}{% endif %}" class="export-btn">CSV</a>
-                <a href="/export/json{% if current_source or current_company %}?{% if current_source %}source={{ current_source }}{% endif %}{% if current_source and current_company %}&{% endif %}{% if current_company %}company={{ current_company }}{% endif %}{% endif %}" class="export-btn json">JSON</a>
-            </div>
+            <a href="/" class="header-btn reset-btn">Reset</a>
         </form>
         
-        <div class="alerts-table">
-            {% if alerts %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Source</th>
-                        <th>Company</th>
-                        <th>Details</th>
-                        <th>Keywords</th>
-                        <th>Link</th>
-                        <th>AI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for alert in alerts %}
-                    <tr data-alert-id="{{ alert.id }}"
-                        data-source="{{ alert.source }}"
-                        data-company="{{ alert.company }}"
-                        data-title="{{ (alert.title or '')|e }}"
-                        data-message="{{ (alert.message or '')|e }}"
-                        data-keywords="{{ alert.keywords or '' }}">
-                        <td class="timestamp">{{ alert.created_at.strftime('%Y-%m-%d %H:%M') if alert.created_at else 'N/A' }}</td>
-                        <td>
-                            <span class="source-badge source-{{ alert.source }}">{{ alert.source }}</span>
-                        </td>
-                        <td class="company-name">{{ alert.company }}</td>
-                        <td>
-                            <div class="alert-title">{{ alert.title or 'No title' }}</div>
-                            <div class="alert-message">{{ alert.message or '' }}</div>
-                            <div class="ai-summary" id="summary-{{ alert.id }}" style="display:none; margin-top: 8px; padding: 8px; background: #e8f4e8; border-radius: 6px; font-size: 0.9rem; color: #2d5a2d;"></div>
-                        </td>
-                        <td>
-                            <div class="keywords">
-                                {% for kw in (alert.keywords or '').split(', ')[:5] %}
-                                {% if kw %}
-                                <span class="keyword-chip">{{ kw }}</span>
-                                {% endif %}
-                                {% endfor %}
-                            </div>
-                        </td>
-                        <td>
-                            {% if alert.url %}
-                            <a href="{{ alert.url }}" target="_blank" class="alert-link">View</a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <button class="explain-btn" data-id="{{ alert.id }}">Explain</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="no-alerts">
-                <p>No alerts found. Run the monitoring check to detect new signals.</p>
+        {% if alerts %}
+            {% for alert in alerts %}
+            <div class="alert-card"
+                 data-id="{{ alert.id }}"
+                 data-source="{{ alert.source }}"
+                 data-company="{{ alert.company }}"
+                 data-title="{{ (alert.title or '')|e }}"
+                 data-message="{{ (alert.message or '')|e }}"
+                 data-keywords="{{ alert.keywords or '' }}">
+                
+                <div class="alert-header">
+                    <div class="alert-meta">
+                        <span class="source-badge source-{{ alert.source }}">{{ alert.source }}</span>
+                        <span class="company-name">{{ alert.company }}</span>
+                    </div>
+                    <span class="alert-time">{{ alert.friendly_time }}</span>
+                </div>
+                
+                <div class="alert-content">
+                    <div class="alert-title">{{ alert.title or 'Signal detected' }}</div>
+                    <div class="alert-message">{{ alert.message or '' }}</div>
+                </div>
+                
+                <div class="alert-actions">
+                    {% if alert.url %}
+                    <a href="{{ alert.url }}" target="_blank" class="action-link">View Source</a>
+                    {% endif %}
+                    {% if ai_available %}
+                    <button class="explain-btn" data-id="{{ alert.id }}">Explain</button>
+                    {% endif %}
+                </div>
+                
+                <div class="ai-summary" id="summary-{{ alert.id }}"></div>
             </div>
-            {% endif %}
-        </div>
-        
-        <div class="refresh-info">
-            <p>Auto-refresh every 60 seconds. Last updated: <span id="last-update">{{ now }}</span></p>
-        </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-alerts">
+                <h3>No alerts yet</h3>
+                <p>Run the monitoring check to detect localization signals.</p>
+            </div>
+        {% endif %}
     </div>
     
     <script>
-        setTimeout(function() {
-            location.reload();
-        }, 60000);
-        
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.explain-btn').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
@@ -443,14 +407,8 @@
         });
         
         async function explainAlert(btn) {
-            const row = btn.closest('tr');
-            const id = row.dataset.alertId;
-            const source = row.dataset.source;
-            const company = row.dataset.company;
-            const title = row.dataset.title;
-            const message = row.dataset.message;
-            const keywords = row.dataset.keywords;
-            
+            const card = btn.closest('.alert-card');
+            const id = card.dataset.id;
             const summaryDiv = document.getElementById('summary-' + id);
             
             if (summaryDiv.style.display === 'block') {
@@ -467,11 +425,11 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        source: source,
-                        company: company,
-                        title: title,
-                        message: message,
-                        keywords: keywords ? keywords.split(', ') : []
+                        source: card.dataset.source,
+                        company: card.dataset.company,
+                        title: card.dataset.title,
+                        message: card.dataset.message,
+                        keywords: card.dataset.keywords ? card.dataset.keywords.split(', ') : []
                     })
                 });
                 
@@ -479,25 +437,28 @@
                 
                 if (result.summary) {
                     summaryDiv.textContent = result.summary;
+                    summaryDiv.classList.remove('error');
                     summaryDiv.style.display = 'block';
                     btn.textContent = 'Hide';
                 } else {
                     summaryDiv.textContent = result.error || 'Could not generate summary';
+                    summaryDiv.classList.add('error');
                     summaryDiv.style.display = 'block';
-                    summaryDiv.style.background = '#fff3cd';
-                    summaryDiv.style.color = '#856404';
                     btn.textContent = 'Retry';
                 }
             } catch (err) {
-                summaryDiv.textContent = 'Error: ' + err.message;
+                summaryDiv.textContent = 'Error connecting to AI service';
+                summaryDiv.classList.add('error');
                 summaryDiv.style.display = 'block';
-                summaryDiv.style.background = '#f8d7da';
-                summaryDiv.style.color = '#721c24';
                 btn.textContent = 'Retry';
             }
             
             btn.disabled = false;
         }
+        
+        setTimeout(function() {
+            location.reload();
+        }, 120000);
     </script>
 </body>
 </html>
