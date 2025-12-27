@@ -17,6 +17,10 @@ author = "agent"
 task = "workflow.run"
 args = "Localization Monitor"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Dashboard"
+
 [[workflows.workflow]]
 name = "Localization Monitor"
 author = "agent"
@@ -28,6 +32,22 @@ args = "python main.py"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "Dashboard"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python dashboard.py"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [deployment]
-deploymentTarget = "scheduled"
-run = ["python", "main.py"]
+deploymentTarget = "autoscale"
+run = ["python", "dashboard.py"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

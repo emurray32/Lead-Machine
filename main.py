@@ -21,6 +21,12 @@ import time
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 
+try:
+    import storage
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
+
 # =============================================================================
 # CONFIGURATION - Edit this section to customize your monitoring targets
 # =============================================================================
@@ -318,6 +324,21 @@ def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> 
                     f"  URL: {commit_url}"
                 )
                 alert(alert_msg)
+                
+                if DB_AVAILABLE:
+                    try:
+                        storage.save_alert(
+                            source="github",
+                            company=company,
+                            title=f"{org}/{repo}: {short_message}",
+                            message=f"By {author}",
+                            keywords=matched_keywords,
+                            url=commit_url,
+                            metadata={"sha": sha, "author": author}
+                        )
+                    except Exception as e:
+                        log(f"Failed to save alert to database: {e}", "WARNING")
+                
                 alert_count += 1
         
         last_commits[repo_key] = new_last_sha
@@ -401,6 +422,20 @@ def check_rss_feed(company: str, rss_url: str, seen_rss: Dict) -> int:
                     f"  Link: {link}"
                 )
                 alert(alert_msg)
+                
+                if DB_AVAILABLE:
+                    try:
+                        storage.save_alert(
+                            source="rss",
+                            company=company,
+                            title=title[:100],
+                            message=summary[:500],
+                            keywords=all_matches,
+                            url=link
+                        )
+                    except Exception as e:
+                        log(f"Failed to save alert to database: {e}", "WARNING")
+                
                 alert_count += 1
         
         seen_rss[company] = new_seen_ids[:10]
@@ -504,6 +539,20 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
                         f"  All keywords found: {', '.join(matched_keywords[:10])}..."
                     )
                     alert(alert_msg)
+                    
+                    if DB_AVAILABLE:
+                        try:
+                            storage.save_alert(
+                                source="docs",
+                                company=company,
+                                title=f"Doc change detected: {url[:80]}",
+                                message=f"New keywords: {', '.join(new_keywords) if new_keywords else 'First scan'}",
+                                keywords=new_keywords if new_keywords else matched_keywords[:10],
+                                url=url
+                            )
+                        except Exception as e:
+                            log(f"Failed to save alert to database: {e}", "WARNING")
+                    
                     alert_count += 1
         
         doc_hashes[hash_key] = current_hash
