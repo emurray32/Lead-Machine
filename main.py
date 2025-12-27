@@ -256,13 +256,69 @@ def contains_keywords(text: str, keywords: List[str] = KEYWORDS) -> List[str]:
     text_lower = text.lower()
     return [kw for kw in keywords if kw.lower() in text_lower]
 
+_github_connection_cache = {"settings": None, "expires_at": None}
+
+def get_github_access_token() -> Optional[str]:
+    """Get GitHub access token from Replit connection or environment variable."""
+    if os.environ.get("GITHUB_TOKEN"):
+        return os.environ.get("GITHUB_TOKEN")
+    
+    hostname = os.environ.get("REPLIT_CONNECTORS_HOSTNAME")
+    repl_identity = os.environ.get("REPL_IDENTITY")
+    web_repl_renewal = os.environ.get("WEB_REPL_RENEWAL")
+    
+    if not hostname:
+        return None
+    
+    x_replit_token = None
+    if repl_identity:
+        x_replit_token = f"repl {repl_identity}"
+    elif web_repl_renewal:
+        x_replit_token = f"depl {web_repl_renewal}"
+    
+    if not x_replit_token:
+        return None
+    
+    cached = _github_connection_cache
+    if cached["settings"] and cached["expires_at"]:
+        try:
+            if datetime.fromisoformat(cached["expires_at"].replace("Z", "+00:00")) > datetime.now():
+                return cached["settings"].get("access_token")
+        except:
+            pass
+    
+    try:
+        response = requests.get(
+            f"https://{hostname}/api/v2/connection?include_secrets=true&connector_names=github",
+            headers={
+                "Accept": "application/json",
+                "X_REPLIT_TOKEN": x_replit_token
+            },
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        connection = data.get("items", [{}])[0]
+        settings = connection.get("settings", {})
+        
+        access_token = settings.get("access_token") or settings.get("oauth", {}).get("credentials", {}).get("access_token")
+        
+        if access_token:
+            _github_connection_cache["settings"] = settings
+            _github_connection_cache["expires_at"] = settings.get("expires_at")
+            return access_token
+    except Exception as e:
+        log(f"Error fetching GitHub connection: {e}", "WARNING")
+    
+    return None
+
 def get_headers() -> Dict[str, str]:
     """Get headers for GitHub API requests."""
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "Localization-Monitor-Bot"
     }
-    github_token = os.environ.get("GITHUB_TOKEN")
+    github_token = get_github_access_token()
     if github_token:
         headers["Authorization"] = f"token {github_token}"
     return headers
@@ -640,10 +696,14 @@ def print_banner() -> None:
     print(f"  - GitHub: Every {GITHUB_CHECK_INTERVAL // 3600} hours")
     print(f"  - RSS/Docs: Every {RSS_DOCS_CHECK_INTERVAL // 3600} hours")
     
-    github_token = os.environ.get("GITHUB_TOKEN")
+    github_token = get_github_access_token()
     slack_webhook = os.environ.get("SLACK_WEBHOOK")
-    print(f"\nSecrets configured:")
-    print(f"  - GITHUB_TOKEN: {'Yes' if github_token else 'No (using anonymous access)'}")
+    has_replit_connection = os.environ.get("REPLIT_CONNECTORS_HOSTNAME") is not None
+    print(f"\nAuthentication configured:")
+    if github_token:
+        print(f"  - GitHub: Yes (via {'Replit connection' if has_replit_connection else 'token'})")
+    else:
+        print(f"  - GitHub: No (using anonymous access - lower rate limits)")
     print(f"  - SLACK_WEBHOOK: {'Yes' if slack_webhook else 'No (console only)'}")
     
     print("\n" + "="*60 + "\n")
