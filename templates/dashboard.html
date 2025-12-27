@@ -265,6 +265,31 @@
             font-size: 0.9rem;
         }
         
+        .explain-btn {
+            padding: 0.4rem 0.8rem;
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        
+        .explain-btn:hover {
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+        }
+        
+        .explain-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .explain-btn:disabled {
+            background: #6c757d;
+            cursor: wait;
+        }
+        
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column;
@@ -350,11 +375,17 @@
                         <th>Details</th>
                         <th>Keywords</th>
                         <th>Link</th>
+                        <th>AI</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for alert in alerts %}
-                    <tr>
+                    <tr data-alert-id="{{ alert.id }}"
+                        data-source="{{ alert.source }}"
+                        data-company="{{ alert.company }}"
+                        data-title="{{ (alert.title or '')|e }}"
+                        data-message="{{ (alert.message or '')|e }}"
+                        data-keywords="{{ alert.keywords or '' }}">
                         <td class="timestamp">{{ alert.created_at.strftime('%Y-%m-%d %H:%M') if alert.created_at else 'N/A' }}</td>
                         <td>
                             <span class="source-badge source-{{ alert.source }}">{{ alert.source }}</span>
@@ -363,6 +394,7 @@
                         <td>
                             <div class="alert-title">{{ alert.title or 'No title' }}</div>
                             <div class="alert-message">{{ alert.message or '' }}</div>
+                            <div class="ai-summary" id="summary-{{ alert.id }}" style="display:none; margin-top: 8px; padding: 8px; background: #e8f4e8; border-radius: 6px; font-size: 0.9rem; color: #2d5a2d;"></div>
                         </td>
                         <td>
                             <div class="keywords">
@@ -377,6 +409,9 @@
                             {% if alert.url %}
                             <a href="{{ alert.url }}" target="_blank" class="alert-link">View</a>
                             {% endif %}
+                        </td>
+                        <td>
+                            <button class="explain-btn" data-id="{{ alert.id }}">Explain</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -398,6 +433,71 @@
         setTimeout(function() {
             location.reload();
         }, 60000);
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.explain-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    explainAlert(e.target);
+                });
+            });
+        });
+        
+        async function explainAlert(btn) {
+            const row = btn.closest('tr');
+            const id = row.dataset.alertId;
+            const source = row.dataset.source;
+            const company = row.dataset.company;
+            const title = row.dataset.title;
+            const message = row.dataset.message;
+            const keywords = row.dataset.keywords;
+            
+            const summaryDiv = document.getElementById('summary-' + id);
+            
+            if (summaryDiv.style.display === 'block') {
+                summaryDiv.style.display = 'none';
+                btn.textContent = 'Explain';
+                return;
+            }
+            
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: source,
+                        company: company,
+                        title: title,
+                        message: message,
+                        keywords: keywords ? keywords.split(', ') : []
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.summary) {
+                    summaryDiv.textContent = result.summary;
+                    summaryDiv.style.display = 'block';
+                    btn.textContent = 'Hide';
+                } else {
+                    summaryDiv.textContent = result.error || 'Could not generate summary';
+                    summaryDiv.style.display = 'block';
+                    summaryDiv.style.background = '#fff3cd';
+                    summaryDiv.style.color = '#856404';
+                    btn.textContent = 'Retry';
+                }
+            } catch (err) {
+                summaryDiv.textContent = 'Error: ' + err.message;
+                summaryDiv.style.display = 'block';
+                summaryDiv.style.background = '#f8d7da';
+                summaryDiv.style.color = '#721c24';
+                btn.textContent = 'Retry';
+            }
+            
+            btn.disabled = false;
+        }
     </script>
 </body>
 </html>

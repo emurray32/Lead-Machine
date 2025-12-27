@@ -10,6 +10,13 @@ import io
 import yaml
 from datetime import datetime
 
+try:
+    import ai_summary
+    AI_AVAILABLE = ai_summary.is_available()
+except Exception:
+    AI_AVAILABLE = False
+    ai_summary = None
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
@@ -296,6 +303,38 @@ def api_quick_scan():
 def api_signal_explanations():
     """Get explanations for signal types."""
     return jsonify(SIGNAL_EXPLANATIONS)
+
+@app.route('/api/summarize', methods=['POST'])
+def api_summarize():
+    """Generate AI summary for an alert."""
+    if not AI_AVAILABLE or not ai_summary:
+        return jsonify({'error': 'AI summaries not available', 'available': False}), 503
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    try:
+        summary = ai_summary.generate_alert_summary(
+            source=data.get('source', ''),
+            company=data.get('company', ''),
+            title=data.get('title', ''),
+            message=data.get('message', ''),
+            keywords=data.get('keywords', []),
+            signal_type=data.get('signal_type')
+        )
+        
+        if summary:
+            return jsonify({'summary': summary, 'available': True})
+        return jsonify({'error': 'Failed to generate summary', 'available': True}), 500
+        
+    except Exception as e:
+        return jsonify({'error': str(e), 'available': True}), 500
+
+@app.route('/api/ai-status')
+def api_ai_status():
+    """Check if AI summaries are available."""
+    return jsonify({'available': AI_AVAILABLE})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
