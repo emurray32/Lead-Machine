@@ -112,6 +112,38 @@
             background: #888;
         }
         
+        .export-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+        }
+        
+        .export-btn.json {
+            background: #17a2b8;
+        }
+        
+        .export-btn.json:hover {
+            background: #138496;
+        }
+        
         .alerts-table {
             background: white;
             border-radius: 8px;
@@ -292,6 +324,11 @@
             
             <button type="submit">Filter</button>
             <a href="/" class="reset-btn" style="padding: 0.5rem 1.5rem; background: #888; color: white; border-radius: 4px; text-decoration: none;">Reset</a>
+            
+            <div class="export-buttons">
+                <a href="/export/csv{% if current_source or current_company %}?{% if current_source %}source={{ current_source }}{% endif %}{% if current_source and current_company %}&{% endif %}{% if current_company %}company={{ current_company }}{% endif %}{% endif %}" class="export-btn">CSV</a>
+                <a href="/export/json{% if current_source or current_company %}?{% if current_source %}source={{ current_source }}{% endif %}{% if current_source and current_company %}&{% endif %}{% if current_company %}company={{ current_company }}{% endif %}{% endif %}" class="export-btn json">JSON</a>
+            </div>
         </form>
         
         <div class="alerts-table">

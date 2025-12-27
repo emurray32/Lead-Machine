@@ -2,9 +2,12 @@
 Flask Web Dashboard for Localization Monitoring Alerts
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 import storage
 import os
+import csv
+import io
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
@@ -54,6 +57,57 @@ def api_alerts():
 def api_stats():
     """API endpoint for statistics."""
     return jsonify(storage.get_alert_stats())
+
+@app.route('/export/csv')
+def export_csv():
+    """Export alerts as CSV file."""
+    source = request.args.get('source')
+    company = request.args.get('company')
+    
+    alerts = storage.get_alerts(limit=10000, source=source, company=company)
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Time', 'Source', 'Company', 'Title', 'Message', 'Keywords', 'URL'])
+    
+    for alert in alerts:
+        writer.writerow([
+            alert.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S') if alert.get('created_at') else '',
+            alert.get('source', ''),
+            alert.get('company', ''),
+            alert.get('title', ''),
+            alert.get('message', ''),
+            alert.get('keywords', ''),
+            alert.get('url', '')
+        ])
+    
+    output.seek(0)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=localization_alerts_{timestamp}.csv'}
+    )
+
+@app.route('/export/json')
+def export_json():
+    """Export alerts as JSON file."""
+    source = request.args.get('source')
+    company = request.args.get('company')
+    
+    alerts = storage.get_alerts(limit=10000, source=source, company=company)
+    
+    for alert in alerts:
+        if alert.get('created_at'):
+            alert['created_at'] = alert['created_at'].isoformat()
+    
+    import json
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    return Response(
+        json.dumps(alerts, indent=2),
+        mimetype='application/json',
+        headers={'Content-Disposition': f'attachment; filename=localization_alerts_{timestamp}.json'}
+    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
