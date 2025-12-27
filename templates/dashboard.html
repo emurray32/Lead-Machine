@@ -194,6 +194,11 @@
             color: white;
         }
         
+        .source-playstore {
+            background: #01875f;
+            color: white;
+        }
+        
         .source-docs {
             background: #0366d6;
             color: white;
@@ -295,8 +300,8 @@
             <div class="stat-label">GitHub</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ stats.rss_count or 0 }}</div>
-            <div class="stat-label">RSS/Play Store</div>
+            <div class="stat-number">{{ stats.playstore_count or 0 }}</div>
+            <div class="stat-label">Play Store</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ stats.docs_count or 0 }}</div>
@@ -310,7 +315,7 @@
             <select name="source" id="source">
                 <option value="">All Sources</option>
                 <option value="github" {% if current_source == 'github' %}selected{% endif %}>GitHub</option>
-                <option value="rss" {% if current_source == 'rss' %}selected{% endif %}>RSS/Play Store</option>
+                <option value="playstore" {% if current_source == 'playstore' %}selected{% endif %}>Play Store</option>
                 <option value="docs" {% if current_source == 'docs' %}selected{% endif %}>Documentation</option>
             </select>
             

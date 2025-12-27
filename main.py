@@ -22,6 +22,12 @@ from datetime import datetime
 from typing import Optional, Dict, List, Any
 
 try:
+    from google_play_scraper import app as gplay_app
+    GPLAY_AVAILABLE = True
+except ImportError:
+    GPLAY_AVAILABLE = False
+
+try:
     import storage
     storage.init_database()
     DB_AVAILABLE = True
@@ -50,6 +56,34 @@ KEYWORDS = [
 LANGUAGE_INDICATORS = [
     "added", "support", "now available in", "introducing", "new language",
     "language support", "available in", "localized", "translated to"
+]
+
+# Bot patterns to filter out - these are maintenance noise, not expansion intent
+BOT_PATTERNS = [
+    "[bot]", "dependabot", "github-actions", "renovate", "greenkeeper",
+    "snyk-bot", "codecov", "semantic-release", "auto-merge"
+]
+
+# Localization directory patterns - files in these dirs indicate true intent
+LOCALIZATION_DIRS = [
+    "locales/", "locale/", "i18n/", "l10n/", "translations/", "lang/",
+    "languages/", "res/values-", "strings/", "messages/", "intl/"
+]
+
+# Localization file extensions
+LOCALIZATION_FILE_PATTERNS = [
+    ".json", ".yaml", ".yml", ".properties", ".po", ".pot", ".xliff",
+    ".strings", ".resx", ".arb"
+]
+
+# Language codes that indicate new language files
+LANGUAGE_CODES = [
+    "ar", "zh", "cs", "da", "nl", "fi", "fr", "de", "el", "he", "hi",
+    "hu", "id", "it", "ja", "ko", "ms", "no", "pl", "pt", "pt-br",
+    "ro", "ru", "sk", "es", "sv", "th", "tr", "uk", "vi", "bn", "ta",
+    "te", "mr", "gu", "kn", "ml", "pa", "sw", "zu", "af", "sq", "am",
+    "hy", "az", "eu", "be", "bs", "bg", "ca", "hr", "et", "fil", "gl",
+    "ka", "is", "lv", "lt", "mk", "mt", "mn", "ne", "fa", "sr", "si", "sl"
 ]
 
 # Target companies to monitor - Edit/expand this list with your targets
@@ -191,6 +225,7 @@ DATA_DIR = "monitoring_data"
 LAST_COMMITS_FILE = os.path.join(DATA_DIR, "last_commits.json")
 SEEN_RSS_FILE = os.path.join(DATA_DIR, "seen_rss.json")
 DOC_HASHES_FILE = os.path.join(DATA_DIR, "doc_hashes.json")
+PLAY_STORE_LANGS_FILE = os.path.join(DATA_DIR, "play_store_langs.json")
 PREVIOUS_TEXTS_DIR = os.path.join(DATA_DIR, "previous_texts")
 
 # =============================================================================
@@ -255,6 +290,45 @@ def contains_keywords(text: str, keywords: List[str] = KEYWORDS) -> List[str]:
     """Check if text contains any keywords, return matched keywords."""
     text_lower = text.lower()
     return [kw for kw in keywords if kw.lower() in text_lower]
+
+def is_bot_author(author: str) -> bool:
+    """Check if the commit author is a bot."""
+    author_lower = author.lower()
+    return any(bot.lower() in author_lower for bot in BOT_PATTERNS)
+
+def is_localization_file(filepath: str) -> bool:
+    """Check if a file path indicates a localization file."""
+    filepath_lower = filepath.lower()
+    in_l10n_dir = any(dir_pattern in filepath_lower for dir_pattern in LOCALIZATION_DIRS)
+    has_l10n_ext = any(filepath_lower.endswith(ext) for ext in LOCALIZATION_FILE_PATTERNS)
+    return in_l10n_dir and has_l10n_ext
+
+def extract_language_from_file(filepath: str) -> Optional[str]:
+    """Extract language code from a localization file path if present."""
+    filepath_lower = filepath.lower()
+    filename = os.path.basename(filepath_lower)
+    name_without_ext = os.path.splitext(filename)[0]
+    
+    for code in LANGUAGE_CODES:
+        if name_without_ext == code or name_without_ext.endswith(f"_{code}") or name_without_ext.endswith(f"-{code}"):
+            return code
+        if f"/{code}/" in filepath_lower or f"/{code}." in filepath_lower:
+            return code
+        if f"values-{code}" in filepath_lower:
+            return code
+    return None
+
+def get_commit_files(org: str, repo: str, sha: str) -> List[Dict]:
+    """Fetch the files changed in a specific commit."""
+    try:
+        url = f"https://api.github.com/repos/{org}/{repo}/commits/{sha}"
+        response = requests.get(url, headers=get_headers(), timeout=30)
+        if response.status_code == 200:
+            commit_data = response.json()
+            return commit_data.get("files", [])
+    except Exception as e:
+        log(f"Error fetching commit files for {sha}: {e}", "WARNING")
+    return []
 
 _github_connection_cache = {"settings": None, "expires_at": None}
 
@@ -329,7 +403,9 @@ def get_headers() -> Dict[str, str]:
 
 def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> int:
     """
-    Check a GitHub repository for new commits with localization keywords.
+    Check a GitHub repository for new localization file additions.
+    Primary signal: New files added to localization directories.
+    Secondary signal: Keyword matches in commit messages (filtered for bots).
     Returns the number of alerts generated.
     """
     alert_count = 0
@@ -366,19 +442,41 @@ def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> 
             if sha == last_sha:
                 break
             
-            message = commit.get("commit", {}).get("message", "")
-            matched_keywords = contains_keywords(message)
+            author = commit.get("commit", {}).get("author", {}).get("name", "Unknown")
             
-            if matched_keywords:
-                author = commit.get("commit", {}).get("author", {}).get("name", "Unknown")
-                commit_url = commit.get("html_url", "")
-                short_message = message.split('\n')[0][:100]
+            if is_bot_author(author):
+                continue
+            
+            commit_url = commit.get("html_url", "")
+            message = commit.get("commit", {}).get("message", "")
+            short_message = message.split('\n')[0][:100]
+            
+            files = get_commit_files(org, repo, sha)
+            new_l10n_files = []
+            detected_languages = []
+            
+            for file_info in files:
+                filepath = file_info.get("filename", "")
+                status = file_info.get("status", "")
+                
+                if status == "added" and is_localization_file(filepath):
+                    new_l10n_files.append(filepath)
+                    lang = extract_language_from_file(filepath)
+                    if lang and lang not in detected_languages:
+                        detected_languages.append(lang)
+            
+            if new_l10n_files:
+                signal_type = "NEW_LANG_FILE"
+                keywords = detected_languages if detected_languages else ["new localization file"]
+                files_display = ", ".join(os.path.basename(f) for f in new_l10n_files[:3])
+                if len(new_l10n_files) > 3:
+                    files_display += f" (+{len(new_l10n_files) - 3} more)"
                 
                 alert_msg = (
-                    f"GITHUB ALERT [{company}] {org}/{repo}:\n"
-                    f"  Message: {short_message}\n"
+                    f"GITHUB [{signal_type}] [{company}] {org}/{repo}:\n"
+                    f"  Files: {files_display}\n"
+                    f"  Languages: {', '.join(detected_languages) if detected_languages else 'unknown'}\n"
                     f"  Author: {author}\n"
-                    f"  Keywords: {', '.join(matched_keywords)}\n"
                     f"  URL: {commit_url}"
                 )
                 alert(alert_msg)
@@ -388,16 +486,45 @@ def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> 
                         storage.save_alert(
                             source="github",
                             company=company,
-                            title=f"{org}/{repo}: {short_message}",
-                            message=f"By {author}",
-                            keywords=matched_keywords,
+                            title=f"[{signal_type}] {org}/{repo}: {files_display}",
+                            message=f"New localization files by {author}. {short_message}",
+                            keywords=keywords,
                             url=commit_url,
-                            metadata={"sha": sha, "author": author}
+                            metadata={"sha": sha, "author": author, "signal_type": signal_type, "files": new_l10n_files[:5]}
                         )
                     except Exception as e:
                         log(f"Failed to save alert to database: {e}", "WARNING")
                 
                 alert_count += 1
+            else:
+                matched_keywords = contains_keywords(message)
+                if matched_keywords:
+                    signal_type = "KEYWORD"
+                    
+                    alert_msg = (
+                        f"GITHUB [{signal_type}] [{company}] {org}/{repo}:\n"
+                        f"  Message: {short_message}\n"
+                        f"  Author: {author}\n"
+                        f"  Keywords: {', '.join(matched_keywords)}\n"
+                        f"  URL: {commit_url}"
+                    )
+                    alert(alert_msg)
+                    
+                    if DB_AVAILABLE:
+                        try:
+                            storage.save_alert(
+                                source="github",
+                                company=company,
+                                title=f"[{signal_type}] {org}/{repo}: {short_message}",
+                                message=f"By {author}",
+                                keywords=matched_keywords,
+                                url=commit_url,
+                                metadata={"sha": sha, "author": author, "signal_type": signal_type}
+                            )
+                        except Exception as e:
+                            log(f"Failed to save alert to database: {e}", "WARNING")
+                    
+                    alert_count += 1
         
         last_commits[repo_key] = new_last_sha
         
@@ -434,8 +561,137 @@ def check_all_github(targets: List[Dict]) -> int:
     return total_alerts
 
 # =============================================================================
-# RSS/PLAY STORE MONITORING
+# PLAY STORE MONITORING (Language List Comparison)
 # =============================================================================
+
+def get_play_store_languages(package_id: str) -> Optional[List[str]]:
+    """Fetch the list of supported languages for an app from Google Play Store."""
+    if not GPLAY_AVAILABLE:
+        return None
+    
+    try:
+        app_info = gplay_app(package_id, lang='en', country='us')
+        descriptions_languages = app_info.get('descriptionHTML', '')
+        
+        available_langs = []
+        
+        for lang_code in LANGUAGE_CODES:
+            try:
+                lang_app = gplay_app(package_id, lang=lang_code, country='us')
+                if lang_app.get('description'):
+                    available_langs.append(lang_code)
+            except:
+                pass
+            time.sleep(0.2)
+        
+        return available_langs if available_langs else None
+        
+    except Exception as e:
+        log(f"Error fetching Play Store info for {package_id}: {e}", "WARNING")
+        return None
+
+def check_play_store_package(company: str, package_id: str, stored_langs: Dict) -> int:
+    """
+    Check a Play Store package for new language support.
+    Compares current language list against previously stored list.
+    Returns the number of alerts generated.
+    """
+    if not GPLAY_AVAILABLE:
+        return 0
+    
+    alert_count = 0
+    
+    try:
+        app_info = gplay_app(package_id, lang='en', country='us')
+        
+        if not app_info:
+            log(f"Could not fetch Play Store info for {package_id}", "WARNING")
+            return 0
+        
+        app_title = app_info.get('title', package_id)
+        installs = app_info.get('installs', 'Unknown')
+        
+        previous_langs = set(stored_langs.get(package_id, []))
+        
+        test_langs = ["en", "es", "fr", "de", "ja", "ko", "zh", "pt", "ru", "ar", "hi", "it", "nl", "pl", "tr", "vi", "th", "id"]
+        current_langs = set()
+        
+        for lang in test_langs:
+            try:
+                lang_app = gplay_app(package_id, lang=lang, country='us')
+                if lang_app and lang_app.get('description'):
+                    current_langs.add(lang)
+                time.sleep(0.3)
+            except:
+                pass
+        
+        new_langs = current_langs - previous_langs
+        
+        if new_langs and previous_langs:
+            signal_type = "NEW_APP_LANG"
+            new_langs_list = list(new_langs)
+            
+            play_url = f"https://play.google.com/store/apps/details?id={package_id}"
+            
+            alert_msg = (
+                f"PLAY STORE [{signal_type}] [{company}]:\n"
+                f"  App: {app_title}\n"
+                f"  New languages: {', '.join(new_langs_list)}\n"
+                f"  Total languages: {len(current_langs)}\n"
+                f"  Installs: {installs}\n"
+                f"  URL: {play_url}"
+            )
+            alert(alert_msg)
+            
+            if DB_AVAILABLE:
+                try:
+                    storage.save_alert(
+                        source="playstore",
+                        company=company,
+                        title=f"[{signal_type}] {app_title}: +{', '.join(new_langs_list)}",
+                        message=f"App now supports {len(current_langs)} languages. Installs: {installs}",
+                        keywords=new_langs_list,
+                        url=play_url,
+                        metadata={"signal_type": signal_type, "package_id": package_id, "new_langs": new_langs_list}
+                    )
+                except Exception as e:
+                    log(f"Failed to save alert to database: {e}", "WARNING")
+            
+            alert_count += 1
+        
+        stored_langs[package_id] = list(current_langs)
+        
+    except Exception as e:
+        log(f"Error checking Play Store for {company} ({package_id}): {e}", "ERROR")
+    
+    return alert_count
+
+def check_all_play_store(targets: List[Dict]) -> int:
+    """Check all configured Play Store packages for new language support."""
+    if not GPLAY_AVAILABLE:
+        log("Play Store checks skipped (google-play-scraper not available)")
+        return 0
+    
+    log("Starting Play Store language checks...")
+    stored_langs = load_json(PLAY_STORE_LANGS_FILE)
+    total_alerts = 0
+    packages_checked = 0
+    
+    for target in targets:
+        company = target.get("company", "Unknown")
+        package_id = target.get("play_package")
+        
+        if not package_id:
+            continue
+        
+        alerts = check_play_store_package(company, package_id, stored_langs)
+        total_alerts += alerts
+        packages_checked += 1
+        time.sleep(REQUEST_DELAY * 2)
+    
+    save_json(PLAY_STORE_LANGS_FILE, stored_langs)
+    log(f"Play Store checks complete. Checked {packages_checked} apps, found {total_alerts} alerts.")
+    return total_alerts
 
 def check_rss_feed(company: str, rss_url: str, seen_rss: Dict) -> int:
     """
@@ -473,7 +729,7 @@ def check_rss_feed(company: str, rss_url: str, seen_rss: Dict) -> int:
                 all_matches = matched_keywords + language_matches
                 
                 alert_msg = (
-                    f"PLAY STORE ALERT [{company}]:\n"
+                    f"RSS ALERT [{company}]:\n"
                     f"  Title: {title[:100]}\n"
                     f"  Summary: {summary[:200]}...\n"
                     f"  Keywords: {', '.join(all_matches)}\n"
@@ -504,8 +760,8 @@ def check_rss_feed(company: str, rss_url: str, seen_rss: Dict) -> int:
     return alert_count
 
 def check_all_rss(targets: List[Dict]) -> int:
-    """Check all configured RSS feeds."""
-    log("Starting RSS/Play Store checks...")
+    """Check all configured RSS feeds (legacy, kept for backward compatibility)."""
+    log("Starting RSS checks...")
     seen_rss = load_json(SEEN_RSS_FILE)
     total_alerts = 0
     feeds_checked = 0
@@ -530,8 +786,8 @@ def check_all_rss(targets: List[Dict]) -> int:
 # DOCUMENTATION PAGE MONITORING
 # =============================================================================
 
-def fetch_doc_text(url: str) -> Optional[str]:
-    """Fetch and extract clean text from a documentation URL."""
+def fetch_doc_page(url: str) -> Optional[Dict]:
+    """Fetch a documentation URL and return parsed data including hreflang tags."""
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (compatible; LocalizationMonitor/1.0)"
@@ -541,30 +797,85 @@ def fetch_doc_text(url: str) -> Optional[str]:
         
         soup = BeautifulSoup(response.text, 'html.parser')
         
+        hreflang_tags = []
+        for link in soup.find_all('link', rel='alternate'):
+            hreflang = link.get('hreflang')
+            href = link.get('href')
+            if hreflang and href:
+                hreflang_tags.append({"lang": hreflang, "href": href})
+        
         for element in soup(['script', 'style', 'nav', 'header', 'footer']):
             element.decompose()
         
-        return soup.get_text(separator=' ', strip=True)
+        text = soup.get_text(separator=' ', strip=True)
+        
+        return {
+            "text": text,
+            "hreflang_tags": hreflang_tags
+        }
         
     except requests.RequestException as e:
         log(f"Error fetching doc URL {url}: {e}", "WARNING")
         return None
 
+def fetch_doc_text(url: str) -> Optional[str]:
+    """Fetch and extract clean text from a documentation URL (legacy wrapper)."""
+    result = fetch_doc_page(url)
+    return result["text"] if result else None
+
 def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
     """
-    Check a documentation URL for changes and localization keywords.
+    Check a documentation URL for hreflang changes (primary) and localization keywords (secondary).
     Returns the number of alerts generated.
     """
     alert_count = 0
     hash_key = f"{company}/{url}"
+    hreflang_key = f"{company}/{url}/hreflang"
     
     try:
-        current_text = fetch_doc_text(url)
-        if not current_text:
+        page_data = fetch_doc_page(url)
+        if not page_data:
             return 0
+        
+        current_text = page_data["text"]
+        current_hreflangs = page_data["hreflang_tags"]
         
         current_hash = hashlib.md5(current_text.encode()).hexdigest()
         previous_hash = doc_hashes.get(hash_key)
+        previous_hreflangs = doc_hashes.get(hreflang_key, [])
+        
+        previous_langs = set(h.get("lang", "") for h in previous_hreflangs if isinstance(h, dict))
+        current_langs = set(h.get("lang", "") for h in current_hreflangs)
+        new_langs = current_langs - previous_langs
+        
+        if new_langs and previous_hreflangs:
+            signal_type = "NEW_HREFLANG"
+            new_langs_list = list(new_langs)
+            
+            alert_msg = (
+                f"DOCS [{signal_type}] [{company}]:\n"
+                f"  New language versions detected!\n"
+                f"  URL: {url}\n"
+                f"  New languages: {', '.join(new_langs_list)}\n"
+                f"  Total languages: {len(current_langs)}"
+            )
+            alert(alert_msg)
+            
+            if DB_AVAILABLE:
+                try:
+                    storage.save_alert(
+                        source="docs",
+                        company=company,
+                        title=f"[{signal_type}] New regional site: {', '.join(new_langs_list)}",
+                        message=f"New hreflang tags detected on {url[:60]}",
+                        keywords=new_langs_list,
+                        url=url,
+                        metadata={"signal_type": signal_type, "new_langs": new_langs_list, "total_langs": len(current_langs)}
+                    )
+                except Exception as e:
+                    log(f"Failed to save alert to database: {e}", "WARNING")
+            
+            alert_count += 1
         
         safe_filename = sanitize_filename(f"{company}_{url[:50]}")
         previous_text_path = os.path.join(PREVIOUS_TEXTS_DIR, f"{safe_filename}.txt")
@@ -577,7 +888,7 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
             except IOError:
                 pass
         
-        if current_hash != previous_hash:
+        if current_hash != previous_hash and alert_count == 0:
             matched_keywords = contains_keywords(current_text)
             
             if matched_keywords:
@@ -589,12 +900,12 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
                     new_keywords = matched_keywords
                 
                 if new_keywords or not previous_hash:
+                    signal_type = "KEYWORD"
                     alert_msg = (
-                        f"DOCS ALERT [{company}]:\n"
+                        f"DOCS [{signal_type}] [{company}]:\n"
                         f"  Possible new localization content detected\n"
                         f"  URL: {url}\n"
-                        f"  New keywords: {', '.join(new_keywords) if new_keywords else 'First scan - all found'}\n"
-                        f"  All keywords found: {', '.join(matched_keywords[:10])}..."
+                        f"  New keywords: {', '.join(new_keywords) if new_keywords else 'First scan - all found'}"
                     )
                     alert(alert_msg)
                     
@@ -603,10 +914,11 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
                             storage.save_alert(
                                 source="docs",
                                 company=company,
-                                title=f"Doc change detected: {url[:80]}",
+                                title=f"[{signal_type}] Doc change: {url[:60]}",
                                 message=f"New keywords: {', '.join(new_keywords) if new_keywords else 'First scan'}",
                                 keywords=new_keywords if new_keywords else matched_keywords[:10],
-                                url=url
+                                url=url,
+                                metadata={"signal_type": signal_type}
                             )
                         except Exception as e:
                             log(f"Failed to save alert to database: {e}", "WARNING")
@@ -614,6 +926,8 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict) -> int:
                     alert_count += 1
         
         doc_hashes[hash_key] = current_hash
+        doc_hashes[hreflang_key] = current_hreflangs
+        
         try:
             with open(previous_text_path, 'w', encoding='utf-8') as f:
                 f.write(current_text)
@@ -685,12 +999,13 @@ def print_banner() -> None:
     print(f"\nMonitoring {len(TARGETS)} target companies:")
     
     github_count = sum(1 for t in TARGETS if t.get("github_repos"))
-    rss_count = sum(1 for t in TARGETS if t.get("rss_url"))
+    playstore_count = sum(1 for t in TARGETS if t.get("play_package"))
     docs_count = sum(1 for t in TARGETS if t.get("doc_urls"))
     
     print(f"  - GitHub repos configured: {github_count} companies")
-    print(f"  - RSS feeds configured: {rss_count} companies")
+    print(f"  - Play Store apps configured: {playstore_count} companies")
     print(f"  - Doc pages configured: {docs_count} companies")
+    print(f"  - Play Store scraper: {'Available' if GPLAY_AVAILABLE else 'Not available'}")
     
     print(f"\nCheck intervals:")
     print(f"  - GitHub: Every {GITHUB_CHECK_INTERVAL // 3600} hours")
@@ -717,10 +1032,10 @@ def main() -> None:
     
     try:
         github_alerts = check_all_github(TARGETS)
-        rss_alerts = check_all_rss(TARGETS)
+        playstore_alerts = check_all_play_store(TARGETS)
         docs_alerts = check_all_docs(TARGETS)
         
-        total_alerts = github_alerts + rss_alerts + docs_alerts
+        total_alerts = github_alerts + playstore_alerts + docs_alerts
         log(f"Monitoring complete. Total alerts: {total_alerts}")
         
     except Exception as e:

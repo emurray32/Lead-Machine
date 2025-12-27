@@ -120,12 +120,12 @@ def get_alert_stats() -> Dict:
         SELECT 
             COUNT(*) as total,
             COUNT(CASE WHEN source = 'github' THEN 1 END) as github_count,
-            COUNT(CASE WHEN source = 'rss' THEN 1 END) as rss_count,
+            COUNT(CASE WHEN source = 'playstore' OR source = 'rss' THEN 1 END) as playstore_count,
             COUNT(CASE WHEN source = 'docs' THEN 1 END) as docs_count
         FROM alerts
     """)
     result = cur.fetchone()
-    stats = dict(result) if result else {"total": 0, "github_count": 0, "rss_count": 0, "docs_count": 0}
+    stats = dict(result) if result else {"total": 0, "github_count": 0, "playstore_count": 0, "docs_count": 0}
     
     cur.close()
     conn.close()

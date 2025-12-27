@@ -1,23 +1,40 @@
 # Localization Monitoring Application
 
 ## Overview
-A unified Python monitoring application that continuously tracks multiple target companies for early localization/phrase-string intent signals across three integrated sources:
-- **GitHub Repositories**: Monitors commits for localization-related keywords
-- **Google Play RSS Feeds**: Monitors app changelogs for new language support
-- **API/Developer Docs**: Detects changes and scans for localization keywords
+A unified Python monitoring application that tracks multiple target companies for early localization/phrase-string intent signals across three integrated sources:
+- **GitHub Repositories**: Monitors for new localization files (primary) and keyword matches (secondary)
+- **Google Play Store**: Compares app language lists over time to detect new language additions
+- **API/Developer Docs**: Detects new hreflang tags (primary) and keyword changes (secondary)
+
+## Signal Types
+The monitor uses intelligent signal detection to reduce noise:
+
+### High-Value Signals (Primary)
+- **NEW_LANG_FILE**: New files added to localization directories (e.g., `locales/fr.json`)
+- **NEW_HREFLANG**: New regional site versions detected via HTML hreflang tags
+- **NEW_APP_LANG**: New languages added to Play Store app listings
+
+### Secondary Signals
+- **KEYWORD**: Keyword matches in commit messages or documentation (filtered for bots)
 
 ## Project Structure
-- `main.py` - Main monitoring script that checks sources and saves alerts
+- `main.py` - Main monitoring script with all detection logic
 - `dashboard.py` - Flask web dashboard for viewing alerts
 - `storage.py` - Database layer for persisting alerts to PostgreSQL
 - `templates/dashboard.html` - Dashboard UI template
-- `monitoring_data/` - JSON files for tracking seen commits, RSS entries, doc hashes
+- `monitoring_data/` - JSON files for tracking state between runs
 
 ## Web Dashboard
-Access the dashboard at port 5000 to view all detected alerts with:
-- Stats cards showing total alerts by source
-- Filterable table with time, source, company, details, keywords, and links
+Access the dashboard at port 5000:
+- Stats cards showing alerts by source (GitHub, Play Store, Documentation)
+- Filterable table with signal type, company, details, and keywords
+- Export to CSV or JSON
 - Auto-refresh every 60 seconds
+
+## Filtering Logic
+- **Bot Filtering**: Commits from dependabot, github-actions, and other bots are excluded
+- **Localization Directories**: Monitors for file additions in `/locales`, `/i18n`, `/translations`, etc.
+- **Language Detection**: Automatically extracts language codes from file paths (e.g., `fr`, `de`, `ja`)
 
 ## Configuration
 
@@ -26,30 +43,24 @@ Edit the `TARGETS` list in `main.py` to add/remove companies. Each entry can hav
 - `company`: Company name for display
 - `github_org`: GitHub organization name
 - `github_repos`: List of repos to monitor
-- `play_package`: Android package name (for reference)
-- `rss_url`: RSS feed URL for Play Store updates
+- `play_package`: Android package ID (e.g., `com.spotify.music`)
 - `doc_urls`: List of documentation URLs to monitor
-
-### Keywords
-Edit the `KEYWORDS` list to customize what localization terms to search for.
 
 ### Check Intervals
 - GitHub: Every 6 hours (configurable via `GITHUB_CHECK_INTERVAL`)
-- RSS/Docs: Every 24 hours (configurable via `RSS_DOCS_CHECK_INTERVAL`)
+- Play Store/Docs: Every 24 hours (configurable via `RSS_DOCS_CHECK_INTERVAL`)
 
-## Optional Secrets
-Add these in the Secrets tab for enhanced functionality:
-- `GITHUB_TOKEN`: GitHub personal access token for higher API rate limits
-- `SLACK_WEBHOOK`: Slack incoming webhook URL for notifications
+## Authentication
+- **GitHub**: Connected via Replit integration for higher rate limits (5000 requests/hour)
+- **SLACK_WEBHOOK**: Optional for push notifications
 
 ## Workflows
 - **Dashboard**: Runs the Flask web server on port 5000
-- **Localization Monitor**: Runs the monitoring checks (can be run manually or scheduled)
-
-## Deployment
-- **Dashboard**: Configured for autoscale web deployment
-- **Monitor**: Run as a scheduled task or manually trigger
+- **Localization Monitor**: Runs the monitoring checks
 
 ## Recent Changes
+- 2025-12-27: Upgraded monitoring with structural change detection (file additions, hreflang parsing)
+- 2025-12-27: Added bot filtering to exclude dependabot/automated commits
+- 2025-12-27: Replaced RSS with Play Store language list comparison
 - 2025-12-27: Added web dashboard with PostgreSQL alert storage
 - 2025-12-21: Initial implementation with 15 target companies
