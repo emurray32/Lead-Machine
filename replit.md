@@ -7,9 +7,17 @@ A unified Python monitoring application that continuously tracks multiple target
 - **API/Developer Docs**: Detects changes and scans for localization keywords
 
 ## Project Structure
-- `main.py` - Main application with all monitoring logic
-- `monitoring_data/` - Persisted state (JSON files for tracking seen commits, RSS entries, doc hashes)
-- `.gitignore` - Ignores Python cache, virtual envs, and monitoring data
+- `main.py` - Main monitoring script that checks sources and saves alerts
+- `dashboard.py` - Flask web dashboard for viewing alerts
+- `storage.py` - Database layer for persisting alerts to PostgreSQL
+- `templates/dashboard.html` - Dashboard UI template
+- `monitoring_data/` - JSON files for tracking seen commits, RSS entries, doc hashes
+
+## Web Dashboard
+Access the dashboard at port 5000 to view all detected alerts with:
+- Stats cards showing total alerts by source
+- Filterable table with time, source, company, details, keywords, and links
+- Auto-refresh every 60 seconds
 
 ## Configuration
 
@@ -34,11 +42,14 @@ Add these in the Secrets tab for enhanced functionality:
 - `GITHUB_TOKEN`: GitHub personal access token for higher API rate limits
 - `SLACK_WEBHOOK`: Slack incoming webhook URL for notifications
 
-## Running
-The app runs continuously via the "Localization Monitor" workflow. It will:
-1. Check all configured GitHub repos for new commits with localization keywords
-2. Parse any configured RSS feeds for language-related updates
-3. Fetch and compare documentation pages for changes
+## Workflows
+- **Dashboard**: Runs the Flask web server on port 5000
+- **Localization Monitor**: Runs the monitoring checks (can be run manually or scheduled)
+
+## Deployment
+- **Dashboard**: Configured for autoscale web deployment
+- **Monitor**: Run as a scheduled task or manually trigger
 
 ## Recent Changes
+- 2025-12-27: Added web dashboard with PostgreSQL alert storage
 - 2025-12-21: Initial implementation with 15 target companies

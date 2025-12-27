@@ -23,8 +23,10 @@ from typing import Optional, Dict, List, Any
 
 try:
     import storage
+    storage.init_database()
     DB_AVAILABLE = True
-except Exception:
+except Exception as e:
+    print(f"[WARNING] Database not available, alerts will only be logged to console: {e}")
     DB_AVAILABLE = False
 
 # =============================================================================

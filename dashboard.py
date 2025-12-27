@@ -26,12 +26,14 @@ def index():
     companies = storage.get_companies()
     stats = storage.get_alert_stats()
     
+    from datetime import datetime
     return render_template('dashboard.html', 
                          alerts=alerts,
                          companies=companies,
                          stats=stats,
                          current_source=source_filter,
-                         current_company=company_filter)
+                         current_company=company_filter,
+                         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
 @app.route('/api/alerts')
 def api_alerts():
