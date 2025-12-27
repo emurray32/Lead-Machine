@@ -1,0 +1,35 @@
+To surface high-value accounts and filter out the noise shown in your current results (like dependabot hits and general API doc scans), you should shift your monitoring strategy from keyword matching to structural changes.
+
+Here are the four key technical suggestions to implement in your project:
+
+1. The "New Language File" Signal (GitHub)
+Currently, your tool triggers on any commit containing keywords like "strings" or "language." To find true expansion intent, modify your GitHub monitor to look for file additions in specific directories.
+
+The Logic: Instead of searching the commit message, check if a commit adds a new file to a localization folder (e.g., i18n/, locales/, or res/values-xx/).
+
+Why it works: A developer adding hindi.json or pt-BR.yaml is a 100% intent signal that a new language is being launched.
+
+Replit Implementation: Use the GitHub API's files attribute and filter for status: "added" and file paths matching **/locales/*.json.
+
+2. Monitor "Hreflang" and Nav Tags (Docs)
+Your current Doc monitor is flagging generic API overview pages because they contain the word "language" in code snippets or general text.
+
+The Logic: Target the HTML metadata or header navigation specifically. Use BeautifulSoup to look for new <link rel="alternate" hreflang="..."> tags in the page head.
+
+Why it works: These tags are used specifically for SEO when a company launches a new regional version of their site. If a new tag for "fr-ca" appears, they have just localized their marketing or documentation site for French Canada.
+
+3. Identify High-Value Personas
+To move from "who committed this" to "is this the right person," you need to distinguish between automated bots and human decision-makers.
+
+Filter out Bots: Exclude any commits where the author contains [bot], dependabot, or github-actions. These are maintenance noise, not expansion intent.
+
+Target the PR Reviewers: The person approving a localization pull request is often a Team Lead or Manager. Use the GitHub API to fetch the "Reviewers" for any high-signal commit you find.
+
+Identify Lead Authors: In your CSV, "V Vineet Kumar" at Shopify added new locales (Hindi, Russian). This is a high-value human lead compared to "dependabot."
+
+4. Replace RSS with "App Store Scrapers"
+The 0 hits on RSS suggest that standard feeds don't provide granular enough data on language support updates.
+
+The Logic: Use a dedicated library like google-play-scraper (Python) to pull the actual languages list of the app package every 24 hours.
+
+The Signal: Don't look for keywords in the "What's New" text. Instead, compare the supported language list from yesterday to today. If the count increases, you have a confirmed account to target.
