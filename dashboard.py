@@ -7,12 +7,38 @@ import storage
 import os
 import csv
 import io
+import yaml
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
 storage.init_database()
+
+COMPANIES_FILE = "companies.yaml"
+
+def load_companies_yaml():
+    """Load companies from YAML config file."""
+    if not os.path.exists(COMPANIES_FILE):
+        return []
+    try:
+        with open(COMPANIES_FILE, 'r') as f:
+            config = yaml.safe_load(f)
+        return config.get('companies', [])
+    except Exception:
+        return []
+
+def save_companies_yaml(companies):
+    """Save companies to YAML config file."""
+    try:
+        config = {'companies': companies}
+        with open(COMPANIES_FILE, 'w') as f:
+            f.write("# Localization Monitor - Company Configuration\n")
+            f.write("# Edit this file or use the dashboard admin panel to add/remove companies\n\n")
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+        return True
+    except Exception:
+        return False
 
 @app.route('/')
 def index():
@@ -108,6 +134,168 @@ def export_json():
         mimetype='application/json',
         headers={'Content-Disposition': f'attachment; filename=localization_alerts_{timestamp}.json'}
     )
+
+SIGNAL_EXPLANATIONS = {
+    'NEW_LANG_FILE': {
+        'title': 'New Language File',
+        'description': 'A new translation file was added to the codebase',
+        'value': 'HIGH',
+        'meaning': 'The company is actively translating their product into a new language. This is strong evidence of expansion plans.'
+    },
+    'NEW_HREFLANG': {
+        'title': 'New Regional Site',
+        'description': 'A new regional website version was detected',
+        'value': 'HIGH',
+        'meaning': 'The company created a localized version of their website for a new region. This shows they are expanding into that market.'
+    },
+    'NEW_APP_LANG': {
+        'title': 'New App Language',
+        'description': 'A new language was added to their mobile app',
+        'value': 'HIGH',
+        'meaning': 'Their Android app now supports a new language. This means they are targeting users who speak that language.'
+    },
+    'KEYWORD': {
+        'title': 'Keyword Match',
+        'description': 'Localization-related keywords were found',
+        'value': 'LOW',
+        'meaning': 'Someone mentioned localization in their code or docs. This could mean they are planning to expand, but it could also be routine maintenance.'
+    }
+}
+
+@app.route('/admin')
+def admin():
+    """Admin panel for managing companies."""
+    companies = load_companies_yaml()
+    return render_template('admin.html', 
+                         companies=companies,
+                         signal_explanations=SIGNAL_EXPLANATIONS)
+
+@app.route('/api/companies', methods=['GET'])
+def api_get_companies():
+    """Get all monitored companies."""
+    companies = load_companies_yaml()
+    return jsonify(companies)
+
+@app.route('/api/companies', methods=['POST'])
+def api_add_company():
+    """Add a new company to monitor."""
+    data = request.get_json()
+    if not data or not data.get('name'):
+        return jsonify({'error': 'Company name is required'}), 400
+    
+    company = {
+        'name': data['name']
+    }
+    if data.get('github_org'):
+        company['github_org'] = data['github_org']
+    if data.get('github_repos'):
+        repos = [r.strip() for r in data['github_repos'].split(',') if r.strip()]
+        if repos:
+            company['github_repos'] = repos
+    if data.get('play_package'):
+        company['play_package'] = data['play_package']
+    if data.get('doc_urls'):
+        urls = [u.strip() for u in data['doc_urls'].split(',') if u.strip()]
+        if urls:
+            company['doc_urls'] = urls
+    
+    companies = load_companies_yaml()
+    companies.append(company)
+    
+    if save_companies_yaml(companies):
+        return jsonify({'success': True, 'company': company})
+    return jsonify({'error': 'Failed to save'}), 500
+
+@app.route('/api/companies/<name>', methods=['DELETE'])
+def api_delete_company(name):
+    """Delete a company from monitoring."""
+    companies = load_companies_yaml()
+    companies = [c for c in companies if c.get('name') != name]
+    
+    if save_companies_yaml(companies):
+        return jsonify({'success': True})
+    return jsonify({'error': 'Failed to save'}), 500
+
+@app.route('/api/quick-scan', methods=['POST'])
+def api_quick_scan():
+    """Run a quick scan for a company without saving."""
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    results = {
+        'company': data.get('name', 'Unknown'),
+        'github': None,
+        'playstore': None,
+        'docs': None,
+        'signals': []
+    }
+    
+    import requests as http_requests
+    
+    if data.get('github_org'):
+        try:
+            org = data['github_org']
+            url = f"https://api.github.com/orgs/{org}/repos?per_page=5&sort=updated"
+            resp = http_requests.get(url, timeout=10)
+            if resp.status_code == 200:
+                repos = resp.json()
+                results['github'] = {
+                    'status': 'found',
+                    'org': org,
+                    'recent_repos': [r['name'] for r in repos[:5]]
+                }
+            else:
+                results['github'] = {'status': 'not_found', 'error': f'Org not found or private'}
+        except Exception as e:
+            results['github'] = {'status': 'error', 'error': str(e)}
+    
+    if data.get('play_package'):
+        try:
+            from google_play_scraper import app as gplay_app
+            package = data['play_package']
+            app_info = gplay_app(package, lang='en', country='us')
+            languages = app_info.get('descriptionTranslations', [])
+            results['playstore'] = {
+                'status': 'found',
+                'title': app_info.get('title', 'Unknown'),
+                'developer': app_info.get('developer', 'Unknown'),
+                'languages_detected': len(languages) if languages else 'Unknown'
+            }
+        except Exception as e:
+            results['playstore'] = {'status': 'not_found', 'error': str(e)}
+    
+    if data.get('doc_urls'):
+        urls = [u.strip() for u in data['doc_urls'].split(',') if u.strip()]
+        doc_results = []
+        for url in urls[:3]:
+            try:
+                resp = http_requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                if resp.status_code == 200:
+                    from bs4 import BeautifulSoup
+                    soup = BeautifulSoup(resp.text, 'html.parser')
+                    hreflangs = []
+                    for link in soup.find_all('link', rel='alternate'):
+                        hl = link.get('hreflang')
+                        if hl:
+                            hreflangs.append(hl)
+                    doc_results.append({
+                        'url': url,
+                        'status': 'accessible',
+                        'hreflangs': hreflangs[:10]
+                    })
+                else:
+                    doc_results.append({'url': url, 'status': 'error', 'code': resp.status_code})
+            except Exception as e:
+                doc_results.append({'url': url, 'status': 'error', 'error': str(e)})
+        results['docs'] = doc_results
+    
+    return jsonify(results)
+
+@app.route('/api/signal-explanations')
+def api_signal_explanations():
+    """Get explanations for signal types."""
+    return jsonify(SIGNAL_EXPLANATIONS)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

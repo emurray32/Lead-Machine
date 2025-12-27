@@ -18,6 +18,7 @@ import hashlib
 import json
 import os
 import time
+import yaml
 from datetime import datetime
 from typing import Optional, Dict, List, Any
 
@@ -86,130 +87,76 @@ LANGUAGE_CODES = [
     "ka", "is", "lv", "lt", "mk", "mt", "mn", "ne", "fa", "sr", "si", "sl"
 ]
 
-# Target companies to monitor - Edit/expand this list with your targets
-# Each entry can have any combination of: github_org, github_repos, rss_url, doc_urls
-TARGETS = [
-    {
-        "company": "Walmart",
-        "github_org": "walmartlabs",
-        "github_repos": ["thorax", "electrode"],
-        "play_package": "com.walmart.android",
-        "rss_url": None,
-        "doc_urls": []
-    },
-    {
-        "company": "Spotify",
-        "github_org": "spotify",
-        "github_repos": ["web-api", "spotify-web-api-ts-sdk"],
-        "play_package": "com.spotify.music",
-        "rss_url": None,
-        "doc_urls": ["https://developer.spotify.com/documentation/web-api"]
-    },
-    {
-        "company": "Airbnb",
-        "github_org": "airbnb",
-        "github_repos": ["javascript", "lottie-android"],
-        "play_package": "com.airbnb.android",
-        "rss_url": None,
-        "doc_urls": []
-    },
-    {
-        "company": "Netflix",
-        "github_org": "Netflix",
-        "github_repos": ["zuul", "eureka"],
-        "play_package": "com.netflix.mediaclient",
-        "rss_url": None,
-        "doc_urls": []
-    },
-    {
-        "company": "Uber",
-        "github_org": "uber",
-        "github_repos": ["RIBs", "baseweb"],
-        "play_package": "com.ubercab",
-        "rss_url": None,
-        "doc_urls": ["https://developer.uber.com/docs/riders/introduction"]
-    },
-    {
-        "company": "Shopify",
-        "github_org": "Shopify",
-        "github_repos": ["polaris", "hydrogen"],
-        "play_package": "com.shopify.mobile",
-        "rss_url": None,
-        "doc_urls": ["https://shopify.dev/docs/api"]
-    },
-    {
-        "company": "Nike",
-        "github_org": "Nike-Inc",
-        "github_repos": ["koheesio"],
-        "play_package": "com.nike.omega",
-        "rss_url": None,
-        "doc_urls": []
-    },
-    {
-        "company": "Stripe",
-        "github_org": "stripe",
-        "github_repos": ["stripe-python", "stripe-node"],
-        "play_package": None,
-        "rss_url": None,
-        "doc_urls": ["https://stripe.com/docs/api"]
-    },
-    {
-        "company": "Twilio",
-        "github_org": "twilio",
-        "github_repos": ["twilio-python", "twilio-node"],
-        "play_package": None,
-        "rss_url": None,
-        "doc_urls": ["https://www.twilio.com/docs/usage/api"]
-    },
-    {
-        "company": "Slack",
-        "github_org": "slackapi",
-        "github_repos": ["bolt-python", "bolt-js"],
-        "play_package": "com.Slack",
-        "rss_url": None,
-        "doc_urls": ["https://api.slack.com/"]
-    },
-    {
-        "company": "Discord",
-        "github_org": "discord",
-        "github_repos": ["discord-api-docs"],
-        "play_package": "com.discord",
-        "rss_url": None,
-        "doc_urls": ["https://discord.com/developers/docs/intro"]
-    },
-    {
-        "company": "Zoom",
-        "github_org": "zoom",
-        "github_repos": ["meetingsdk-sample-signature-node.js"],
-        "play_package": "us.zoom.videomeetings",
-        "rss_url": None,
-        "doc_urls": ["https://developers.zoom.us/docs/api/"]
-    },
-    {
-        "company": "PayPal",
-        "github_org": "paypal",
-        "github_repos": ["PayPal-Python-SDK"],
-        "play_package": "com.paypal.android.p2pmobile",
-        "rss_url": None,
-        "doc_urls": ["https://developer.paypal.com/docs/api/overview/"]
-    },
-    {
-        "company": "Square",
-        "github_org": "square",
-        "github_repos": ["okhttp", "retrofit"],
-        "play_package": "com.squareup",
-        "rss_url": None,
-        "doc_urls": ["https://developer.squareup.com/docs"]
-    },
-    {
-        "company": "Doordash",
-        "github_org": "doordash",
-        "github_repos": [],
-        "play_package": "com.dd.doordash",
-        "rss_url": None,
-        "doc_urls": []
-    }
-]
+# =============================================================================
+# COMPANY CONFIGURATION - Loaded from companies.yaml
+# =============================================================================
+
+COMPANIES_FILE = "companies.yaml"
+
+def load_companies() -> List[Dict[str, Any]]:
+    """Load company configuration from YAML file."""
+    if not os.path.exists(COMPANIES_FILE):
+        log(f"Warning: {COMPANIES_FILE} not found, using empty list", "WARNING")
+        return []
+    
+    try:
+        with open(COMPANIES_FILE, 'r') as f:
+            config = yaml.safe_load(f)
+        
+        companies = config.get('companies', [])
+        targets = []
+        
+        for company in companies:
+            target = {
+                "company": company.get('name', 'Unknown'),
+                "github_org": company.get('github_org'),
+                "github_repos": company.get('github_repos', []),
+                "play_package": company.get('play_package'),
+                "rss_url": None,
+                "doc_urls": company.get('doc_urls', [])
+            }
+            targets.append(target)
+        
+        log(f"Loaded {len(targets)} companies from {COMPANIES_FILE}")
+        return targets
+    except Exception as e:
+        log(f"Error loading {COMPANIES_FILE}: {e}", "ERROR")
+        return []
+
+def save_companies(companies: List[Dict[str, Any]]) -> bool:
+    """Save company configuration to YAML file."""
+    try:
+        yaml_companies = []
+        for target in companies:
+            company = {'name': target.get('company', 'Unknown')}
+            if target.get('github_org'):
+                company['github_org'] = target['github_org']
+            if target.get('github_repos'):
+                company['github_repos'] = target['github_repos']
+            if target.get('play_package'):
+                company['play_package'] = target['play_package']
+            if target.get('doc_urls'):
+                company['doc_urls'] = target['doc_urls']
+            yaml_companies.append(company)
+        
+        config = {'companies': yaml_companies}
+        
+        with open(COMPANIES_FILE, 'w') as f:
+            f.write("# Localization Monitor - Company Configuration\n")
+            f.write("# Edit this file or use the dashboard admin panel to add/remove companies\n\n")
+            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+        
+        log(f"Saved {len(yaml_companies)} companies to {COMPANIES_FILE}")
+        return True
+    except Exception as e:
+        log(f"Error saving {COMPANIES_FILE}: {e}", "ERROR")
+        return False
+
+def get_targets() -> List[Dict[str, Any]]:
+    """Get current target list, loading from file."""
+    return load_companies()
+
+TARGETS = []
 
 # Check intervals (in seconds)
 GITHUB_CHECK_INTERVAL = 6 * 60 * 60  # 6 hours
@@ -974,13 +921,15 @@ def run_monitoring_cycle(last_github_check: float, last_rss_docs_check: float) -
     rss_alerts = 0
     docs_alerts = 0
     
+    targets = get_targets()
+    
     if current_time - last_github_check >= GITHUB_CHECK_INTERVAL:
-        github_alerts = check_all_github(TARGETS)
+        github_alerts = check_all_github(targets)
         last_github_check = current_time
     
     if current_time - last_rss_docs_check >= RSS_DOCS_CHECK_INTERVAL:
-        rss_alerts = check_all_rss(TARGETS)
-        docs_alerts = check_all_docs(TARGETS)
+        rss_alerts = check_all_rss(targets)
+        docs_alerts = check_all_docs(targets)
         last_rss_docs_check = current_time
     
     total_alerts = github_alerts + rss_alerts + docs_alerts
@@ -989,18 +938,18 @@ def run_monitoring_cycle(last_github_check: float, last_rss_docs_check: float) -
     
     return last_github_check, last_rss_docs_check
 
-def print_banner() -> None:
+def print_banner(targets: List[Dict]) -> None:
     """Print startup banner with configuration summary."""
     print("\n" + "="*60)
     print(" LOCALIZATION MONITORING APPLICATION")
     print(" Version 1.0")
     print("="*60)
     print(f"\nStarted at: {get_timestamp()}")
-    print(f"\nMonitoring {len(TARGETS)} target companies:")
+    print(f"\nMonitoring {len(targets)} target companies:")
     
-    github_count = sum(1 for t in TARGETS if t.get("github_repos"))
-    playstore_count = sum(1 for t in TARGETS if t.get("play_package"))
-    docs_count = sum(1 for t in TARGETS if t.get("doc_urls"))
+    github_count = sum(1 for t in targets if t.get("github_repos"))
+    playstore_count = sum(1 for t in targets if t.get("play_package"))
+    docs_count = sum(1 for t in targets if t.get("doc_urls"))
     
     print(f"  - GitHub repos configured: {github_count} companies")
     print(f"  - Play Store apps configured: {playstore_count} companies")
@@ -1025,15 +974,16 @@ def print_banner() -> None:
 
 def main() -> None:
     """Main entry point for the monitoring application."""
-    print_banner()
+    targets = get_targets()
+    print_banner(targets)
     ensure_directories()
     
     log("Running scheduled monitoring check...")
     
     try:
-        github_alerts = check_all_github(TARGETS)
-        playstore_alerts = check_all_play_store(TARGETS)
-        docs_alerts = check_all_docs(TARGETS)
+        github_alerts = check_all_github(targets)
+        playstore_alerts = check_all_play_store(targets)
+        docs_alerts = check_all_docs(targets)
         
         total_alerts = github_alerts + playstore_alerts + docs_alerts
         log(f"Monitoring complete. Total alerts: {total_alerts}")

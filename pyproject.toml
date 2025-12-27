@@ -9,5 +9,6 @@ dependencies = [
     "flask>=3.1.2",
     "google-play-scraper>=1.2.7",
     "psycopg2-binary>=2.9.11",
+    "pyyaml>=6.0.3",
     "requests>=2.32.5",
 ]

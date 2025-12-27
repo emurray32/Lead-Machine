@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Localization Monitor</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        header h1 { font-size: 2rem; margin-bottom: 10px; }
+        header p { opacity: 0.9; }
+        .nav-links { margin-top: 15px; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            margin: 0 5px;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.3); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group small {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        
+        .company-list { max-height: 400px; overflow-y: auto; }
+        .company-item {
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+        .company-item h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .company-item .meta {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .company-item .meta span {
+            display: inline-block;
+            background: #e8e8e8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px 4px 2px 0;
+        }
+        .company-item .actions { margin-top: 10px; }
+        
+        .scan-results {
+            display: none;
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .scan-results.show { display: block; }
+        .scan-results h4 { margin-bottom: 12px; color: #333; }
+        .scan-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+        .scan-item.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .scan-item.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .scan-item.info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        
+        .signal-guide {
+            margin-top: 30px;
+        }
+        .signal-card {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .signal-card.high { background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); }
+        .signal-card.low { background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); }
+        .signal-card h4 { margin-bottom: 6px; }
+        .signal-card .value-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .signal-card .value-badge.high { background: #28a745; color: white; }
+        .signal-card .value-badge.low { background: #ffc107; color: #333; }
+        
+        .loading { opacity: 0.6; pointer-events: none; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: #333;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+        }
+        .toast.success { background: #28a745; }
+        .toast.error { background: #dc3545; }
+        .toast.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel</h1>
+            <p>Manage companies and understand signals</p>
+            <div class="nav-links">
+                <a href="/">Dashboard</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </header>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>Add New Company</h2>
+                <form id="addCompanyForm">
+                    <div class="form-group">
+                        <label>Company Name *</label>
+                        <input type="text" id="companyName" required placeholder="e.g., Adobe">
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Organization</label>
+                        <input type="text" id="githubOrg" placeholder="e.g., adobe">
+                        <small>The organization name from github.com/organization</small>
+                    </div>
+                    <div class="form-group">
+                        <label>GitHub Repos (optional)</label>
+                        <input type="text" id="githubRepos" placeholder="e.g., react-spectrum, brackets">
+                        <small>Comma-separated list. Leave empty to monitor all public repos.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Play Store Package ID</label>
+                        <input type="text" id="playPackage" placeholder="e.g., com.adobe.reader">
+                        <small>Android app package name (find it in the Play Store URL)</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Documentation URLs</label>
+                        <textarea id="docUrls" rows="2" placeholder="e.g., https://developer.adobe.com/docs"></textarea>
+                        <small>Comma-separated list of doc pages to monitor for regional versions</small>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary" onclick="quickScan()">Quick Scan</button>
+                        <button type="submit" class="btn btn-primary">Add Company</button>
+                    </div>
+                </form>
+                
+                <div id="scanResults" class="scan-results">
+                    <h4>Quick Scan Results</h4>
+                    <div id="scanResultsContent"></div>
+                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="addFromScan()">Add This Company</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Monitored Companies ({{ companies|length }})</h2>
+                <div class="company-list" id="companyList">
+                    {% for company in companies %}
+                    <div class="company-item">
+                        <h3>{{ company.name }}</h3>
+                        <div class="meta">
+                            {% if company.github_org %}
+                            <span>GitHub: {{ company.github_org }}</span>
+                            {% endif %}
+                            {% if company.play_package %}
+                            <span>Play: {{ company.play_package }}</span>
+                            {% endif %}
+                            {% if company.doc_urls %}
+                            <span>Docs: {{ company.doc_urls|length }} URL(s)</span>
+                            {% endif %}
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-danger" onclick="deleteCompany('{{ company.name }}')">Remove</button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="color: #888; text-align: center; padding: 40px;">No companies configured yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="signal-guide card" style="margin-top: 20px;">
+            <h2>Understanding Signal Types</h2>
+            <p style="color: #666; margin-bottom: 20px;">These are the types of alerts you'll see. High-value signals indicate actual expansion, while low-value signals are hints that need investigation.</p>
+            
+            <div class="grid">
+                {% for key, signal in signal_explanations.items() %}
+                <div class="signal-card {{ signal.value|lower }}">
+                    <h4>
+                        {{ signal.title }}
+                        <span class="value-badge {{ signal.value|lower }}">{{ signal.value }} VALUE</span>
+                    </h4>
+                    <p style="color: #555; font-size: 0.9rem; margin: 8px 0;">{{ signal.description }}</p>
+                    <p style="color: #333; font-size: 0.95rem;"><strong>What it means:</strong> {{ signal.meaning }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => { toast.className = 'toast'; }, 3000);
+        }
+        
+        document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('companyName').value,
+                github_org: document.getElementById('githubOrg').value,
+                github_repos: document.getElementById('githubRepos').value,
+                play_package: document.getElementById('playPackage').value,
+                doc_urls: document.getElementById('docUrls').value
+            };
+            
+            try {
+                const resp = await fetch('/api/companies', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                
+                if (result.success) {
+                    showToast('Company added successfully!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.error || 'Failed to add company', 'error');
+                }
+            } catch (err) {
+                showToast('Error adding company', 'error');
+            }
+        });
+        
+        async function deleteCompany(name) {
+            if (!confirm('Remove ' + name + ' from monitoring?')) return;
+            
+            try {
+                const resp = await fetch('/api/companies/' + encodeURIComponent(name), {
+                    method: 'DELETE'
+                });
+                const result = await resp.json();
+                
+                if (result.success) {
+                    showToast('Company removed');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.error || 'Failed to remove', 'error');
+                }
+            } catch (err) {
+                showToast('Error removing company', 'error');
+            }
+        }
+        
+        async function quickScan() {
+            const data = {
+                name: document.getElementById('companyName').value || 'Test',
+                github_org: document.getElementById('githubOrg').value,
+                play_package: document.getElementById('playPackage').value,
+                doc_urls: document.getElementById('docUrls').value
+            };
+            
+            if (!data.github_org && !data.play_package && !data.doc_urls) {
+                showToast('Please fill in at least one field to scan', 'error');
+                return;
+            }
+            
+            document.getElementById('scanResults').classList.add('show');
+            document.getElementById('scanResultsContent').innerHTML = '<p>Scanning...</p>';
+            
+            try {
+                const resp = await fetch('/api/quick-scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                
+                let html = '';
+                
+                if (result.github) {
+                    if (result.github.status === 'found') {
+                        html += '<div class="scan-item success"><strong>GitHub:</strong> Found org "' + result.github.org + '"';
+                        if (result.github.recent_repos) {
+                            html += '<br>Recent repos: ' + result.github.recent_repos.join(', ');
+                        }
+                        html += '</div>';
+                    } else {
+                        html += '<div class="scan-item error"><strong>GitHub:</strong> ' + (result.github.error || 'Not found') + '</div>';
+                    }
+                }
+                
+                if (result.playstore) {
+                    if (result.playstore.status === 'found') {
+                        html += '<div class="scan-item success"><strong>Play Store:</strong> Found "' + result.playstore.title + '" by ' + result.playstore.developer + '</div>';
+                    } else {
+                        html += '<div class="scan-item error"><strong>Play Store:</strong> ' + (result.playstore.error || 'Not found') + '</div>';
+                    }
+                }
+                
+                if (result.docs && result.docs.length > 0) {
+                    for (const doc of result.docs) {
+                        if (doc.status === 'accessible') {
+                            html += '<div class="scan-item success"><strong>Docs:</strong> ' + doc.url;
+                            if (doc.hreflangs && doc.hreflangs.length > 0) {
+                                html += '<br>Languages found: ' + doc.hreflangs.join(', ');
+                            }
+                            html += '</div>';
+                        } else {
+                            html += '<div class="scan-item error"><strong>Docs:</strong> ' + doc.url + ' - ' + (doc.error || 'Error') + '</div>';
+                        }
+                    }
+                }
+                
+                if (!html) {
+                    html = '<div class="scan-item info">No results to show</div>';
+                }
+                
+                document.getElementById('scanResultsContent').innerHTML = html;
+                
+            } catch (err) {
+                document.getElementById('scanResultsContent').innerHTML = '<div class="scan-item error">Scan failed: ' + err.message + '</div>';
+            }
+        }
+        
+        function addFromScan() {
+            document.getElementById('addCompanyForm').dispatchEvent(new Event('submit'));
+        }
+    </script>
+</body>
+</html>
