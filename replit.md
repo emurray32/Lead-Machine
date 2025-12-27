@@ -29,12 +29,14 @@ The monitor uses intelligent signal detection to reduce noise:
 
 ## Web Dashboard
 Access the dashboard at port 5000:
-- Stats cards showing alerts by source (GitHub, Play Store, Documentation)
-- Filterable table with signal type, company, details, and keywords
+- **Card-based layout** - Clean, scannable alerts instead of dense table
+- **Friendly timestamps** - "1h ago", "Yesterday", "Dec 27" instead of full dates
+- Stats bar showing alerts by source (GitHub, Play Store, Docs)
 - **AI Explain button** - Get plain-English summaries of what each alert means
-- Export to CSV or JSON
-- Auto-refresh every 60 seconds
-- Link to Admin Panel for managing companies
+- Filter by source or company
+- Export to CSV
+- Auto-refresh every 2 minutes
+- Admin and Export buttons in header
 
 ## Admin Panel
 Access at `/admin` to:
@@ -76,6 +78,7 @@ Each company can have:
 - **Localization Monitor**: Runs the monitoring checks
 
 ## Recent Changes
+- 2025-12-27: Redesigned dashboard with card layout, friendly timestamps, cleaner UI
 - 2025-12-27: Added AI-powered alert summaries using Gemini Pro
 - 2025-12-27: Added Admin Panel for managing companies without code
 - 2025-12-27: Added Quick Scan feature to test companies before adding
