@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Localization Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --phrase-green: #03EAB3;
+            --phrase-black: #181818;
+            --phrase-dark-green: #027361;
+            --phrase-light-gray: #F4F4F4;
+            --phrase-blue: #1080FC;
+            --phrase-red: #E84831;
+            --phrase-gray-200: #E0E0E0;
+            --phrase-blue-light: #EAF2F9;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,14 +26,15 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--phrase-light-gray);
+            color: var(--phrase-black);
+            line-height: 1.5;
+            font-size: 12px;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--phrase-black);
             color: white;
             padding: 1.5rem 2rem;
             display: flex;
@@ -30,8 +45,15 @@
         }
         
         .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        @media (min-width: 768px) {
+            .header h1 {
+                font-size: 64px;
+            }
         }
         
         .header-actions {
@@ -40,40 +62,45 @@
         }
         
         .header-btn {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.25rem;
             border-radius: 6px;
             text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: opacity 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+            transition: opacity 0.2s, transform 0.1s;
         }
         
         .header-btn:hover {
             opacity: 0.9;
         }
         
+        .header-btn:active {
+            transform: scale(0.98);
+        }
+        
         .btn-admin {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             color: white;
+            border: 1px solid rgba(255,255,255,0.3);
         }
         
         .btn-export {
-            background: white;
-            color: #667eea;
+            background: var(--phrase-blue);
+            color: white;
         }
         
         .btn-leads {
-            background: #28a745;
-            color: white;
+            background: var(--phrase-green);
+            color: var(--phrase-black);
         }
         
         .stats-row {
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 2rem;
+            padding: 1.25rem;
             background: white;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid var(--phrase-gray-200);
         }
         
         .stat {
@@ -82,76 +109,98 @@
         }
         
         .stat-num {
-            font-size: 1.75rem;
+            font-size: 36px;
             font-weight: 700;
-            color: #667eea;
+            color: var(--phrase-dark-green);
         }
         
         .stat-label {
-            font-size: 0.75rem;
-            color: #888;
+            font-size: 10px;
+            color: #666;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1.25px;
+            font-weight: 700;
+            line-height: 1.5;
         }
         
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 1.5rem 1rem;
+            padding: 2rem 1.5rem;
         }
         
         .filters {
             display: flex;
             gap: 0.75rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
         }
         
         .filters select {
             padding: 0.6rem 1rem;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--phrase-gray-200);
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
             background: white;
             min-width: 140px;
         }
         
+        .filters select:focus {
+            outline: none;
+            border-color: var(--phrase-blue);
+        }
+        
         .filters button {
-            padding: 0.6rem 1.25rem;
-            background: #667eea;
-            color: white;
+            padding: 0.6rem 1.5rem;
+            background: var(--phrase-green);
+            color: var(--phrase-black);
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .filters button:hover {
+            background: var(--phrase-dark-green);
+            color: white;
         }
         
         .filters .reset-btn {
-            background: #6c757d;
+            background: white;
+            color: var(--phrase-black);
+            border: 1px solid var(--phrase-gray-200);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
         }
         
+        .filters .reset-btn:hover {
+            background: var(--phrase-light-gray);
+        }
+        
         .alert-card {
             background: white;
             border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: box-shadow 0.2s;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--phrase-gray-200);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s, transform 0.2s;
         }
         
         .alert-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
         }
         
         .alert-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
         
         .alert-meta {
@@ -161,53 +210,56 @@
         }
         
         .source-badge {
-            padding: 0.25rem 0.6rem;
+            padding: 0.3rem 0.75rem;
             border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
         .source-github {
-            background: #f0f0f0;
-            color: #333;
+            background: var(--phrase-black);
+            color: white;
         }
         
         .source-docs {
-            background: #e3f2fd;
-            color: #1565c0;
+            background: var(--phrase-blue);
+            color: white;
         }
         
         .source-playstore {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: var(--phrase-green);
+            color: var(--phrase-black);
         }
         
         .company-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 1rem;
+            font-weight: 700;
+            color: var(--phrase-black);
+            font-size: 14px;
         }
         
         .alert-time {
-            font-size: 0.85rem;
+            font-size: 10px;
             color: #888;
+            font-weight: 400;
         }
         
         .alert-content {
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
         
         .alert-title {
-            font-size: 0.95rem;
-            color: #444;
-            margin-bottom: 0.25rem;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--phrase-black);
+            margin-bottom: 0.35rem;
         }
         
         .alert-message {
-            font-size: 0.85rem;
-            color: #666;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
         }
         
         .alert-actions {
@@ -220,35 +272,36 @@
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            padding: 0.5rem 0.9rem;
-            background: #667eea;
-            color: white;
+            padding: 0.55rem 1rem;
+            background: var(--phrase-green);
+            color: var(--phrase-black);
             text-decoration: none;
             border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             transition: background 0.2s;
         }
         
         .action-link:hover {
-            background: #5a67d8;
+            background: var(--phrase-dark-green);
+            color: white;
         }
         
         .explain-btn {
-            padding: 0.5rem 0.9rem;
-            background: #f8f9fa;
-            color: #667eea;
-            border: 1px solid #667eea;
+            padding: 0.55rem 1rem;
+            background: var(--phrase-blue);
+            color: white;
+            border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
             transition: all 0.2s;
         }
         
         .explain-btn:hover {
-            background: #667eea;
-            color: white;
+            opacity: 0.9;
         }
         
         .explain-btn:disabled {
@@ -258,46 +311,61 @@
         
         .ai-summary {
             display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            margin-top: 1.25rem;
+            padding: 1.25rem;
+            background: var(--phrase-blue-light);
             border-radius: 8px;
-            font-size: 0.9rem;
-            color: #333;
+            font-size: 12px;
+            color: var(--phrase-black);
             line-height: 1.6;
-            border-left: 3px solid #667eea;
+            border-left: 4px solid var(--phrase-blue);
         }
         
         .ai-summary.error {
-            background: #fff3cd;
-            border-left-color: #ffc107;
-            color: #856404;
+            background: #FEF3F2;
+            border-left-color: var(--phrase-red);
+            color: #7A271A;
         }
         
         .no-alerts {
             text-align: center;
-            padding: 4rem 2rem;
-            color: #888;
+            padding: 5rem 2rem;
+            color: #666;
         }
         
         .no-alerts h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: #666;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--phrase-black);
+        }
+        
+        .no-alerts p {
+            font-size: 12px;
         }
         
         @media (max-width: 600px) {
             .header {
                 flex-direction: column;
                 text-align: center;
+                padding: 1.25rem 1rem;
+            }
+            
+            .header h1 {
+                font-size: 36px;
             }
             
             .stats-row {
                 flex-wrap: wrap;
+                gap: 1rem;
             }
             
             .stat {
                 padding: 0.5rem 1rem;
+            }
+            
+            .stat-num {
+                font-size: 24px;
             }
             
             .alert-header {

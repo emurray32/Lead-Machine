@@ -4,74 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Localization Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        :root {
+            --phrase-green: #03EAB3;
+            --phrase-black: #181818;
+            --phrase-dark-green: #027361;
+            --phrase-light-gray: #F4F4F4;
+            --phrase-blue: #1080FC;
+            --phrase-red: #E84831;
+            --phrase-gray-200: #E0E0E0;
+            --phrase-blue-light: #EAF2F9;
         }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--phrase-black);
+            min-height: 100vh;
+            padding: 24px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
         .container { max-width: 1200px; margin: 0 auto; }
+        
         header {
             text-align: center;
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 36px;
         }
-        header h1 { font-size: 2rem; margin-bottom: 10px; }
-        header p { opacity: 0.9; }
-        .nav-links { margin-top: 15px; }
+        
+        header h1 { 
+            font-size: 48px; 
+            font-weight: 700;
+            margin-bottom: 12px; 
+            letter-spacing: -0.5px;
+        }
+        
+        @media (min-width: 768px) {
+            header h1 { font-size: 64px; }
+        }
+        
+        header p { 
+            opacity: 0.8; 
+            font-size: 14px;
+        }
+        
+        .nav-links { margin-top: 20px; }
+        
         .nav-links a {
             color: white;
             text-decoration: none;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            margin: 0 5px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            margin: 0 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.2s;
         }
-        .nav-links a:hover { background: rgba(255,255,255,0.3); }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
         
         .card {
             background: white;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        .card h2 {
-            font-size: 1.3rem;
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            padding: 28px;
+            border: 1px solid var(--phrase-gray-200);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
         }
         
-        .form-group { margin-bottom: 16px; }
+        .card h2 {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.25px;
+            color: var(--phrase-black);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--phrase-green);
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
         .form-group label {
             display: block;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--phrase-black);
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+        
         .form-group input, .form-group textarea {
             width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e0e0e0;
+            padding: 12px 14px;
+            border: 1px solid var(--phrase-gray-200);
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
             transition: border-color 0.2s;
         }
+        
         .form-group input:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--phrase-blue);
         }
+        
         .form-group small {
-            color: #888;
-            font-size: 0.8rem;
-            margin-top: 4px;
+            color: #666;
+            font-size: 10px;
+            margin-top: 6px;
             display: block;
         }
         
@@ -79,110 +131,200 @@
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
+            transition: transform 0.1s, opacity 0.2s;
         }
+        
         .btn:active { transform: scale(0.98); }
+        
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--phrase-green);
+            color: var(--phrase-black);
+        }
+        
+        .btn-primary:hover { 
+            background: var(--phrase-dark-green);
             color: white;
         }
-        .btn-primary:hover { box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+        
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-        .btn-danger {
-            background: #dc3545;
+            background: var(--phrase-blue);
             color: white;
-            padding: 6px 12px;
-            font-size: 0.85rem;
         }
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-danger {
+            background: var(--phrase-red);
+            color: white;
+            padding: 8px 16px;
+            font-size: 11px;
+        }
+        
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-group { display: flex; gap: 12px; margin-top: 12px; }
         
         .company-list { max-height: 400px; overflow-y: auto; }
+        
         .company-item {
-            padding: 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            background: #fafafa;
+            padding: 18px;
+            border: 1px solid var(--phrase-gray-200);
+            border-radius: 10px;
+            margin-bottom: 14px;
+            background: white;
+            transition: box-shadow 0.2s;
         }
+        
+        .company-item:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        
         .company-item h3 {
-            font-size: 1.1rem;
-            color: #333;
-            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--phrase-black);
+            margin-bottom: 10px;
         }
+        
         .company-item .meta {
-            font-size: 0.85rem;
-            color: #666;
+            font-size: 10px;
+            color: #555;
         }
+        
         .company-item .meta span {
             display: inline-block;
-            background: #e8e8e8;
-            padding: 2px 8px;
+            background: var(--phrase-light-gray);
+            padding: 4px 10px;
             border-radius: 4px;
-            margin: 2px 4px 2px 0;
+            margin: 3px 6px 3px 0;
+            font-weight: 600;
         }
-        .company-item .actions { margin-top: 10px; }
+        
+        .company-item .actions { margin-top: 14px; }
         
         .scan-results {
             display: none;
-            margin-top: 20px;
-            padding: 16px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--phrase-blue-light);
+            border-radius: 10px;
+            border-left: 4px solid var(--phrase-blue);
         }
+        
         .scan-results.show { display: block; }
-        .scan-results h4 { margin-bottom: 12px; color: #333; }
-        .scan-item {
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
+        
+        .scan-results h4 { 
+            margin-bottom: 14px; 
+            color: var(--phrase-black);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .scan-item.success { background: #d4edda; border: 1px solid #c3e6cb; }
-        .scan-item.error { background: #f8d7da; border: 1px solid #f5c6cb; }
-        .scan-item.info { background: #d1ecf1; border: 1px solid #bee5eb; }
+        
+        .scan-item {
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .scan-item.success { 
+            background: #ECFDF5; 
+            border: 1px solid #A7F3D0; 
+            color: #065F46;
+        }
+        
+        .scan-item.error { 
+            background: #FEF2F2; 
+            border: 1px solid #FECACA; 
+            color: #991B1B;
+        }
+        
+        .scan-item.info { 
+            background: var(--phrase-blue-light); 
+            border: 1px solid #BAE6FD; 
+            color: #0C4A6E;
+        }
         
         .signal-guide {
-            margin-top: 30px;
+            margin-top: 36px;
         }
+        
         .signal-card {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            border: 1px solid var(--phrase-gray-200);
         }
-        .signal-card.high { background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); }
-        .signal-card.low { background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); }
-        .signal-card h4 { margin-bottom: 6px; }
+        
+        .signal-card.high { 
+            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); 
+            border-color: #A7F3D0;
+        }
+        
+        .signal-card.low { 
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); 
+            border-color: #FCD34D;
+        }
+        
+        .signal-card h4 { 
+            margin-bottom: 8px; 
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--phrase-black);
+        }
+        
         .signal-card .value-badge {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
         }
-        .signal-card .value-badge.high { background: #28a745; color: white; }
-        .signal-card .value-badge.low { background: #ffc107; color: #333; }
+        
+        .signal-card .value-badge.high { 
+            background: var(--phrase-green); 
+            color: var(--phrase-black); 
+        }
+        
+        .signal-card .value-badge.low { 
+            background: #FCD34D; 
+            color: var(--phrase-black); 
+        }
         
         .loading { opacity: 0.6; pointer-events: none; }
+        
         .toast {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: #333;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 28px;
+            background: var(--phrase-black);
             color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             z-index: 1000;
             display: none;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .toast.success { background: #28a745; }
-        .toast.error { background: #dc3545; }
+        
+        .toast.success { background: var(--phrase-dark-green); }
+        .toast.error { background: var(--phrase-red); }
         .toast.show { display: block; animation: slideIn 0.3s ease; }
+        
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -237,7 +379,7 @@
                 <div id="scanResults" class="scan-results">
                     <h4>Quick Scan Results</h4>
                     <div id="scanResultsContent"></div>
-                    <button class="btn btn-primary" style="margin-top: 12px;" onclick="addFromScan()">Add This Company</button>
+                    <button class="btn btn-primary" style="margin-top: 14px;" onclick="addFromScan()">Add This Company</button>
                 </div>
             </div>
             
@@ -263,15 +405,15 @@
                         </div>
                     </div>
                     {% else %}
-                    <p style="color: #888; text-align: center; padding: 40px;">No companies configured yet.</p>
+                    <p style="color: #888; text-align: center; padding: 48px;">No companies configured yet.</p>
                     {% endfor %}
                 </div>
             </div>
         </div>
         
-        <div class="signal-guide card" style="margin-top: 20px;">
+        <div class="signal-guide card" style="margin-top: 24px;">
             <h2>Understanding Signal Types</h2>
-            <p style="color: #666; margin-bottom: 20px;">These are the types of alerts you'll see. High-value signals indicate actual expansion, while low-value signals are hints that need investigation.</p>
+            <p style="color: #555; margin-bottom: 24px; font-size: 12px;">These are the types of alerts you'll see. High-value signals indicate actual expansion, while low-value signals are hints that need investigation.</p>
             
             <div class="grid">
                 {% for key, signal in signal_explanations.items() %}
@@ -280,8 +422,8 @@
                         {{ signal.title }}
                         <span class="value-badge {{ signal.value|lower }}">{{ signal.value }} VALUE</span>
                     </h4>
-                    <p style="color: #555; font-size: 0.9rem; margin: 8px 0;">{{ signal.description }}</p>
-                    <p style="color: #333; font-size: 0.95rem;"><strong>What it means:</strong> {{ signal.meaning }}</p>
+                    <p style="color: #555; font-size: 12px; margin: 10px 0; line-height: 1.5;">{{ signal.description }}</p>
+                    <p style="color: var(--phrase-black); font-size: 12px;"><strong>What it means:</strong> {{ signal.meaning }}</p>
                 </div>
                 {% endfor %}
             </div>

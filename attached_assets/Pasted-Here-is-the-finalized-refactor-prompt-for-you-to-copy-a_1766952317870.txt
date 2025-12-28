@@ -1,0 +1,92 @@
+Here is the finalized refactor prompt for you to copy and paste into Replit AI. This prompt combines the technical requirements of your current Flask app with the specific stylistic rules found in the Phrase Brand Guidelines.
+
+Replit AI Refactor Prompt: "Phrase" Brand Alignment
+Goal: Refactor the UI/UX of my Localization Monitor dashboard to strictly align with the Phrase Brand Guidelines.
+
+Core Technical Requirements: Modify templates/dashboard.html and templates/admin.html. Use the brand colors and typography defined below. Use clean, modern CSS and ensure the dashboard remains fully responsive.
+
+1. Typography (Strict Implementation)
+
+Headline Font: Import and use FK Screamer Legacy Upright for all primary H1 headlines.
+
+
+
+Large Viewports: 64px.
+
+
+Small Viewports: 48px.
+
+
+Body & UI Font: Use Inter for all other text.
+
+
+Subheadlines (H2): Inter Bold (700) at 36px (Large) or 24px (Small).
+
+
+
+Section Headers (H3): Inter Bold (700), 12px, Uppercase, 1.25 tracking, 1.5 line height.
+
+
+
+
+Body Copy: Inter Regular (400), 12px, 1.5 line height.
+
+
+
+Utility Text: Inter Regular (400), 10px.
+
+
+2. Color Palette (HEX Specifics)
+
+Primary Palette:
+
+
+
+Black: #181818 (Use for main text and high-impact headers).
+
+
+Phrase Green: #03EAB3 (Use for primary buttons and success signals).
+
+
+Dark Green: #027361 (Alternative header or accent color).
+
+
+Light Gray: #F4F4F4 (Main page background).
+
+
+Secondary/Utility Colors:
+
+
+Phrase Blue: #1080FC (Use for "Explain" buttons and secondary links).
+
+
+Phrase Red: #E84831 (Use for error states or delete actions).
+
+3. Component Styling
+Headers: Replace the purple gradient with a solid Black (#181818) header. Text inside must be White (#FFFFFF).
+
+
+Alert Cards: Adopt a "Geometric Abstraction" style. Use white cards with thin #E0E0E0 borders and subtle drop shadows.
+
+
+
+
+Buttons: Follow Button Style 1 (Solid Fill).
+
+Default: Phrase Green background with Black text.
+
+Secondary: Phrase Blue background with White text.
+
+Badges: Use solid fills for source indicators:
+
+GitHub: Black (#181818).
+
+Docs: Phrase Blue (#1080FC).
+
+Play Store: Phrase Green (#03EAB3).
+
+4. Layout & Content
+Increase whitespace around alert cards to match the "Landing Page Mockup" spacing.
+
+
+Ensure the AI Summary container uses the Blue 10 (Utility Light) tint: #EAF2F9
