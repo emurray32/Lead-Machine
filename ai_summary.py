@@ -16,7 +16,10 @@ try:
     if AI_INTEGRATIONS_GEMINI_API_KEY and AI_INTEGRATIONS_GEMINI_BASE_URL:
         client = genai.Client(
             api_key=AI_INTEGRATIONS_GEMINI_API_KEY,
-            http_options={"base_url": AI_INTEGRATIONS_GEMINI_BASE_URL}
+            http_options={
+                'api_version': '',
+                'base_url': AI_INTEGRATIONS_GEMINI_BASE_URL
+            }
         )
         GEMINI_AVAILABLE = True
     else:
