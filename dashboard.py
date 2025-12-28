@@ -123,35 +123,68 @@ def api_stats():
     """API endpoint for statistics."""
     return jsonify(storage.get_alert_stats())
 
+HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR']
+
+def filter_high_value_alerts(alerts: list) -> list:
+    """Filter alerts to only include high-value signals."""
+    filtered = []
+    for alert in alerts:
+        metadata = alert.get('metadata', {})
+        if isinstance(metadata, dict):
+            signal_type = metadata.get('signal_type', '')
+            if signal_type in HIGH_VALUE_SIGNALS:
+                filtered.append(alert)
+    return filtered
+
 @app.route('/export/csv')
 def export_csv():
-    """Export alerts as CSV file."""
+    """Export alerts as CSV file. Use ?high_value=true for CRM-ready leads."""
     source = request.args.get('source')
     company = request.args.get('company')
+    high_value_only = request.args.get('high_value', '').lower() == 'true'
     
     alerts = storage.get_alerts(limit=10000, source=source, company=company)
     
+    if high_value_only:
+        alerts = filter_high_value_alerts(alerts)
+    
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Time', 'Source', 'Company', 'Title', 'Message', 'Keywords', 'URL'])
     
-    for alert in alerts:
-        writer.writerow([
-            alert.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S') if alert.get('created_at') else '',
-            alert.get('source', ''),
-            alert.get('company', ''),
-            alert.get('title', ''),
-            alert.get('message', ''),
-            alert.get('keywords', ''),
-            alert.get('url', '')
-        ])
+    if high_value_only:
+        writer.writerow(['Time', 'Source', 'Company', 'Signal Type', 'Title', 'Message', 'Keywords', 'URL'])
+        for alert in alerts:
+            metadata = alert.get('metadata', {}) or {}
+            writer.writerow([
+                alert.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S') if alert.get('created_at') else '',
+                alert.get('source', ''),
+                alert.get('company', ''),
+                metadata.get('signal_type', '') if isinstance(metadata, dict) else '',
+                alert.get('title', ''),
+                alert.get('message', ''),
+                alert.get('keywords', ''),
+                alert.get('url', '')
+            ])
+    else:
+        writer.writerow(['Time', 'Source', 'Company', 'Title', 'Message', 'Keywords', 'URL'])
+        for alert in alerts:
+            writer.writerow([
+                alert.get('created_at', '').strftime('%Y-%m-%d %H:%M:%S') if alert.get('created_at') else '',
+                alert.get('source', ''),
+                alert.get('company', ''),
+                alert.get('title', ''),
+                alert.get('message', ''),
+                alert.get('keywords', ''),
+                alert.get('url', '')
+            ])
     
     output.seek(0)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'localization_leads_{timestamp}.csv' if high_value_only else f'localization_alerts_{timestamp}.csv'
     return Response(
         output.getvalue(),
         mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment; filename=localization_alerts_{timestamp}.csv'}
+        headers={'Content-Disposition': f'attachment; filename={filename}'}
     )
 
 @app.route('/export/json')

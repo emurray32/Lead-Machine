@@ -2,9 +2,9 @@
 
 ## Overview
 A unified Python monitoring application that tracks multiple target companies for early localization/phrase-string intent signals across three integrated sources:
-- **GitHub Repositories**: Monitors for new localization files (primary) and keyword matches (secondary)
+- **GitHub Repositories**: Monitors for new localization files, commits, and open PRs
 - **Google Play Store**: Compares app language lists over time to detect new language additions
-- **API/Developer Docs**: Detects new hreflang tags (primary) and keyword changes (secondary)
+- **API/Developer Docs**: Detects new hreflang tags and keyword changes
 
 ## Signal Types
 The monitor uses intelligent signal detection to reduce noise:
@@ -13,78 +13,113 @@ The monitor uses intelligent signal detection to reduce noise:
 - **NEW_LANG_FILE**: New files added to localization directories (e.g., `locales/fr.json`)
 - **NEW_HREFLANG**: New regional site versions detected via HTML hreflang tags
 - **NEW_APP_LANG**: New languages added to Play Store app listings
+- **OPEN_PR**: Open pull requests with localization keywords (early intent signal)
 
 ### Secondary Signals
 - **KEYWORD**: Keyword matches in commit messages or documentation (filtered for bots)
 
 ## Project Structure
-- `main.py` - Main monitoring script with all detection logic
-- `dashboard.py` - Flask web dashboard for viewing alerts
-- `storage.py` - Database layer for persisting alerts to PostgreSQL
-- `ai_summary.py` - Gemini Pro integration for AI-powered alert explanations
-- `companies.yaml` - Company configuration file (edit via Admin Panel or directly)
-- `templates/dashboard.html` - Dashboard UI template
-- `templates/admin.html` - Admin panel template
-- `monitoring_data/` - JSON files for tracking state between runs
+```
+.
+├── main.py                 # Main orchestrator with parallel processing
+├── dashboard.py            # Flask web dashboard
+├── storage.py              # PostgreSQL database layer
+├── ai_summary.py           # Gemini Pro AI summaries with language context
+├── companies.yaml          # Company configuration
+├── monitors/               # Modular monitor implementations
+│   ├── __init__.py
+│   ├── common.py           # Shared utilities
+│   ├── github_monitor.py   # GitHub commits & PRs
+│   ├── playstore_monitor.py # Play Store language tracking
+│   ├── docs_monitor.py     # Documentation hreflang detection
+│   └── webhooks.py         # Generic webhook system
+├── templates/
+│   ├── dashboard.html
+│   └── admin.html
+└── monitoring_data/        # State tracking JSON files
+```
 
 ## Web Dashboard
 Access the dashboard at port 5000:
-- **Card-based layout** - Clean, scannable alerts instead of dense table
-- **Friendly timestamps** - "1h ago", "Yesterday", "Dec 27" instead of full dates
-- Stats bar showing alerts by source (GitHub, Play Store, Docs)
-- **AI Explain button** - Get plain-English summaries of what each alert means
+- **Card-based layout** - Clean, scannable alerts
+- **Friendly timestamps** - "1h ago", "Yesterday", "Dec 27"
+- Stats bar showing alerts by source
+- **AI Explain button** - Get plain-English summaries with language context
+- **Export Leads** - CRM-ready export of high-value signals only
+- **Export All** - Full alert dump
 - Filter by source or company
-- Export to CSV
 - Auto-refresh every 2 minutes
-- Admin and Export buttons in header
 
 ## Admin Panel
 Access at `/admin` to:
-- **Add new companies** to monitor with a simple form
-- **Quick Scan** - Test a company before adding permanently
+- **Add new companies** to monitor
+- **Quick Scan** - Test a company before adding
 - **Remove companies** from monitoring
-- **Signal explanations** - Understand what each signal type means
+- **Signal explanations** - Understand each signal type
+
+## New Features (v2.0)
+
+### Enhanced AI Context
+AI summaries now include language count context:
+- "This company already supports 20 languages and just added Arabic"
+- Helps assess if expansion is major or niche
+
+### Lead Export Filtering
+Export only high-value signals for CRM import:
+- `/export/csv?high_value=true` - Leads only
+- `/export/csv` - All alerts
+
+### Pull Request Monitoring
+Detects open PRs with localization intent before they merge:
+- Titles containing "translation", "localization", etc.
+- Provides weeks of early notice
+
+### Parallel Processing
+Uses `concurrent.futures` for faster monitoring:
+- GitHub repos checked in parallel (5 workers)
+- All sources (GitHub, Play Store, Docs) run concurrently
+
+### Generic Webhooks
+Push alerts to external services:
+```python
+from monitors.webhooks import register_webhook
+
+register_webhook(
+    name="Zapier",
+    url="https://hooks.zapier.com/...",
+    events=["NEW_LANG_FILE", "NEW_APP_LANG"]
+)
+```
 
 ## Configuration
 
 ### Editing Companies
-Two ways to manage monitored companies:
-1. **Admin Panel**: Go to `/admin` and use the form (no code needed)
+1. **Admin Panel**: `/admin` (no code needed)
 2. **YAML file**: Edit `companies.yaml` directly
 
-Each company can have:
-- `name`: Company name for display (required)
-- `github_org`: GitHub organization name
-- `github_repos`: List of repos to monitor
-- `play_package`: Android package ID (e.g., `com.spotify.music`)
-- `doc_urls`: List of documentation URLs to monitor
-
 ### Check Intervals
-- GitHub: Every 6 hours (configurable via `GITHUB_CHECK_INTERVAL`)
-- Play Store/Docs: Every 24 hours (configurable via `RSS_DOCS_CHECK_INTERVAL`)
-
-## Filtering Logic
-- **Bot Filtering**: Commits from dependabot, github-actions, and other bots are excluded
-- **Localization Directories**: Monitors for file additions in `/locales`, `/i18n`, `/translations`, etc.
-- **Language Detection**: Automatically extracts language codes from file paths (e.g., `fr`, `de`, `ja`)
+- GitHub: Every 6 hours
+- Play Store/Docs: Every 24 hours
 
 ## Authentication
-- **GitHub**: Connected via Replit integration for higher rate limits (5000 requests/hour)
-- **Gemini AI**: Connected via Replit AI Integrations for alert summaries
+- **GitHub**: Connected via Replit integration
+- **Gemini AI**: Connected via Replit AI Integrations
 - **SLACK_WEBHOOK**: Optional for push notifications
+- **Custom Webhooks**: Configure via `monitors/webhooks.py`
 
 ## Workflows
-- **Dashboard**: Runs the Flask web server on port 5000
-- **Localization Monitor**: Runs the monitoring checks
+- **Dashboard**: Flask web server on port 5000
+- **Localization Monitor**: Runs monitoring checks
 
 ## Recent Changes
-- 2025-12-27: Redesigned dashboard with card layout, friendly timestamps, cleaner UI
+- 2025-12-28: Refactored monitors into modular `monitors/` directory
+- 2025-12-28: Added parallel processing with concurrent.futures
+- 2025-12-28: Added PR monitoring for early localization signals
+- 2025-12-28: Added generic webhook system for Zapier/Make.com
+- 2025-12-28: Added high-value lead export filtering for CRM
+- 2025-12-28: Enhanced AI summaries with language count context
+- 2025-12-27: Redesigned dashboard with card layout, friendly timestamps
 - 2025-12-27: Added AI-powered alert summaries using Gemini Pro
-- 2025-12-27: Added Admin Panel for managing companies without code
-- 2025-12-27: Added Quick Scan feature to test companies before adding
-- 2025-12-27: Created companies.yaml config file for easy company management
-- 2025-12-27: Upgraded monitoring with structural change detection (file additions, hreflang parsing)
-- 2025-12-27: Added bot filtering to exclude dependabot/automated commits
-- 2025-12-27: Replaced RSS with Play Store language list comparison
-- 2025-12-27: Added web dashboard with PostgreSQL alert storage
+- 2025-12-27: Added Admin Panel for managing companies
+- 2025-12-27: Created companies.yaml config file
 - 2025-12-21: Initial implementation with 15 target companies
