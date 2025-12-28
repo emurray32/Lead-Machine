@@ -104,7 +104,7 @@ Write a brief, actionable explanation (1-2 sentences) of what this means and why
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-2.0-flash",
             contents=prompt
         )
         
