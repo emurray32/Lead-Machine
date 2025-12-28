@@ -1,138 +1,106 @@
 # Localization Monitor - Company Configuration
-# =============================================
-# Add companies you want to monitor below. Each company needs at least a name.
-# All other fields are optional - just delete lines you don't need.
-#
-# FIELDS:
-#   name:         Company display name (required)
-#   github_org:   GitHub organization name (e.g., "spotify")
-#   github_repos: List of specific repos to monitor (leave empty for all public repos)
-#   play_package: Android app package ID (e.g., "com.spotify.music")
-#   doc_urls:     List of documentation URLs to check for hreflang tags
-#
-# EXAMPLE:
-#   - name: Spotify
-#     github_org: spotify
-#     github_repos:
-#       - web-api
-#       - spotify-web-api-ts-sdk
-#     play_package: com.spotify.music
-#     doc_urls:
-#       - https://developer.spotify.com/documentation/web-api
+# Edit this file or use the dashboard admin panel to add/remove companies
 
 companies:
-  - name: Walmart
-    github_org: walmartlabs
-    github_repos:
-      - thorax
-      - electrode
-    play_package: com.walmart.android
-
-  - name: Spotify
-    github_org: spotify
-    github_repos:
-      - web-api
-      - spotify-web-api-ts-sdk
-    play_package: com.spotify.music
-    doc_urls:
-      - https://developer.spotify.com/documentation/web-api
-
-  - name: Airbnb
-    github_org: airbnb
-    github_repos:
-      - javascript
-      - lottie-android
-    play_package: com.airbnb.android
-
-  - name: Netflix
-    github_org: Netflix
-    github_repos:
-      - zuul
-      - eureka
-    play_package: com.netflix.mediaclient
-
-  - name: Uber
-    github_org: uber
-    github_repos:
-      - RIBs
-      - baseweb
-    play_package: com.ubercab
-    doc_urls:
-      - https://developer.uber.com/docs/riders/introduction
-
-  - name: Shopify
-    github_org: Shopify
-    github_repos:
-      - polaris
-      - hydrogen
-    play_package: com.shopify.mobile
-    doc_urls:
-      - https://shopify.dev/docs/api
-
-  - name: Nike
-    github_org: Nike-Inc
-    github_repos:
-      - koheesio
-    play_package: com.nike.omega
-
-  - name: Stripe
-    github_org: stripe
-    github_repos:
-      - stripe-python
-      - stripe-node
-    doc_urls:
-      - https://stripe.com/docs/api
-
-  - name: Twilio
-    github_org: twilio
-    github_repos:
-      - twilio-python
-      - twilio-node
-    doc_urls:
-      - https://www.twilio.com/docs/usage/api
-
-  - name: Slack
-    github_org: slackapi
-    github_repos:
-      - bolt-python
-      - bolt-js
-    play_package: com.Slack
-    doc_urls:
-      - https://api.slack.com/
-
-  - name: Discord
-    github_org: discord
-    github_repos:
-      - discord-api-docs
-    play_package: com.discord
-    doc_urls:
-      - https://discord.com/developers/docs/intro
-
-  - name: Zoom
-    github_org: zoom
-    github_repos:
-      - meetingsdk-sample-signature-node.js
-    play_package: us.zoom.videomeetings
-    doc_urls:
-      - https://developers.zoom.us/docs/api/
-
-  - name: PayPal
-    github_org: paypal
-    github_repos:
-      - PayPal-Python-SDK
-    play_package: com.paypal.android.p2pmobile
-    doc_urls:
-      - https://developer.paypal.com/docs/api/overview/
-
-  - name: Square
-    github_org: square
-    github_repos:
-      - okhttp
-      - retrofit
-    play_package: com.squareup
-    doc_urls:
-      - https://developer.squareup.com/docs
-
-  - name: Doordash
-    github_org: doordash
-    play_package: com.dd.doordash
+- name: Walmart
+  github_org: walmartlabs
+  github_repos:
+  - thorax
+  - electrode
+  play_package: com.walmart.android
+- name: Spotify
+  github_org: spotify
+  github_repos:
+  - web-api
+  - spotify-web-api-ts-sdk
+  play_package: com.spotify.music
+  doc_urls:
+  - https://developer.spotify.com/documentation/web-api
+- name: Airbnb
+  github_org: airbnb
+  github_repos:
+  - javascript
+  - lottie-android
+  play_package: com.airbnb.android
+- name: Netflix
+  github_org: Netflix
+  github_repos:
+  - zuul
+  - eureka
+  play_package: com.netflix.mediaclient
+- name: Uber
+  github_org: uber
+  github_repos:
+  - RIBs
+  - baseweb
+  play_package: com.ubercab
+  doc_urls:
+  - https://developer.uber.com/docs/riders/introduction
+- name: Shopify
+  github_org: Shopify
+  github_repos:
+  - polaris
+  - hydrogen
+  play_package: com.shopify.mobile
+  doc_urls:
+  - https://shopify.dev/docs/api
+- name: Nike
+  github_org: Nike-Inc
+  github_repos:
+  - koheesio
+  play_package: com.nike.omega
+- name: Stripe
+  github_org: stripe
+  github_repos:
+  - stripe-python
+  - stripe-node
+  doc_urls:
+  - https://stripe.com/docs/api
+- name: Twilio
+  github_org: twilio
+  github_repos:
+  - twilio-python
+  - twilio-node
+  doc_urls:
+  - https://www.twilio.com/docs/usage/api
+- name: Slack
+  github_org: slackapi
+  github_repos:
+  - bolt-python
+  - bolt-js
+  play_package: com.Slack
+  doc_urls:
+  - https://api.slack.com/
+- name: Discord
+  github_org: discord
+  github_repos:
+  - discord-api-docs
+  play_package: com.discord
+  doc_urls:
+  - https://discord.com/developers/docs/intro
+- name: Zoom
+  github_org: zoom
+  github_repos:
+  - meetingsdk-sample-signature-node.js
+  play_package: us.zoom.videomeetings
+  doc_urls:
+  - https://developers.zoom.us/docs/api/
+- name: PayPal
+  github_org: paypal
+  github_repos:
+  - PayPal-Python-SDK
+  play_package: com.paypal.android.p2pmobile
+  doc_urls:
+  - https://developer.paypal.com/docs/api/overview/
+- name: Square
+  github_org: square
+  github_repos:
+  - okhttp
+  - retrofit
+  play_package: com.squareup
+  doc_urls:
+  - https://developer.squareup.com/docs
+- name: Doordash
+  github_org: doordash
+  play_package: com.dd.doordash
+- name: Tesla
