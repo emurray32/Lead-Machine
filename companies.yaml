@@ -103,4 +103,3 @@ companies:
 - name: Doordash
   github_org: doordash
   play_package: com.dd.doordash
-- name: Tesla
