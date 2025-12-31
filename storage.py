@@ -160,3 +160,96 @@ def prune_old_alerts(days: int = 90) -> int:
     conn.close()
     
     return deleted
+
+
+def get_company_alerts(company: str, limit: Optional[int] = None) -> List[Dict]:
+    """Get all alerts for a specific company."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    query = "SELECT * FROM alerts WHERE company = %s ORDER BY created_at DESC"
+    params = [company]
+    
+    if limit:
+        query += " LIMIT %s"
+        params.append(limit)
+    
+    cur.execute(query, params)
+    alerts = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    return [dict(a) for a in alerts]
+
+
+def get_company_metrics(company: str) -> Dict:
+    """Get aggregated metrics for a company."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cur.execute("""
+        SELECT 
+            COUNT(*) as total_alerts,
+            COUNT(CASE WHEN source = 'github' THEN 1 END) as github_count,
+            COUNT(CASE WHEN source = 'playstore' THEN 1 END) as playstore_count,
+            COUNT(CASE WHEN source = 'docs' THEN 1 END) as docs_count,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_LANG_FILE' THEN 1 END) as new_lang_files,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_HREFLANG' THEN 1 END) as new_hreflangs,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_APP_LANG' THEN 1 END) as new_app_langs,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'OPEN_PR' THEN 1 END) as open_prs,
+            MIN(created_at) as first_seen,
+            MAX(created_at) as last_activity
+        FROM alerts
+        WHERE company = %s
+    """, (company,))
+    
+    result = cur.fetchone()
+    metrics = dict(result) if result else {
+        'total_alerts': 0,
+        'github_count': 0,
+        'playstore_count': 0,
+        'docs_count': 0,
+        'new_lang_files': 0,
+        'new_hreflangs': 0,
+        'new_app_langs': 0,
+        'open_prs': 0,
+        'first_seen': None,
+        'last_activity': None
+    }
+    
+    cur.execute("""
+        SELECT DISTINCT metadata->>'signal_type' as signal_type
+        FROM alerts
+        WHERE company = %s AND metadata->>'signal_type' IS NOT NULL
+    """, (company,))
+    signal_types = [row['signal_type'] for row in cur.fetchall()]
+    metrics['signal_types'] = signal_types
+    
+    cur.execute("""
+        SELECT metadata->'new_langs' as new_langs
+        FROM alerts
+        WHERE company = %s AND metadata->'new_langs' IS NOT NULL
+    """, (company,))
+    
+    all_languages = set()
+    for row in cur.fetchall():
+        if row['new_langs']:
+            langs = row['new_langs']
+            if isinstance(langs, list):
+                all_languages.update(langs)
+    metrics['detected_languages'] = list(all_languages)
+    
+    cur.execute("""
+        SELECT DISTINCT metadata->>'author' as author
+        FROM alerts
+        WHERE company = %s AND metadata->>'author' IS NOT NULL
+        LIMIT 10
+    """, (company,))
+    authors = [row['author'] for row in cur.fetchall() if row['author']]
+    metrics['contributors'] = authors
+    
+    cur.close()
+    conn.close()
+    
+    return metrics

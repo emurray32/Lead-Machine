@@ -415,5 +415,58 @@ def api_ai_status():
     """Check if AI summaries are available."""
     return jsonify({'available': AI_AVAILABLE})
 
+
+@app.route('/company/<company_name>')
+def company_page(company_name):
+    """Company detail page with comprehensive summary and alert history."""
+    alerts = storage.get_company_alerts(company_name)
+    
+    if not alerts:
+        return render_template('company.html',
+                             company_name=company_name,
+                             alerts=[],
+                             metrics={},
+                             ai_available=AI_AVAILABLE,
+                             not_found=True)
+    
+    for alert in alerts:
+        alert['friendly_time'] = friendly_time(alert.get('created_at'))
+    
+    metrics = storage.get_company_metrics(company_name)
+    
+    if metrics.get('first_seen'):
+        metrics['first_seen_friendly'] = friendly_time(metrics['first_seen'])
+    if metrics.get('last_activity'):
+        metrics['last_activity_friendly'] = friendly_time(metrics['last_activity'])
+    
+    return render_template('company.html',
+                         company_name=company_name,
+                         alerts=alerts,
+                         metrics=metrics,
+                         ai_available=AI_AVAILABLE,
+                         not_found=False)
+
+
+@app.route('/api/company/<company_name>/profile')
+def api_company_profile(company_name):
+    """Generate/refresh AI company profile."""
+    if not AI_AVAILABLE or not ai_summary:
+        return jsonify({'error': 'AI not available', 'available': False}), 503
+    
+    alerts = storage.get_company_alerts(company_name)
+    if not alerts:
+        return jsonify({'error': 'No alerts found for company'}), 404
+    
+    metrics = storage.get_company_metrics(company_name)
+    
+    try:
+        profile = ai_summary.generate_company_profile(company_name, alerts, metrics)
+        if profile:
+            return jsonify({'profile': profile, 'available': True})
+        return jsonify({'error': 'Failed to generate profile', 'available': True}), 500
+    except Exception as e:
+        return jsonify({'error': str(e), 'available': True}), 500
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

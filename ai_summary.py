@@ -307,3 +307,89 @@ def is_high_value_signal(signal_type: str) -> bool:
 def is_available() -> bool:
     """Check if AI summary is available."""
     return GEMINI_AVAILABLE
+
+
+def generate_company_profile(company: str, alerts: List[Dict], metrics: Dict) -> Optional[str]:
+    """
+    Generate a comprehensive company profile summary based on all their alerts.
+    Provides sales intelligence about their localization maturity and market expansion.
+    """
+    if not GEMINI_AVAILABLE or not client:
+        return None
+    
+    if not alerts:
+        return None
+    
+    total_alerts = metrics.get('total_alerts', len(alerts))
+    github_count = metrics.get('github_count', 0)
+    playstore_count = metrics.get('playstore_count', 0)
+    docs_count = metrics.get('docs_count', 0)
+    
+    detected_languages = metrics.get('detected_languages', [])
+    contributors = metrics.get('contributors', [])
+    signal_types = metrics.get('signal_types', [])
+    
+    first_seen = metrics.get('first_seen')
+    last_activity = metrics.get('last_activity')
+    
+    recent_alerts = alerts[:10]
+    alert_summaries = []
+    for alert in recent_alerts:
+        signal_type = alert.get('metadata', {}).get('signal_type', '') if alert.get('metadata') else ''
+        title = alert.get('title', '')[:100]
+        alert_summaries.append(f"- [{signal_type}] {title}")
+    
+    market_context = get_market_context(detected_languages)
+    
+    lang_list = ', '.join(detected_languages[:10]) if detected_languages else 'Unknown'
+    contributor_list = ', '.join(contributors[:5]) if contributors else 'No contributors tracked'
+    
+    maturity_assessment = ""
+    if total_alerts > 20:
+        maturity_assessment = "Very active in localization with frequent updates."
+    elif total_alerts > 10:
+        maturity_assessment = "Regularly investing in localization."
+    elif total_alerts > 3:
+        maturity_assessment = "Growing localization footprint."
+    else:
+        maturity_assessment = "Early stage in localization journey."
+    
+    high_value_count = sum(1 for a in alerts if a.get('metadata', {}).get('signal_type') in HIGH_VALUE_SIGNALS)
+    
+    prompt = f"""You are a sales intelligence analyst helping a localization services salesperson understand a potential client.
+
+Generate a comprehensive 3-4 paragraph company profile for {company} based on their localization activity. Include:
+
+1. **Executive Summary**: Overall assessment of their localization maturity and recent activity level
+2. **Market Expansion Analysis**: What markets they're targeting based on detected languages
+3. **Opportunity Assessment**: Why this is a good sales prospect and what services they might need
+4. **Recommended Approach**: How to approach this company as a sales lead
+
+Company Data:
+- Total Signals Detected: {total_alerts}
+- High-Value Signals: {high_value_count}
+- Sources: GitHub ({github_count}), Play Store ({playstore_count}), Docs ({docs_count})
+- Languages Detected: {lang_list}
+- {market_context}
+- Key Contributors: {contributor_list}
+- Maturity: {maturity_assessment}
+- Signal Types: {', '.join(signal_types) if signal_types else 'Various'}
+
+Recent Activity:
+{chr(10).join(alert_summaries)}
+
+Write a professional sales intelligence report. Be specific about market opportunities and actionable in your recommendations."""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        
+        if response and response.text:
+            return response.text.strip()
+        return None
+        
+    except Exception as e:
+        print(f"Error generating company profile: {e}")
+        return None

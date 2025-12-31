@@ -341,6 +341,17 @@
             color: var(--gray-900);
         }
         
+        .company-cell a {
+            color: var(--gray-900);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .company-cell a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
         .badge {
             display: inline-flex;
             align-items: center;
@@ -669,7 +680,7 @@
                             data-signal-type="{{ alert.metadata.signal_type if alert.metadata and alert.metadata.signal_type else '' }}"
                             data-metadata="{{ (alert.metadata|tojson|e) if alert.metadata else '{}' }}">
                             <td class="time-cell">{{ alert.friendly_time }}</td>
-                            <td class="company-cell">{{ alert.company }}</td>
+                            <td class="company-cell"><a href="/company/{{ alert.company }}">{{ alert.company }}</a></td>
                             <td>
                                 <span class="badge badge-{{ alert.source }}">{{ alert.source }}</span>
                             </td>
