@@ -2,6 +2,8 @@
 Centralized configuration for the Localization Monitor.
 """
 import os
+import sys
+
 
 # Database
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -62,3 +64,30 @@ LANGUAGE_CODES = [
     "hy", "az", "eu", "be", "bs", "bg", "ca", "hr", "et", "fil", "gl",
     "ka", "is", "lv", "lt", "mk", "mt", "mn", "ne", "fa", "sr", "si", "sl"
 ]
+
+
+def validate_config() -> bool:
+    """
+    Validate that critical environment variables are configured.
+    Returns True if all required config is present, False otherwise.
+    Prints warnings for missing optional config.
+    """
+    warnings = []
+
+    # Required for database operations
+    if not DATABASE_URL:
+        warnings.append("DATABASE_URL not set - alerts will only be logged to console")
+
+    # Required for AI features
+    gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("AI_INTEGRATIONS_GEMINI_API_KEY")
+    if not gemini_key:
+        warnings.append("GEMINI_API_KEY not set - AI summaries will be disabled")
+
+    # Production security check
+    if SECRET_KEY == 'dev-secret-key' and os.environ.get('FLASK_ENV') == 'production':
+        warnings.append("Using default SECRET_KEY in production - this is a security risk")
+
+    for warning in warnings:
+        print(f"[CONFIG WARNING] {warning}", file=sys.stderr)
+
+    return True
