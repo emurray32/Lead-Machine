@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Localization Monitor</title>
+    <title>Admin - GitHub i18n Timeline</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,14 +31,9 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -49,7 +43,6 @@
             font-size: 14px;
         }
 
-        /* Header */
         .header {
             background: white;
             border-bottom: 1px solid var(--gray-200);
@@ -57,7 +50,7 @@
         }
 
         .header-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 1rem 2rem;
             display: flex;
@@ -76,8 +69,8 @@
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 8px;
             display: flex;
@@ -85,7 +78,7 @@
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 12px;
         }
 
         .nav-links {
@@ -113,9 +106,8 @@
             color: var(--primary);
         }
 
-        /* Main */
         .main-content {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -136,7 +128,6 @@
             color: var(--gray-500);
         }
 
-        /* Grid */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -144,13 +135,12 @@
             margin-bottom: 2rem;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Card */
         .card {
             background: white;
             border-radius: 12px;
@@ -177,7 +167,6 @@
             margin-top: 0.25rem;
         }
 
-        /* Form */
         .form-group {
             margin-bottom: 1.25rem;
         }
@@ -190,8 +179,7 @@
             margin-bottom: 0.5rem;
         }
 
-        .form-input,
-        .form-textarea {
+        .form-input {
             width: 100%;
             padding: 0.625rem 0.875rem;
             border: 1px solid var(--gray-300);
@@ -201,16 +189,10 @@
             transition: all 0.2s;
         }
 
-        .form-input:focus,
-        .form-textarea:focus {
+        .form-input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-light);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
         }
 
         .form-hint {
@@ -219,7 +201,6 @@
             margin-top: 0.375rem;
         }
 
-        /* Buttons */
         .btn {
             padding: 0.625rem 1.25rem;
             border-radius: 8px;
@@ -270,9 +251,8 @@
             margin-top: 1rem;
         }
 
-        /* Company List */
         .company-list {
-            max-height: 600px;
+            max-height: 500px;
             overflow-y: auto;
         }
 
@@ -293,7 +273,7 @@
             font-size: 15px;
             font-weight: 600;
             color: var(--gray-900);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .company-meta {
@@ -314,7 +294,6 @@
             font-weight: 500;
         }
 
-        /* Scan Results */
         .scan-results {
             display: none;
             margin-top: 1.5rem;
@@ -365,7 +344,6 @@
             border: 1px solid var(--gray-300);
         }
 
-        /* Signal Guide */
         .signal-card {
             padding: 1.25rem;
             border-radius: 10px;
@@ -422,7 +400,6 @@
             color: var(--gray-900);
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 2rem;
@@ -431,53 +408,42 @@
             background: var(--gray-900);
             color: white;
             border-radius: 10px;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-md);
             z-index: 1000;
             display: none;
             font-size: 14px;
             font-weight: 500;
-            animation: slideIn 0.3s ease;
         }
 
-        .toast.success {
-            background: var(--success);
-        }
-
-        .toast.error {
-            background: var(--danger);
-        }
-
-        .toast.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.show { display: block; }
 
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
             color: var(--gray-500);
         }
+
+        .signals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .signals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="header-content">
             <a href="/" class="logo">
-                <div class="logo-icon">L</div>
-                Localization Monitor
+                <div class="logo-icon">i18n</div>
+                GitHub i18n Timeline
             </a>
             <nav class="nav-links">
                 <a href="/" class="nav-link">Dashboard</a>
@@ -486,72 +452,54 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="page-header">
             <h1 class="page-title">Admin Panel</h1>
-            <p class="page-subtitle">Manage companies and understand signal types</p>
+            <p class="page-subtitle">Configure GitHub organizations to monitor for internationalization activity</p>
         </div>
 
         <div class="grid">
-            <!-- Add Company Form -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Add New Company</h2>
-                    <p class="card-subtitle">Configure monitoring for a new company</p>
+                    <h2 class="card-title">Add GitHub Organization</h2>
+                    <p class="card-subtitle">Monitor a company's GitHub for i18n signals</p>
                 </div>
 
                 <form id="addCompanyForm">
                     <div class="form-group">
                         <label class="form-label">Company Name *</label>
-                        <input type="text" id="companyName" class="form-input" required placeholder="e.g., Adobe">
+                        <input type="text" id="companyName" class="form-input" required placeholder="e.g., Stripe">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">GitHub Organization</label>
-                        <input type="text" id="githubOrg" class="form-input" placeholder="e.g., adobe">
+                        <label class="form-label">GitHub Organization *</label>
+                        <input type="text" id="githubOrg" class="form-input" required placeholder="e.g., stripe">
                         <div class="form-hint">Organization name from github.com/organization</div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">GitHub Repos (optional)</label>
-                        <input type="text" id="githubRepos" class="form-input"
-                            placeholder="e.g., react-spectrum, brackets">
+                        <label class="form-label">Specific Repos (optional)</label>
+                        <input type="text" id="githubRepos" class="form-input" placeholder="e.g., stripe-js, stripe-react-native">
                         <div class="form-hint">Comma-separated list. Leave empty to monitor all public repos.</div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Play Store Package ID</label>
-                        <input type="text" id="playPackage" class="form-input" placeholder="e.g., com.adobe.reader">
-                        <div class="form-hint">Android app package name (find it in the Play Store URL)</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Documentation URLs</label>
-                        <textarea id="docUrls" class="form-textarea"
-                            placeholder="e.g., https://developer.adobe.com/docs"></textarea>
-                        <div class="form-hint">Comma-separated list of doc pages to monitor</div>
-                    </div>
-
                     <div class="btn-group">
-                        <button type="button" class="btn btn-secondary" onclick="quickScan()">Quick Scan</button>
+                        <button type="button" class="btn btn-secondary" onclick="quickScan()">Verify GitHub</button>
                         <button type="submit" class="btn btn-primary">Add Company</button>
                     </div>
                 </form>
 
                 <div id="scanResults" class="scan-results">
-                    <div class="scan-title">Quick Scan Results</div>
+                    <div class="scan-title">GitHub Verification</div>
                     <div id="scanResultsContent"></div>
-                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="addFromScan()">Add This
-                        Company</button>
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="addFromScan()">Add This Company</button>
                 </div>
             </div>
 
-            <!-- Company List -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">Monitored Companies ({{ companies|length }})</h2>
-                    <p class="card-subtitle">Currently tracking {{ companies|length }} companies</p>
+                    <p class="card-subtitle">GitHub organizations being tracked for i18n activity</p>
                 </div>
 
                 <div class="company-list">
@@ -560,13 +508,10 @@
                         <div class="company-name">{{ company.name }}</div>
                         <div class="company-meta">
                             {% if company.github_org %}
-                            <span class="meta-badge">GitHub: {{ company.github_org }}</span>
+                            <span class="meta-badge">github.com/{{ company.github_org }}</span>
                             {% endif %}
-                            {% if company.play_package %}
-                            <span class="meta-badge">Play: {{ company.play_package }}</span>
-                            {% endif %}
-                            {% if company.doc_urls %}
-                            <span class="meta-badge">Docs: {{ company.doc_urls|length }} URL(s)</span>
+                            {% if company.github_repos %}
+                            <span class="meta-badge">{{ company.github_repos|length }} repo(s)</span>
                             {% endif %}
                         </div>
                         <button class="btn btn-danger" onclick="deleteCompany('{{ company.name }}')">Remove</button>
@@ -574,31 +519,46 @@
                     {% else %}
                     <div class="empty-state">
                         <p>No companies configured yet.</p>
+                        <p style="margin-top: 0.5rem; font-size: 13px;">Add a GitHub organization to start tracking i18n activity.</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Signal Guide -->
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">Understanding Signal Types</h2>
-                <p class="card-subtitle">High-value signals indicate actual expansion, while low-value signals need
-                    investigation</p>
+                <h2 class="card-title">Understanding i18n Signals</h2>
+                <p class="card-subtitle">What we look for in GitHub repositories</p>
             </div>
 
-            <div class="grid">
-                {% for key, signal in signal_explanations.items() %}
-                <div class="signal-card {{ signal.value|lower }}">
+            <div class="signals-grid">
+                <div class="signal-card high">
                     <div class="signal-title">
-                        {{ signal.title }}
-                        <span class="signal-badge {{ signal.value|lower }}">{{ signal.value }}</span>
+                        New Language File
+                        <span class="signal-badge high">HIGH VALUE</span>
                     </div>
-                    <p class="signal-desc">{{ signal.description }}</p>
-                    <p class="signal-meaning"><strong>What it means:</strong> {{ signal.meaning }}</p>
+                    <p class="signal-desc">A new translation file was added to the codebase (e.g., fr.json, es.yaml)</p>
+                    <p class="signal-meaning"><strong>Meaning:</strong> The company is actively adding support for a new language - strong expansion signal.</p>
                 </div>
-                {% endfor %}
+
+                <div class="signal-card high">
+                    <div class="signal-title">
+                        i18n Pull Request
+                        <span class="signal-badge high">HIGH VALUE</span>
+                    </div>
+                    <p class="signal-desc">An open PR with localization keywords in the title</p>
+                    <p class="signal-meaning"><strong>Meaning:</strong> Early signal of upcoming language support - PRs show intent before changes are merged.</p>
+                </div>
+
+                <div class="signal-card low">
+                    <div class="signal-title">
+                        Keyword Match
+                        <span class="signal-badge low">LOW VALUE</span>
+                    </div>
+                    <p class="signal-desc">Commits containing i18n-related keywords (translate, localization, etc.)</p>
+                    <p class="signal-meaning"><strong>Meaning:</strong> General i18n activity - could be new features or maintenance. Worth investigating.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -613,16 +573,19 @@
             setTimeout(() => { toast.className = 'toast'; }, 3000);
         }
 
-        document.getElementById('addCompanyForm').addEventListener('submit', async function (e) {
+        document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const data = {
                 name: document.getElementById('companyName').value,
                 github_org: document.getElementById('githubOrg').value,
-                github_repos: document.getElementById('githubRepos').value,
-                play_package: document.getElementById('playPackage').value,
-                doc_urls: document.getElementById('docUrls').value
+                github_repos: document.getElementById('githubRepos').value
             };
+
+            if (!data.github_org) {
+                showToast('GitHub organization is required', 'error');
+                return;
+            }
 
             try {
                 const resp = await fetch('/api/companies', {
@@ -664,26 +627,24 @@
         }
 
         async function quickScan() {
-            const data = {
-                name: document.getElementById('companyName').value || 'Test',
-                github_org: document.getElementById('githubOrg').value,
-                play_package: document.getElementById('playPackage').value,
-                doc_urls: document.getElementById('docUrls').value
-            };
+            const githubOrg = document.getElementById('githubOrg').value;
 
-            if (!data.github_org && !data.play_package && !data.doc_urls) {
-                showToast('Please fill in at least one field to scan', 'error');
+            if (!githubOrg) {
+                showToast('Enter a GitHub organization to verify', 'error');
                 return;
             }
 
             document.getElementById('scanResults').classList.add('show');
-            document.getElementById('scanResultsContent').innerHTML = '<p class="scan-item info">Scanning...</p>';
+            document.getElementById('scanResultsContent').innerHTML = '<p class="scan-item info">Verifying GitHub organization...</p>';
 
             try {
                 const resp = await fetch('/api/quick-scan', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        name: document.getElementById('companyName').value || 'Test',
+                        github_org: githubOrg
+                    })
                 });
                 const result = await resp.json();
 
@@ -691,46 +652,24 @@
 
                 if (result.github) {
                     if (result.github.status === 'found') {
-                        html += '<div class="scan-item success"><strong>GitHub:</strong> Found org "' + result.github.org + '"';
-                        if (result.github.recent_repos) {
-                            html += '<br>Recent repos: ' + result.github.recent_repos.join(', ');
+                        html += '<div class="scan-item success"><strong>GitHub Organization Found:</strong> ' + result.github.org;
+                        if (result.github.recent_repos && result.github.recent_repos.length > 0) {
+                            html += '<br><br><strong>Recent repos:</strong> ' + result.github.recent_repos.join(', ');
                         }
                         html += '</div>';
                     } else {
-                        html += '<div class="scan-item error"><strong>GitHub:</strong> ' + (result.github.error || 'Not found') + '</div>';
-                    }
-                }
-
-                if (result.playstore) {
-                    if (result.playstore.status === 'found') {
-                        html += '<div class="scan-item success"><strong>Play Store:</strong> Found "' + result.playstore.title + '" by ' + result.playstore.developer + '</div>';
-                    } else {
-                        html += '<div class="scan-item error"><strong>Play Store:</strong> ' + (result.playstore.error || 'Not found') + '</div>';
-                    }
-                }
-
-                if (result.docs && result.docs.length > 0) {
-                    for (const doc of result.docs) {
-                        if (doc.status === 'accessible') {
-                            html += '<div class="scan-item success"><strong>Docs:</strong> ' + doc.url;
-                            if (doc.hreflangs && doc.hreflangs.length > 0) {
-                                html += '<br>Languages found: ' + doc.hreflangs.join(', ');
-                            }
-                            html += '</div>';
-                        } else {
-                            html += '<div class="scan-item error"><strong>Docs:</strong> ' + doc.url + ' - ' + (doc.error || 'Error') + '</div>';
-                        }
+                        html += '<div class="scan-item error"><strong>GitHub:</strong> ' + (result.github.error || 'Organization not found or private') + '</div>';
                     }
                 }
 
                 if (!html) {
-                    html = '<div class="scan-item info">No results to show</div>';
+                    html = '<div class="scan-item info">Could not verify organization</div>';
                 }
 
                 document.getElementById('scanResultsContent').innerHTML = html;
 
             } catch (err) {
-                document.getElementById('scanResultsContent').innerHTML = '<div class="scan-item error">Scan failed: ' + err.message + '</div>';
+                document.getElementById('scanResultsContent').innerHTML = '<div class="scan-item error">Verification failed: ' + err.message + '</div>';
             }
         }
 
@@ -739,5 +678,4 @@
         }
     </script>
 </body>
-
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Localization Monitor - Dashboard</title>
+    <title>GitHub i18n Timeline - Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,8 +16,6 @@
             --success-light: #d1fae5;
             --warning: #f59e0b;
             --warning-light: #fef3c7;
-            --danger: #ef4444;
-            --danger-light: #fee2e2;
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
@@ -31,15 +29,10 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--gray-50);
@@ -47,8 +40,7 @@
             line-height: 1.6;
             font-size: 14px;
         }
-        
-        /* Header */
+
         .header {
             background: white;
             border-bottom: 1px solid var(--gray-200);
@@ -57,9 +49,9 @@
             z-index: 100;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .header-content {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 1rem 2rem;
             display: flex;
@@ -67,13 +59,13 @@
             align-items: center;
             gap: 2rem;
         }
-        
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
-        
+
         .logo {
             font-size: 20px;
             font-weight: 700;
@@ -83,10 +75,10 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 8px;
             display: flex;
@@ -94,14 +86,14 @@
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 12px;
         }
-        
+
         .header-nav {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .nav-link {
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -111,24 +103,23 @@
             font-size: 14px;
             transition: all 0.2s;
         }
-        
+
         .nav-link:hover {
             background: var(--gray-100);
             color: var(--gray-900);
         }
-        
+
         .nav-link.active {
             background: var(--primary-light);
             color: var(--primary);
         }
-        
+
         .header-actions {
             display: flex;
             gap: 0.75rem;
             align-items: center;
         }
-        
-        /* Buttons */
+
         .btn {
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -143,435 +134,327 @@
             gap: 0.5rem;
             white-space: nowrap;
         }
-        
-        .btn:active {
-            transform: scale(0.98);
-        }
-        
+
         .btn-primary {
             background: var(--primary);
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: var(--primary-dark);
         }
-        
+
         .btn-secondary {
             background: white;
             color: var(--gray-700);
             border: 1px solid var(--gray-300);
         }
-        
+
         .btn-secondary:hover {
             background: var(--gray-50);
             border-color: var(--gray-400);
         }
-        
+
         .btn-sm {
             padding: 0.375rem 0.75rem;
             font-size: 13px;
         }
-        
-        /* Stats Bar */
-        .stats-bar {
-            background: white;
-            border-bottom: 1px solid var(--gray-200);
-            padding: 1.5rem 2rem;
-        }
-        
-        .stats-container {
-            max-width: 1600px;
+
+        .main-content {
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 16px;
+        }
+
+        .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        
+
         .stat-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
         }
-        
-        .stat-label {
-            font-size: 13px;
-            color: var(--gray-500);
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
+
         .stat-value {
             font-size: 32px;
             font-weight: 700;
             color: var(--gray-900);
             line-height: 1;
         }
-        
-        .stat-change {
-            font-size: 12px;
-            color: var(--success);
-            font-weight: 500;
-        }
-        
-        /* Main Content */
-        .main-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        /* Filters */
-        .filters-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--gray-200);
-        }
-        
-        .filters-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr auto;
-            gap: 1rem;
-            align-items: end;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .filter-label {
+
+        .stat-label {
             font-size: 13px;
-            font-weight: 500;
-            color: var(--gray-700);
-        }
-        
-        .search-input {
-            padding: 0.625rem 1rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-            background: white;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-        
-        .select-input {
-            padding: 0.625rem 1rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .select-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
-        }
-        
-        /* Table */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--gray-200);
-            overflow: hidden;
-        }
-        
-        .table-wrapper {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        th {
-            padding: 0.75rem 1rem;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--gray-600);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        tbody tr {
-            border-bottom: 1px solid var(--gray-100);
-            transition: background 0.15s;
-        }
-        
-        tbody tr:hover {
-            background: var(--gray-50);
-        }
-        
-        tbody tr:last-child {
-            border-bottom: none;
-        }
-        
-        td {
-            padding: 1rem;
-            font-size: 14px;
-            color: var(--gray-700);
-        }
-        
-        .company-cell {
-            font-weight: 600;
-            color: var(--gray-900);
-        }
-        
-        .company-cell a {
-            color: var(--gray-900);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .company-cell a:hover {
-            color: var(--primary);
-            text-decoration: underline;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.625rem;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            line-height: 1;
-        }
-        
-        .badge-github {
-            background: var(--gray-900);
-            color: white;
-        }
-        
-        .badge-playstore {
-            background: var(--success);
-            color: white;
-        }
-        
-        .badge-docs {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .badge-high {
-            background: var(--success-light);
-            color: var(--success);
-            font-weight: 600;
-        }
-        
-        .badge-low {
-            background: var(--warning-light);
-            color: var(--warning);
-        }
-        
-        .time-cell {
             color: var(--gray-500);
-            font-size: 13px;
+            font-weight: 500;
+            margin-top: 0.5rem;
         }
-        
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
+
+        .companies-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 2rem;
         }
-        
-        /* Pagination */
-        .pagination {
+
+        .section-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--gray-200);
         }
-        
-        .pagination-info {
-            font-size: 13px;
-            color: var(--gray-600);
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
         }
-        
-        .pagination-controls {
+
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .company-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .company-card:hover {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .company-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .company-stats {
             display: flex;
             gap: 0.5rem;
         }
-        
-        .page-btn {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid var(--gray-300);
+
+        .mini-stat {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .mini-stat.success {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .mini-stat.warning {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .company-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .company-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .recent-activity {
             background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--gray-700);
-            transition: all 0.2s;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
         }
-        
-        .page-btn:hover:not(:disabled) {
+
+        .activity-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: background 0.15s;
+        }
+
+        .activity-item:hover {
             background: var(--gray-50);
-            border-color: var(--gray-400);
         }
-        
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+        .activity-item:last-child {
+            border-bottom: none;
         }
-        
-        .page-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+
+        .activity-marker {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-top: 0.35rem;
+            flex-shrink: 0;
         }
-        
-        /* Empty State */
+
+        .activity-marker.pr {
+            background: var(--warning);
+        }
+
+        .activity-marker.keyword {
+            background: var(--gray-400);
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-company {
+            font-weight: 600;
+            color: var(--gray-900);
+            text-decoration: none;
+        }
+
+        .activity-company:hover {
+            color: var(--primary);
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--gray-500);
+            flex-shrink: 0;
+        }
+
+        .activity-title {
+            font-size: 13px;
+            color: var(--gray-700);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .signal-badge {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+        }
+
+        .signal-badge.new-lang {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .signal-badge.pr {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .signal-badge.keyword {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
         }
-        
-        .empty-state-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1rem;
-            background: var(--gray-100);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-        
+
         .empty-state h3 {
             font-size: 18px;
             font-weight: 600;
             color: var(--gray-900);
             margin-bottom: 0.5rem;
         }
-        
+
         .empty-state p {
             color: var(--gray-500);
             font-size: 14px;
         }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--gray-900);
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-        }
-        
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .filters-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
+
             .header-left {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 1rem;
             }
-            
-            .header-actions {
-                justify-content: stretch;
-            }
-            
-            .filters-grid {
+
+            .companies-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .stats-container {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .table-wrapper {
-                overflow-x: scroll;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <div class="header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <div class="logo-icon">L</div>
-                    Localization Monitor
+                    <div class="logo-icon">i18n</div>
+                    GitHub i18n Timeline
                 </a>
                 <nav class="header-nav">
                     <a href="/" class="nav-link active">Dashboard</a>
@@ -579,235 +462,115 @@
                 </nav>
             </div>
             <div class="header-actions">
-                <a href="/export/csv?high_value=true" class="btn btn-secondary btn-sm">Export Leads</a>
-                <a href="/export/csv" class="btn btn-primary btn-sm">Export All</a>
+                <a href="/export/csv" class="btn btn-secondary btn-sm">Export CSV</a>
             </div>
         </div>
     </div>
-    
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-label">Total Alerts</div>
-                <div class="stat-value">{{ stats.total }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">GitHub</div>
-                <div class="stat-value">{{ stats.github_count }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Play Store</div>
-                <div class="stat-value">{{ stats.playstore_count }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Documentation</div>
-                <div class="stat-value">{{ stats.docs_count }}</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Main Content -->
+
     <div class="main-content">
-        <!-- Filters -->
-        <div class="filters-section">
-            <form method="get" action="/">
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <label class="filter-label">Search</label>
-                        <input type="text" name="search" class="search-input" placeholder="Search company, title, or keywords..." value="{{ request.args.get('search', '') }}">
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Source</label>
-                        <select name="source" class="select-input">
-                            <option value="">All Sources</option>
-                            <option value="github" {% if current_source == 'github' %}selected{% endif %}>GitHub</option>
-                            <option value="playstore" {% if current_source == 'playstore' %}selected{% endif %}>Play Store</option>
-                            <option value="docs" {% if current_source == 'docs' %}selected{% endif %}>Documentation</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Company</label>
-                        <select name="company" class="select-input">
-                            <option value="">All Companies</option>
-                            {% for company in companies %}
-                            <option value="{{ company }}" {% if current_company == company %}selected{% endif %}>{{ company }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Signal Type</label>
-                        <select name="signal_type" class="select-input">
-                            <option value="">All Signals</option>
-                            <option value="NEW_LANG_FILE">New Lang File</option>
-                            <option value="NEW_HREFLANG">New Hreflang</option>
-                            <option value="NEW_APP_LANG">New App Lang</option>
-                            <option value="OPEN_PR">Open PR</option>
-                            <option value="KEYWORD">Keyword</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </div>
-                </div>
-            </form>
+        <div class="page-header">
+            <h1 class="page-title">i18n Intelligence Dashboard</h1>
+            <p class="page-subtitle">Track company internationalization journeys through their GitHub activity</p>
         </div>
-        
-        <!-- Table -->
-        <div class="table-container">
-            {% if alerts %}
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Company</th>
-                            <th>Source</th>
-                            <th>Signal Type</th>
-                            <th>Title</th>
-                            <th>Keywords</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for alert in alerts %}
-                        <tr data-id="{{ alert.id }}"
-                            data-source="{{ alert.source }}"
-                            data-company="{{ alert.company }}"
-                            data-title="{{ (alert.title or '')|e }}"
-                            data-message="{{ (alert.message or '')|e }}"
-                            data-keywords="{{ alert.keywords or '' }}"
-                            data-signal-type="{{ alert.metadata.signal_type if alert.metadata and alert.metadata.signal_type else '' }}"
-                            data-metadata="{{ (alert.metadata|tojson|e) if alert.metadata else '{}' }}">
-                            <td class="time-cell">{{ alert.friendly_time }}</td>
-                            <td class="company-cell"><a href="/company/{{ alert.company }}">{{ alert.company }}</a></td>
-                            <td>
-                                <span class="badge badge-{{ alert.source }}">{{ alert.source }}</span>
-                            </td>
-                            <td>
-                                {% if alert.metadata and alert.metadata.signal_type %}
-                                    {% if alert.metadata.signal_type in ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR'] %}
-                                        <span class="badge badge-high">{{ alert.metadata.signal_type }}</span>
-                                    {% else %}
-                                        <span class="badge badge-low">{{ alert.metadata.signal_type }}</span>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="badge badge-low">UNKNOWN</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ alert.title or 'Signal detected' }}</td>
-                            <td>
-                                <span style="font-size: 13px; color: var(--gray-600);">{{ alert.keywords or '-' }}</span>
-                            </td>
-                            <td>
-                                <div class="actions-cell">
-                                    {% if alert.url %}
-                                    <a href="{{ alert.url }}" target="_blank" class="btn btn-secondary btn-sm">View</a>
-                                    {% endif %}
-                                    {% if ai_available %}
-                                    <button class="btn btn-primary btn-sm explain-btn" data-id="{{ alert.id }}">Explain</button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value">{{ companies_summary|length if companies_summary else companies|length }}</div>
+                <div class="stat-label">Companies Tracked</div>
             </div>
-            
-            <!-- Pagination -->
-            <div class="pagination">
-                <div class="pagination-info">
-                    Showing {{ alerts|length }} of {{ stats.total }} alerts
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.github_count }}</div>
+                <div class="stat-label">GitHub Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Signals</div>
+            </div>
+        </div>
+
+        {% if companies_summary %}
+        <div class="companies-section">
+            <div class="section-header">
+                <h2 class="section-title">Companies with i18n Activity</h2>
+            </div>
+            <div class="companies-grid">
+                {% for company in companies_summary %}
+                <a href="/company/{{ company.company }}" class="company-link">
+                    <div class="company-card">
+                        <div class="company-card-header">
+                            <span class="company-name">{{ company.company }}</span>
+                            <div class="company-stats">
+                                {% if company.lang_files > 0 %}
+                                <span class="mini-stat success">{{ company.lang_files }} files</span>
+                                {% endif %}
+                                {% if company.open_prs > 0 %}
+                                <span class="mini-stat warning">{{ company.open_prs }} PRs</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="company-meta">
+                            <span>{{ company.total_signals }} signals</span>
+                            {% if company.last_activity %}
+                            <span>Last: {{ company.last_activity.strftime('%b %d') if company.last_activity else 'N/A' }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="recent-activity">
+            <div class="section-header">
+                <h2 class="section-title">Recent i18n Activity</h2>
+                <span style="color: var(--gray-500); font-size: 13px;">{{ alerts|length }} events</span>
+            </div>
+
+            {% if alerts %}
+            <div class="activity-list">
+                {% for alert in alerts[:50] %}
+                {% set signal_type = (alert.metadata or {}).get('signal_type', 'KEYWORD') %}
+                {% set signal_class = 'new-lang' if signal_type == 'NEW_LANG_FILE' else ('pr' if signal_type == 'OPEN_PR' else 'keyword') %}
+                <div class="activity-item">
+                    <div class="activity-marker {{ signal_class }}"></div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <a href="/company/{{ alert.company }}" class="activity-company">{{ alert.company }}</a>
+                            <span class="activity-time">{{ alert.friendly_time }}</span>
+                        </div>
+                        <div class="activity-title">{{ alert.title or 'i18n activity detected' }}</div>
+                        <div class="activity-meta">
+                            <span class="signal-badge {{ signal_class }}">
+                                {% if signal_type == 'NEW_LANG_FILE' %}
+                                    New Language
+                                {% elif signal_type == 'OPEN_PR' %}
+                                    i18n PR
+                                {% else %}
+                                    Keyword
+                                {% endif %}
+                            </span>
+                            {% if alert.url %}
+                            <a href="{{ alert.url }}" target="_blank" style="color: var(--primary); font-size: 12px; text-decoration: none;">View</a>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="pagination-controls">
-                    <button class="page-btn" disabled>Previous</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn" disabled>Next</button>
-                </div>
+                {% endfor %}
             </div>
             {% else %}
             <div class="empty-state">
-                <div class="empty-state-icon">📊</div>
-                <h3>No alerts found</h3>
-                <p>Run the monitoring check to detect localization signals or adjust your filters.</p>
+                <h3>No activity yet</h3>
+                <p>Run the monitoring check or add companies in the Admin panel to start tracking.</p>
+                <p style="margin-top: 1rem;">
+                    <a href="/admin" class="btn btn-primary">Add Companies</a>
+                </p>
             </div>
             {% endif %}
         </div>
     </div>
-    
-    <!-- AI Sales Narrative Modal -->
-    <div id="aiModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Sales Intelligence</h3>
-            </div>
-            <div class="modal-body" id="aiModalBody">
-                <p style="color: var(--gray-500);">Loading...</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeAIModal()">Close</button>
-            </div>
-        </div>
-    </div>
-    
+
     <script>
-        // AI Explanation with full context
-        document.querySelectorAll('.explain-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const row = this.closest('tr');
-                const modal = document.getElementById('aiModal');
-                const modalBody = document.getElementById('aiModalBody');
-                
-                modal.classList.add('show');
-                modalBody.innerHTML = '<p style="color: var(--gray-500);">Generating sales narrative...</p>';
-                
-                let metadata = {};
-                try {
-                    metadata = JSON.parse(row.dataset.metadata || '{}');
-                } catch (e) {
-                    metadata = {};
-                }
-                
-                try {
-                    const response = await fetch('/api/summarize', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            source: row.dataset.source,
-                            company: row.dataset.company,
-                            title: row.dataset.title,
-                            message: row.dataset.message,
-                            keywords: row.dataset.keywords ? row.dataset.keywords.split(', ') : [],
-                            signal_type: row.dataset.signalType || metadata.signal_type || null,
-                            metadata: metadata
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.summary) {
-                        modalBody.innerHTML = `<p style="line-height: 1.8; font-size: 15px;">${result.summary}</p>`;
-                    } else {
-                        modalBody.innerHTML = `<p style="color: var(--danger);">${result.error || 'Could not generate summary'}</p>`;
-                    }
-                } catch (err) {
-                    modalBody.innerHTML = '<p style="color: var(--danger);">Error connecting to AI service</p>';
-                }
-            });
-        });
-        
-        function closeAIModal() {
-            document.getElementById('aiModal').classList.remove('show');
-        }
-        
-        // Close modal on outside click
-        document.getElementById('aiModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAIModal();
-            }
-        });
-        
         // Auto-refresh every 2 minutes
         setTimeout(() => location.reload(), 120000);
     </script>

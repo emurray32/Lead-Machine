@@ -316,34 +316,29 @@ def generate_company_profile(company: str, alerts: List[Dict], metrics: Dict) ->
     """
     if not GEMINI_AVAILABLE or not client:
         return None
-    
+
     if not alerts:
         return None
-    
+
     total_alerts = metrics.get('total_alerts', len(alerts))
     github_count = metrics.get('github_count', 0)
-    playstore_count = metrics.get('playstore_count', 0)
-    docs_count = metrics.get('docs_count', 0)
-    
+
     detected_languages = metrics.get('detected_languages', [])
     contributors = metrics.get('contributors', [])
     signal_types = metrics.get('signal_types', [])
-    
-    first_seen = metrics.get('first_seen')
-    last_activity = metrics.get('last_activity')
-    
+
     recent_alerts = alerts[:10]
     alert_summaries = []
     for alert in recent_alerts:
         signal_type = alert.get('metadata', {}).get('signal_type', '') if alert.get('metadata') else ''
         title = alert.get('title', '')[:100]
         alert_summaries.append(f"- [{signal_type}] {title}")
-    
+
     market_context = get_market_context(detected_languages)
-    
+
     lang_list = ', '.join(detected_languages[:10]) if detected_languages else 'Unknown'
     contributor_list = ', '.join(contributors[:5]) if contributors else 'No contributors tracked'
-    
+
     maturity_assessment = ""
     if total_alerts > 20:
         maturity_assessment = "Very active in localization with frequent updates."
@@ -353,22 +348,21 @@ def generate_company_profile(company: str, alerts: List[Dict], metrics: Dict) ->
         maturity_assessment = "Growing localization footprint."
     else:
         maturity_assessment = "Early stage in localization journey."
-    
+
     high_value_count = sum(1 for a in alerts if a.get('metadata', {}).get('signal_type') in HIGH_VALUE_SIGNALS)
-    
-    prompt = f"""You are a sales intelligence analyst helping a localization services salesperson understand a potential client.
 
-Generate a comprehensive 3-4 paragraph company profile for {company} based on their localization activity. Include:
+    prompt = f"""You are a sales intelligence analyst helping understand a company's internationalization journey based on their GitHub activity.
 
-1. **Executive Summary**: Overall assessment of their localization maturity and recent activity level
-2. **Market Expansion Analysis**: What markets they're targeting based on detected languages
-3. **Opportunity Assessment**: Why this is a good sales prospect and what services they might need
-4. **Recommended Approach**: How to approach this company as a sales lead
+Generate a comprehensive 3-4 paragraph profile for {company} based on their i18n/localization GitHub activity. Include:
+
+1. **Executive Summary**: Overall assessment of their internationalization maturity and what their GitHub activity reveals about their global expansion strategy
+2. **Market Expansion Analysis**: What markets they're targeting based on detected languages and the order they added them
+3. **Team Focus**: What the engineering team is prioritizing based on commit patterns
+4. **Opportunity Assessment**: Why this company is interesting from an i18n perspective
 
 Company Data:
-- Total Signals Detected: {total_alerts}
-- High-Value Signals: {high_value_count}
-- Sources: GitHub ({github_count}), Play Store ({playstore_count}), Docs ({docs_count})
+- Total GitHub Signals: {total_alerts}
+- High-Value Signals (new language files, PRs): {high_value_count}
 - Languages Detected: {lang_list}
 - {market_context}
 - Key Contributors: {contributor_list}
@@ -378,18 +372,94 @@ Company Data:
 Recent Activity:
 {chr(10).join(alert_summaries)}
 
-Write a professional sales intelligence report. Be specific about market opportunities and actionable in your recommendations."""
+Write a professional analysis focused on understanding their internationalization journey and team priorities."""
 
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
-        
+
         if response and response.text:
             return response.text.strip()
         return None
-        
+
     except Exception as e:
         print(f"Error generating company profile: {e}")
+        return None
+
+
+def generate_i18n_journey_narrative(company: str, timeline: List[Dict], metrics: Dict) -> Optional[str]:
+    """
+    Generate a narrative about a company's internationalization journey based on their timeline.
+    """
+    if not GEMINI_AVAILABLE or not client:
+        return None
+
+    if not timeline:
+        return None
+
+    detected_languages = metrics.get('detected_languages', [])
+    contributors = metrics.get('contributors', [])
+
+    timeline_events = []
+    for event in timeline[:15]:
+        date_str = event['date'].strftime('%b %Y') if event.get('date') else 'Unknown'
+        signal = event.get('signal_type', 'UNKNOWN')
+        langs = ', '.join(event.get('languages_added', [])) if event.get('languages_added') else ''
+        author = event.get('author', 'Unknown')
+
+        if signal == 'NEW_LANG_FILE' and langs:
+            timeline_events.append(f"- {date_str}: Added {langs} language files (by {author})")
+        elif signal == 'OPEN_PR':
+            timeline_events.append(f"- {date_str}: Opened i18n PR #{event.get('pr_number', '?')} (by {author})")
+        elif signal == 'KEYWORD':
+            timeline_events.append(f"- {date_str}: i18n-related commit (by {author})")
+
+    market_context = get_market_context(detected_languages)
+    first_event = timeline[0] if timeline else None
+    last_event = timeline[-1] if timeline else None
+
+    duration = ""
+    if first_event and last_event and first_event.get('date') and last_event.get('date'):
+        days = (last_event['date'] - first_event['date']).days
+        if days > 365:
+            duration = f"over {days // 365} year(s)"
+        elif days > 30:
+            duration = f"over {days // 30} month(s)"
+        else:
+            duration = f"{days} days"
+
+    prompt = f"""You are analyzing {company}'s internationalization journey based on their GitHub commit history.
+
+Write a compelling 2-3 paragraph narrative about their i18n journey. Include:
+1. How their internationalization started and evolved
+2. What markets they seem to be prioritizing
+3. The pace and pattern of their expansion
+4. What this tells us about their global strategy
+
+Timeline of i18n Events:
+{chr(10).join(timeline_events) if timeline_events else 'Limited activity detected'}
+
+Summary Data:
+- Journey Duration: {duration}
+- Total Languages Added: {len(detected_languages)}
+- Languages: {', '.join(detected_languages[:10]) if detected_languages else 'Unknown'}
+- {market_context}
+- Key Contributors: {', '.join(contributors[:5]) if contributors else 'Unknown'}
+
+Write an insightful narrative that tells the story of their internationalization journey. Focus on patterns and what this reveals about their strategy."""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        if response and response.text:
+            return response.text.strip()
+        return None
+
+    except Exception as e:
+        print(f"Error generating i18n journey narrative: {e}")
         return None
