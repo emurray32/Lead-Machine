@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ company_name }} - Localization Monitor</title>
+    <title>{{ company_name }} - i18n Timeline</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,8 +16,6 @@
             --success-light: #d1fae5;
             --warning: #f59e0b;
             --warning-light: #fef3c7;
-            --danger: #ef4444;
-            --danger-light: #fee2e2;
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
@@ -31,11 +29,10 @@
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--gray-50);
@@ -43,7 +40,7 @@
             line-height: 1.6;
             font-size: 14px;
         }
-        
+
         .header {
             background: white;
             border-bottom: 1px solid var(--gray-200);
@@ -52,7 +49,7 @@
             z-index: 100;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .header-content {
             max-width: 1400px;
             margin: 0 auto;
@@ -61,13 +58,13 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 2rem;
         }
-        
+
         .logo {
             font-size: 20px;
             font-weight: 700;
@@ -77,7 +74,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .logo-icon {
             width: 32px;
             height: 32px;
@@ -90,12 +87,12 @@
             font-weight: 700;
             font-size: 16px;
         }
-        
+
         .header-nav {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .nav-link {
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -105,12 +102,12 @@
             font-size: 14px;
             transition: all 0.2s;
         }
-        
+
         .nav-link:hover {
             background: var(--gray-100);
             color: var(--gray-900);
         }
-        
+
         .btn {
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -124,32 +121,32 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .btn-primary {
             background: var(--primary);
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: var(--primary-dark);
         }
-        
+
         .btn-secondary {
             background: white;
             color: var(--gray-700);
             border: 1px solid var(--gray-300);
         }
-        
+
         .btn-secondary:hover {
             background: var(--gray-50);
         }
-        
+
         .main-content {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-        
+
         .breadcrumb {
             display: flex;
             align-items: center;
@@ -158,16 +155,16 @@
             color: var(--gray-500);
             font-size: 14px;
         }
-        
+
         .breadcrumb a {
             color: var(--primary);
             text-decoration: none;
         }
-        
+
         .breadcrumb a:hover {
             text-decoration: underline;
         }
-        
+
         .company-header {
             background: white;
             border-radius: 12px;
@@ -175,280 +172,332 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
         }
-        
+
         .company-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-        
+
         .company-subtitle {
             color: var(--gray-500);
             font-size: 16px;
             margin-bottom: 1.5rem;
         }
-        
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-        
+
         .stat-card {
             background: var(--gray-50);
             border-radius: 8px;
             padding: 1rem;
             text-align: center;
         }
-        
+
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             color: var(--primary);
         }
-        
+
         .stat-label {
             font-size: 12px;
             color: var(--gray-500);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 1.5rem;
+
+        .languages-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-200);
         }
-        
-        @media (max-width: 1024px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .profile-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 80px;
-        }
-        
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .profile-title {
-            font-size: 18px;
+
+        .section-label {
+            font-size: 13px;
             font-weight: 600;
-        }
-        
-        .profile-content {
             color: var(--gray-700);
-            line-height: 1.8;
-            white-space: pre-wrap;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .profile-loading {
+
+        .languages-list {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3rem;
-            color: var(--gray-500);
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        
-        .alerts-section {
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-        
-        .section-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .alert-count {
+
+        .lang-tag {
             background: var(--primary-light);
             color: var(--primary);
-            padding: 0.25rem 0.75rem;
+            padding: 0.375rem 0.75rem;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
         }
-        
-        .alerts-list {
-            max-height: 800px;
-            overflow-y: auto;
-        }
-        
-        .alert-item {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--gray-100);
-            transition: background 0.2s;
-        }
-        
-        .alert-item:hover {
-            background: var(--gray-50);
-        }
-        
-        .alert-item:last-child {
-            border-bottom: none;
-        }
-        
-        .alert-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.5rem;
-        }
-        
-        .alert-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .alert-time {
-            font-size: 12px;
-            color: var(--gray-500);
-        }
-        
-        .badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .badge-github {
-            background: var(--gray-800);
-            color: white;
-        }
-        
-        .badge-playstore {
-            background: var(--success);
-            color: white;
-        }
-        
-        .badge-docs {
-            background: var(--warning);
-            color: white;
-        }
-        
-        .signal-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .signal-NEW_LANG_FILE,
-        .signal-NEW_HREFLANG,
-        .signal-NEW_APP_LANG,
-        .signal-OPEN_PR {
-            background: var(--success-light);
-            color: var(--success);
-        }
-        
-        .signal-KEYWORD {
-            background: var(--gray-200);
-            color: var(--gray-600);
-        }
-        
-        .alert-title {
-            font-weight: 500;
-            color: var(--gray-800);
-            margin-bottom: 0.25rem;
-        }
-        
-        .alert-message {
-            font-size: 13px;
-            color: var(--gray-500);
-        }
-        
-        .alert-link {
-            display: inline-block;
-            margin-top: 0.5rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 13px;
-        }
-        
-        .alert-link:hover {
-            text-decoration: underline;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--gray-500);
-        }
-        
-        .empty-state h2 {
-            font-size: 24px;
-            margin-bottom: 0.5rem;
-            color: var(--gray-700);
-        }
-        
-        .languages-list {
+
+        .contributors-list {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
             margin-top: 1rem;
         }
-        
-        .lang-tag {
+
+        .contributor-tag {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            padding: 0.375rem 0.75rem;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Timeline Styles */
+        .timeline-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .event-count {
             background: var(--primary-light);
             color: var(--primary);
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
         }
-        
-        .contributors-list {
+
+        .timeline {
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 2.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-200);
+        }
+
+        .timeline-event {
+            position: relative;
+            padding-left: 4rem;
+            padding-bottom: 1.5rem;
+            margin-left: 0;
+        }
+
+        .timeline-event:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 1.5rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--primary);
+            z-index: 1;
+        }
+
+        .timeline-marker.new-lang {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .timeline-marker.pr {
+            background: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .timeline-marker.keyword {
+            background: var(--gray-400);
+            border-color: var(--gray-400);
+        }
+
+        .event-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .event-card.new-lang {
+            border-left-color: var(--success);
+        }
+
+        .event-card.pr {
+            border-left-color: var(--warning);
+        }
+
+        .event-card.keyword {
+            border-left-color: var(--gray-400);
+        }
+
+        .event-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .contributor-tag {
-            background: var(--gray-100);
-            color: var(--gray-700);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-        
-        .info-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--gray-200);
-        }
-        
-        .info-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--gray-700);
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 0.5rem;
         }
-        
+
+        .event-type {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .event-type.new-lang {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .event-type.pr {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .event-type.keyword {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .event-date {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .event-title {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+            font-size: 14px;
+        }
+
+        .event-details {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        .event-languages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+            margin-top: 0.5rem;
+        }
+
+        .event-lang {
+            background: var(--success-light);
+            color: var(--success);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .event-cumulative {
+            margin-top: 0.5rem;
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+
+        .event-author {
+            margin-top: 0.5rem;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .event-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .event-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .narrative-content {
+            color: var(--gray-700);
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--gray-500);
+        }
+
         .spinner {
             width: 24px;
             height: 24px;
@@ -456,10 +505,39 @@
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+
+        .files-list {
+            margin-top: 0.5rem;
+            font-size: 11px;
+            color: var(--gray-500);
+        }
+
+        .file-item {
+            background: var(--gray-100);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+            display: inline-block;
+            font-family: monospace;
         }
     </style>
 </head>
@@ -468,8 +546,8 @@
         <div class="header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <span class="logo-icon">L</span>
-                    Localization Monitor
+                    <span class="logo-icon">i18n</span>
+                    GitHub i18n Timeline
                 </a>
                 <nav class="header-nav">
                     <a href="/" class="nav-link">Dashboard</a>
@@ -491,171 +569,267 @@
 
         {% if not_found %}
         <div class="empty-state">
-            <h2>No Data Found</h2>
-            <p>No alerts have been recorded for {{ company_name }} yet.</p>
+            <h2>No GitHub Data Found</h2>
+            <p>No i18n activity has been recorded for {{ company_name }} yet.</p>
             <p style="margin-top: 1rem;">
                 <a href="/admin" class="btn btn-primary">Add Company to Monitor</a>
             </p>
         </div>
         {% else %}
-        
+
         <div class="company-header">
             <h1 class="company-title">{{ company_name }}</h1>
             <p class="company-subtitle">
-                {% if metrics.last_activity_friendly %}
-                    Last activity: {{ metrics.last_activity_friendly }}
+                Internationalization Timeline
+                {% if metrics.journey_duration %}
+                | Journey: {{ metrics.journey_duration }}
                 {% endif %}
-                {% if metrics.first_seen_friendly %}
-                    | First seen: {{ metrics.first_seen_friendly }}
+                {% if metrics.last_activity_friendly %}
+                | Last activity: {{ metrics.last_activity_friendly }}
                 {% endif %}
             </p>
-            
+
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">{{ metrics.total_alerts or 0 }}</div>
-                    <div class="stat-label">Total Signals</div>
+                    <div class="stat-value">{{ timeline|length }}</div>
+                    <div class="stat-label">Total Events</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ metrics.github_count or 0 }}</div>
-                    <div class="stat-label">GitHub</div>
+                    <div class="stat-value">{{ metrics.new_lang_files or 0 }}</div>
+                    <div class="stat-label">Language Files</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ metrics.playstore_count or 0 }}</div>
-                    <div class="stat-label">Play Store</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ metrics.docs_count or 0 }}</div>
-                    <div class="stat-label">Documentation</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ (metrics.new_lang_files or 0) + (metrics.new_hreflangs or 0) + (metrics.new_app_langs or 0) + (metrics.open_prs or 0) }}</div>
-                    <div class="stat-label">High-Value Signals</div>
+                    <div class="stat-value">{{ metrics.open_prs or 0 }}</div>
+                    <div class="stat-label">i18n PRs</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ metrics.detected_languages|length if metrics.detected_languages else 0 }}</div>
-                    <div class="stat-label">Languages Detected</div>
+                    <div class="stat-label">Languages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ metrics.contributors|length if metrics.contributors else 0 }}</div>
+                    <div class="stat-label">Contributors</div>
                 </div>
             </div>
-            
+
             {% if metrics.detected_languages %}
-            <div class="languages-list">
-                {% for lang in metrics.detected_languages[:15] %}
-                <span class="lang-tag">{{ lang }}</span>
+            <div class="languages-section">
+                <div class="section-label">Languages Detected</div>
+                <div class="languages-list">
+                    {% for lang in metrics.detected_languages[:20] %}
+                    <span class="lang-tag">{{ lang }}</span>
+                    {% endfor %}
+                    {% if metrics.detected_languages|length > 20 %}
+                    <span class="lang-tag">+{{ metrics.detected_languages|length - 20 }} more</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if metrics.contributors %}
+            <div class="section-label" style="margin-top: 1rem;">Key Contributors</div>
+            <div class="contributors-list">
+                {% for contributor in metrics.contributors[:10] %}
+                <span class="contributor-tag">{{ contributor }}</span>
                 {% endfor %}
-                {% if metrics.detected_languages|length > 15 %}
-                <span class="lang-tag">+{{ metrics.detected_languages|length - 15 }} more</span>
-                {% endif %}
             </div>
             {% endif %}
         </div>
 
         <div class="content-grid">
-            <div class="alerts-section">
+            <div class="timeline-section">
                 <div class="section-header">
-                    <h2 class="section-title">Signal History</h2>
-                    <span class="alert-count">{{ alerts|length }} signals</span>
+                    <h2 class="section-title">
+                        i18n Timeline
+                    </h2>
+                    <span class="event-count">{{ timeline|length }} events</span>
                 </div>
-                <div class="alerts-list">
-                    {% for alert in alerts %}
-                    <div class="alert-item">
-                        <div class="alert-header">
-                            <div class="alert-meta">
-                                <span class="badge badge-{{ alert.source }}">{{ alert.source }}</span>
-                                {% set signal_type = (alert.metadata or {}).get('signal_type', '') %}
-                                {% if signal_type %}
-                                <span class="signal-badge signal-{{ signal_type }}">{{ signal_type }}</span>
+
+                <div class="timeline">
+                    {% for event in timeline|reverse %}
+                    {% set event_class = 'new-lang' if event.signal_type == 'NEW_LANG_FILE' else ('pr' if event.signal_type == 'OPEN_PR' else 'keyword') %}
+                    <div class="timeline-event">
+                        <div class="timeline-marker {{ event_class }}"></div>
+                        <div class="event-card {{ event_class }}">
+                            <div class="event-header">
+                                <span class="event-type {{ event_class }}">
+                                    {% if event.signal_type == 'NEW_LANG_FILE' %}
+                                        New Language File
+                                    {% elif event.signal_type == 'OPEN_PR' %}
+                                        i18n Pull Request
+                                    {% else %}
+                                        i18n Activity
+                                    {% endif %}
+                                </span>
+                                <span class="event-date">{{ event.friendly_time }}</span>
+                            </div>
+
+                            <div class="event-title">{{ event.title or 'i18n commit' }}</div>
+
+                            {% if event.message %}
+                            <div class="event-details">{{ event.message[:150] }}{% if event.message|length > 150 %}...{% endif %}</div>
+                            {% endif %}
+
+                            {% if event.languages_added %}
+                            <div class="event-languages">
+                                {% for lang in event.languages_added %}
+                                <span class="event-lang">+ {{ lang }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if event.files %}
+                            <div class="files-list">
+                                {% for file in event.files[:3] %}
+                                <span class="file-item">{{ file.split('/')|last }}</span>
+                                {% endfor %}
+                                {% if event.files|length > 3 %}
+                                <span class="file-item">+{{ event.files|length - 3 }} more</span>
                                 {% endif %}
                             </div>
-                            <span class="alert-time">{{ alert.friendly_time }}</span>
+                            {% endif %}
+
+                            {% if event.cumulative_languages and event.cumulative_languages|length > 0 %}
+                            <div class="event-cumulative">
+                                Total languages at this point: {{ event.cumulative_languages|length }}
+                            </div>
+                            {% endif %}
+
+                            {% if event.author %}
+                            <div class="event-author">By: {{ event.author }}</div>
+                            {% endif %}
+
+                            {% if event.url %}
+                            <a href="{{ event.url }}" target="_blank" class="event-link">View on GitHub</a>
+                            {% endif %}
                         </div>
-                        <div class="alert-title">{{ alert.title or 'No title' }}</div>
-                        {% if alert.message %}
-                        <div class="alert-message">{{ alert.message[:200] }}{% if alert.message|length > 200 %}...{% endif %}</div>
-                        {% endif %}
-                        {% if alert.url %}
-                        <a href="{{ alert.url }}" target="_blank" class="alert-link">View source</a>
-                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="profile-card">
-                <div class="profile-header">
-                    <h3 class="profile-title">Sales Intelligence Summary</h3>
-                    {% if ai_available %}
-                    <button class="btn btn-secondary" onclick="refreshProfile()" id="refresh-btn">Refresh</button>
-                    {% endif %}
-                </div>
-                
-                <div id="profile-content">
-                    {% if ai_available %}
-                    <div class="profile-loading" id="profile-loading">
-                        <div class="spinner"></div>
-                        <span style="margin-left: 0.5rem;">Generating summary...</span>
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">
+                        i18n Journey Narrative
+                        {% if ai_available %}
+                        <button class="btn btn-secondary" onclick="refreshJourney()" id="journey-btn" style="padding: 0.25rem 0.5rem; font-size: 12px;">Refresh</button>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <p style="color: var(--gray-500); text-align: center; padding: 2rem;">
-                        AI summaries are not available. Connect Gemini AI to enable sales intelligence.
-                    </p>
-                    {% endif %}
-                </div>
-                
-                {% if metrics.contributors %}
-                <div class="info-section">
-                    <div class="info-title">Key Contributors</div>
-                    <div class="contributors-list">
-                        {% for contributor in metrics.contributors[:8] %}
-                        <span class="contributor-tag">{{ contributor }}</span>
-                        {% endfor %}
+                    <div id="journey-content">
+                        {% if ai_available %}
+                        <div class="loading" id="journey-loading">
+                            <div class="spinner"></div>
+                            <span>Analyzing journey...</span>
+                        </div>
+                        {% else %}
+                        <p style="color: var(--gray-500);">
+                            AI analysis not available. Connect Gemini AI to enable journey narratives.
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">
+                        Company Analysis
+                        {% if ai_available %}
+                        <button class="btn btn-secondary" onclick="refreshProfile()" id="profile-btn" style="padding: 0.25rem 0.5rem; font-size: 12px;">Refresh</button>
+                        {% endif %}
+                    </div>
+                    <div id="profile-content">
+                        {% if ai_available %}
+                        <div class="loading" id="profile-loading">
+                            <div class="spinner"></div>
+                            <span>Generating analysis...</span>
+                        </div>
+                        {% else %}
+                        <p style="color: var(--gray-500);">
+                            AI analysis not available.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-        
+
         {% endif %}
     </main>
 
     <script>
-        async function loadProfile() {
-            const btn = document.getElementById('refresh-btn');
-            const content = document.getElementById('profile-content');
-            
+        async function loadJourney() {
+            const btn = document.getElementById('journey-btn');
+            const content = document.getElementById('journey-content');
+
             if (btn) btn.disabled = true;
-            
+
+            try {
+                const response = await fetch('/api/company/{{ company_name }}/journey');
+                const data = await response.json();
+
+                if (data.narrative) {
+                    content.innerHTML = '<div class="narrative-content">' + data.narrative.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</div>';
+                } else {
+                    content.innerHTML = '<p style="color: var(--gray-500);">Unable to generate narrative. Click Refresh to try again.</p>';
+                }
+            } catch (error) {
+                content.innerHTML = '<p style="color: var(--gray-500);">Error loading narrative.</p>';
+            }
+
+            if (btn) {
+                btn.disabled = false;
+            }
+        }
+
+        async function refreshJourney() {
+            const btn = document.getElementById('journey-btn');
+            const content = document.getElementById('journey-content');
+
+            btn.disabled = true;
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><span>Analyzing journey...</span></div>';
+
+            await loadJourney();
+        }
+
+        async function loadProfile() {
+            const btn = document.getElementById('profile-btn');
+            const content = document.getElementById('profile-content');
+
+            if (btn) btn.disabled = true;
+
             try {
                 const response = await fetch('/api/company/{{ company_name }}/profile');
                 const data = await response.json();
-                
+
                 if (data.profile) {
-                    content.innerHTML = '<div class="profile-content">' + data.profile.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</div>';
+                    content.innerHTML = '<div class="narrative-content">' + data.profile.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</div>';
                 } else {
-                    content.innerHTML = '<p style="color: var(--gray-500); padding: 1rem;">Unable to generate profile. Click Refresh to try again.</p>';
+                    content.innerHTML = '<p style="color: var(--gray-500);">Unable to generate profile. Click Refresh to try again.</p>';
                 }
             } catch (error) {
-                content.innerHTML = '<p style="color: var(--danger); padding: 1rem;">Error loading profile. Click Refresh to try again.</p>';
+                content.innerHTML = '<p style="color: var(--gray-500);">Error loading profile.</p>';
             }
-            
+
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = 'Refresh';
             }
         }
-        
+
         async function refreshProfile() {
-            const btn = document.getElementById('refresh-btn');
+            const btn = document.getElementById('profile-btn');
             const content = document.getElementById('profile-content');
-            
+
             btn.disabled = true;
-            btn.textContent = 'Generating...';
-            content.innerHTML = '<div class="profile-loading"><div class="spinner"></div><span style="margin-left: 0.5rem;">Generating summary...</span></div>';
-            
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><span>Generating analysis...</span></div>';
+
             await loadProfile();
         }
-        
+
         {% if ai_available and not not_found %}
-        document.addEventListener('DOMContentLoaded', loadProfile);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadJourney();
+            setTimeout(loadProfile, 500);
+        });
         {% endif %}
     </script>
 </body>

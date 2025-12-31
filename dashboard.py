@@ -1,5 +1,6 @@
 """
-Flask Web Dashboard for Localization Monitoring Alerts
+Flask Web Dashboard for GitHub i18n Timeline Intelligence
+Focused on tracking company internationalization journeys through GitHub activity.
 """
 
 from flask import Flask, render_template, jsonify, request, Response
@@ -78,31 +79,31 @@ def save_companies_yaml(companies):
 
 @app.route('/')
 def index():
-    """Main dashboard page."""
-    source_filter = request.args.get('source', '')
+    """Main dashboard page - GitHub i18n focused."""
     company_filter = request.args.get('company', '')
     search_query = request.args.get('search', '')
     signal_type_filter = request.args.get('signal_type', '')
-    
+
     alerts = storage.get_alerts(
         limit=500,
-        source=source_filter if source_filter else None,
+        source='github',
         company=company_filter if company_filter else None,
         search=search_query if search_query else None,
         signal_type=signal_type_filter if signal_type_filter else None
     )
-    
+
     for alert in alerts:
         alert['friendly_time'] = friendly_time(alert.get('created_at'))
-    
-    companies = storage.get_companies()
+
+    companies_summary = storage.get_all_companies_summary()
+    companies = [c['company'] for c in companies_summary]
     stats = storage.get_alert_stats()
-    
-    return render_template('dashboard.html', 
+
+    return render_template('dashboard.html',
                          alerts=alerts,
                          companies=companies,
+                         companies_summary=companies_summary,
                          stats=stats,
-                         current_source=source_filter,
                          current_company=company_filter,
                          ai_available=AI_AVAILABLE)
 
@@ -418,30 +419,42 @@ def api_ai_status():
 
 @app.route('/company/<company_name>')
 def company_page(company_name):
-    """Company detail page with comprehensive summary and alert history."""
-    alerts = storage.get_company_alerts(company_name)
-    
-    if not alerts:
+    """Company detail page with i18n timeline and journey narrative."""
+    timeline = storage.get_company_timeline(company_name)
+
+    if not timeline:
         return render_template('company.html',
                              company_name=company_name,
-                             alerts=[],
+                             timeline=[],
                              metrics={},
                              ai_available=AI_AVAILABLE,
                              not_found=True)
-    
-    for alert in alerts:
-        alert['friendly_time'] = friendly_time(alert.get('created_at'))
-    
+
+    for event in timeline:
+        event['friendly_time'] = friendly_time(event.get('date'))
+
     metrics = storage.get_company_metrics(company_name)
-    
+
     if metrics.get('first_seen'):
         metrics['first_seen_friendly'] = friendly_time(metrics['first_seen'])
     if metrics.get('last_activity'):
         metrics['last_activity_friendly'] = friendly_time(metrics['last_activity'])
-    
+
+    if timeline:
+        first_date = timeline[0].get('date')
+        last_date = timeline[-1].get('date')
+        if first_date and last_date:
+            days = (last_date - first_date).days
+            if days > 365:
+                metrics['journey_duration'] = f"{days // 365} year(s)"
+            elif days > 30:
+                metrics['journey_duration'] = f"{days // 30} month(s)"
+            else:
+                metrics['journey_duration'] = f"{days} days"
+
     return render_template('company.html',
                          company_name=company_name,
-                         alerts=alerts,
+                         timeline=timeline,
                          metrics=metrics,
                          ai_available=AI_AVAILABLE,
                          not_found=False)
@@ -452,18 +465,40 @@ def api_company_profile(company_name):
     """Generate/refresh AI company profile."""
     if not AI_AVAILABLE or not ai_summary:
         return jsonify({'error': 'AI not available', 'available': False}), 503
-    
-    alerts = storage.get_company_alerts(company_name)
-    if not alerts:
-        return jsonify({'error': 'No alerts found for company'}), 404
-    
+
+    timeline = storage.get_company_timeline(company_name)
+    if not timeline:
+        return jsonify({'error': 'No data found for company'}), 404
+
     metrics = storage.get_company_metrics(company_name)
-    
+
     try:
+        alerts = storage.get_company_alerts(company_name)
         profile = ai_summary.generate_company_profile(company_name, alerts, metrics)
         if profile:
             return jsonify({'profile': profile, 'available': True})
         return jsonify({'error': 'Failed to generate profile', 'available': True}), 500
+    except Exception as e:
+        return jsonify({'error': str(e), 'available': True}), 500
+
+
+@app.route('/api/company/<company_name>/journey')
+def api_company_journey(company_name):
+    """Generate AI narrative about the company's i18n journey."""
+    if not AI_AVAILABLE or not ai_summary:
+        return jsonify({'error': 'AI not available', 'available': False}), 503
+
+    timeline = storage.get_company_timeline(company_name)
+    if not timeline:
+        return jsonify({'error': 'No data found for company'}), 404
+
+    metrics = storage.get_company_metrics(company_name)
+
+    try:
+        narrative = ai_summary.generate_i18n_journey_narrative(company_name, timeline, metrics)
+        if narrative:
+            return jsonify({'narrative': narrative, 'available': True})
+        return jsonify({'error': 'Failed to generate narrative', 'available': True}), 500
     except Exception as e:
         return jsonify({'error': str(e), 'available': True}), 500
 

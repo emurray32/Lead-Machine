@@ -184,72 +184,155 @@ def get_company_alerts(company: str, limit: Optional[int] = None) -> List[Dict]:
 
 
 def get_company_metrics(company: str) -> Dict:
-    """Get aggregated metrics for a company."""
+    """Get aggregated metrics for a company focused on GitHub i18n signals."""
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
+
     cur.execute("""
-        SELECT 
+        SELECT
             COUNT(*) as total_alerts,
             COUNT(CASE WHEN source = 'github' THEN 1 END) as github_count,
-            COUNT(CASE WHEN source = 'playstore' THEN 1 END) as playstore_count,
-            COUNT(CASE WHEN source = 'docs' THEN 1 END) as docs_count,
             COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_LANG_FILE' THEN 1 END) as new_lang_files,
-            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_HREFLANG' THEN 1 END) as new_hreflangs,
-            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_APP_LANG' THEN 1 END) as new_app_langs,
             COUNT(CASE WHEN metadata->>'signal_type' = 'OPEN_PR' THEN 1 END) as open_prs,
             MIN(created_at) as first_seen,
             MAX(created_at) as last_activity
         FROM alerts
-        WHERE company = %s
+        WHERE company = %s AND source = 'github'
     """, (company,))
-    
+
     result = cur.fetchone()
     metrics = dict(result) if result else {
         'total_alerts': 0,
         'github_count': 0,
-        'playstore_count': 0,
-        'docs_count': 0,
         'new_lang_files': 0,
-        'new_hreflangs': 0,
-        'new_app_langs': 0,
         'open_prs': 0,
         'first_seen': None,
         'last_activity': None
     }
-    
+
     cur.execute("""
         SELECT DISTINCT metadata->>'signal_type' as signal_type
         FROM alerts
-        WHERE company = %s AND metadata->>'signal_type' IS NOT NULL
+        WHERE company = %s AND source = 'github' AND metadata->>'signal_type' IS NOT NULL
     """, (company,))
     signal_types = [row['signal_type'] for row in cur.fetchall()]
     metrics['signal_types'] = signal_types
-    
+
     cur.execute("""
-        SELECT metadata->'new_langs' as new_langs
+        SELECT metadata->'new_langs' as new_langs, metadata->'files' as files,
+               metadata->>'detected_languages' as detected_languages
         FROM alerts
-        WHERE company = %s AND metadata->'new_langs' IS NOT NULL
+        WHERE company = %s AND source = 'github'
     """, (company,))
-    
+
     all_languages = set()
+    all_files = []
     for row in cur.fetchall():
         if row['new_langs']:
             langs = row['new_langs']
             if isinstance(langs, list):
                 all_languages.update(langs)
-    metrics['detected_languages'] = list(all_languages)
-    
+        if row['detected_languages']:
+            try:
+                detected = row['detected_languages']
+                if isinstance(detected, list):
+                    all_languages.update(detected)
+            except:
+                pass
+        if row['files']:
+            files = row['files']
+            if isinstance(files, list):
+                all_files.extend(files)
+    metrics['detected_languages'] = sorted(list(all_languages))
+    metrics['localization_files'] = list(set(all_files))[:20]
+
     cur.execute("""
         SELECT DISTINCT metadata->>'author' as author
         FROM alerts
-        WHERE company = %s AND metadata->>'author' IS NOT NULL
-        LIMIT 10
+        WHERE company = %s AND source = 'github' AND metadata->>'author' IS NOT NULL
+        LIMIT 15
     """, (company,))
     authors = [row['author'] for row in cur.fetchall() if row['author']]
     metrics['contributors'] = authors
-    
+
     cur.close()
     conn.close()
-    
+
     return metrics
+
+
+def get_company_timeline(company: str) -> List[Dict]:
+    """Get chronological timeline of i18n events for a company."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""
+        SELECT
+            id, created_at, source, title, message, keywords, url, metadata
+        FROM alerts
+        WHERE company = %s AND source = 'github'
+        ORDER BY created_at ASC
+    """, (company,))
+
+    alerts = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    timeline = []
+    cumulative_languages = set()
+
+    for alert in alerts:
+        metadata = alert.get('metadata') or {}
+        signal_type = metadata.get('signal_type', 'UNKNOWN')
+
+        new_langs = []
+        if metadata.get('new_langs'):
+            new_langs = metadata['new_langs'] if isinstance(metadata['new_langs'], list) else []
+        elif metadata.get('detected_languages'):
+            new_langs = metadata['detected_languages'] if isinstance(metadata['detected_languages'], list) else []
+
+        for lang in new_langs:
+            cumulative_languages.add(lang)
+
+        timeline.append({
+            'id': alert['id'],
+            'date': alert['created_at'],
+            'signal_type': signal_type,
+            'title': alert['title'],
+            'message': alert['message'],
+            'url': alert['url'],
+            'author': metadata.get('author'),
+            'files': metadata.get('files', []),
+            'languages_added': new_langs,
+            'cumulative_languages': sorted(list(cumulative_languages)),
+            'pr_number': metadata.get('pr_number'),
+            'reviewers': metadata.get('reviewers', [])
+        })
+
+    return timeline
+
+
+def get_all_companies_summary() -> List[Dict]:
+    """Get summary of all companies with GitHub i18n activity."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""
+        SELECT
+            company,
+            COUNT(*) as total_signals,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_LANG_FILE' THEN 1 END) as lang_files,
+            COUNT(CASE WHEN metadata->>'signal_type' = 'OPEN_PR' THEN 1 END) as open_prs,
+            MIN(created_at) as first_activity,
+            MAX(created_at) as last_activity
+        FROM alerts
+        WHERE source = 'github'
+        GROUP BY company
+        ORDER BY last_activity DESC
+    """)
+
+    companies = [dict(row) for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+
+    return companies
