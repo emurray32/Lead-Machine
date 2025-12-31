@@ -9,14 +9,13 @@ import requests
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
-from .common import log, load_json, save_json, WEBHOOKS_FILE
-
-WEBHOOKS_FILE = os.path.join("monitoring_data", "webhooks.json")
+import config
+from .common import log, load_json, save_json
 
 
 def get_webhooks() -> List[Dict]:
     """Get all registered webhooks."""
-    data = load_json(WEBHOOKS_FILE)
+    data = load_json(config.WEBHOOKS_FILE)
     return data.get("webhooks", [])
 
 
@@ -35,7 +34,7 @@ def register_webhook(name: str, url: str, events: List[str] = None, headers: Dic
         True if registered successfully
     """
     try:
-        data = load_json(WEBHOOKS_FILE)
+        data = load_json(config.WEBHOOKS_FILE)
         webhooks = data.get("webhooks", [])
         
         existing = next((w for w in webhooks if w.get("name") == name), None)
@@ -55,7 +54,7 @@ def register_webhook(name: str, url: str, events: List[str] = None, headers: Dic
             })
         
         data["webhooks"] = webhooks
-        save_json(WEBHOOKS_FILE, data)
+        save_json(config.WEBHOOKS_FILE, data)
         log(f"Webhook registered: {name}")
         return True
         
@@ -67,10 +66,10 @@ def register_webhook(name: str, url: str, events: List[str] = None, headers: Dic
 def remove_webhook(name: str) -> bool:
     """Remove a webhook by name."""
     try:
-        data = load_json(WEBHOOKS_FILE)
+        data = load_json(config.WEBHOOKS_FILE)
         webhooks = data.get("webhooks", [])
         data["webhooks"] = [w for w in webhooks if w.get("name") != name]
-        save_json(WEBHOOKS_FILE, data)
+        save_json(config.WEBHOOKS_FILE, data)
         return True
     except Exception as e:
         log(f"Error removing webhook: {e}", "ERROR")

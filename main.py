@@ -21,12 +21,9 @@ import os
 import time
 import yaml
 from datetime import datetime
-from typing import Dict, List, Any
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
+import config
 from monitors.common import (
-    log, ensure_directories, load_json, save_json,
-    DATA_DIR, LAST_COMMITS_FILE
+    log, ensure_directories, load_json, save_json
 )
 from monitors.github_monitor import check_all_github, check_github_repo, check_github_prs
 from monitors.playstore_monitor import check_all_play_store
@@ -41,24 +38,20 @@ except Exception as e:
     print(f"[WARNING] Database not available, alerts will only be logged to console: {e}")
     DB_AVAILABLE = False
 
-COMPANIES_FILE = "companies.yaml"
 
-GITHUB_CHECK_INTERVAL = 6 * 60 * 60
-RSS_DOCS_CHECK_INTERVAL = 24 * 60 * 60
-MAIN_LOOP_SLEEP = 60
 
 
 def load_companies() -> List[Dict[str, Any]]:
     """Load company configuration from YAML file."""
-    if not os.path.exists(COMPANIES_FILE):
-        log(f"Warning: {COMPANIES_FILE} not found, using empty list", "WARNING")
+    if not os.path.exists(config.COMPANIES_FILE):
+        log(f"Warning: {config.COMPANIES_FILE} not found, using empty list", "WARNING")
         return []
     
     try:
-        with open(COMPANIES_FILE, 'r') as f:
-            config = yaml.safe_load(f)
+        with open(config.COMPANIES_FILE, 'r') as f:
+            config_data = yaml.safe_load(f)
         
-        companies = config.get('companies', [])
+        companies = config_data.get('companies', [])
         targets = []
         
         for company in companies:
@@ -72,7 +65,7 @@ def load_companies() -> List[Dict[str, Any]]:
             }
             targets.append(target)
         
-        log(f"Loaded {len(targets)} companies from {COMPANIES_FILE}")
+        log(f"Loaded {len(targets)} companies from {config.COMPANIES_FILE}")
         return targets
     except Exception as e:
         log(f"Error loading {COMPANIES_FILE}: {e}", "ERROR")
@@ -87,7 +80,7 @@ def get_targets() -> List[Dict[str, Any]]:
 def check_github_parallel(targets: List[Dict]) -> int:
     """Check GitHub repos in parallel for faster processing."""
     log("Starting parallel GitHub checks...")
-    last_commits = load_json(LAST_COMMITS_FILE)
+    last_commits = load_json(config.LAST_COMMITS_FILE)
     total_alerts = 0
     
     tasks = []
@@ -123,7 +116,7 @@ def check_github_parallel(targets: List[Dict]) -> int:
                 task_info = futures[future]
                 log(f"Error in parallel check for {task_info}: {e}", "ERROR")
     
-    save_json(LAST_COMMITS_FILE, last_commits)
+    save_json(config.LAST_COMMITS_FILE, last_commits)
     log(f"Parallel GitHub checks complete. Found {total_alerts} alerts.")
     return total_alerts
 
@@ -193,12 +186,12 @@ def main():
     try:
         now = time.time()
         
-        if now - last_github_check >= GITHUB_CHECK_INTERVAL:
+        if now - last_github_check >= config.GITHUB_CHECK_INTERVAL:
             github_alerts = check_github_parallel(targets)
             last_github_check = now
             log(f"GitHub check complete: {github_alerts} alerts")
         
-        if now - last_rss_docs_check >= RSS_DOCS_CHECK_INTERVAL:
+        if now - last_rss_docs_check >= config.RSS_DOCS_CHECK_INTERVAL:
             playstore_alerts = check_all_play_store(targets)
             docs_alerts = check_all_docs(targets)
             last_rss_docs_check = now

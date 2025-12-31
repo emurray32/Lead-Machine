@@ -5,55 +5,21 @@ Shared utilities and configuration for monitors.
 import os
 import json
 import time
+import logging
 import requests
 from datetime import datetime
 from typing import List, Dict, Optional, Any
+import config
 
-KEYWORDS = [
-    "i18n", "l10n", "localization", "localisation", "translate", "translation",
-    "rtl", "right-to-left", "pluralization", "language", "locale", "gettext",
-    "es.json", "fr.json", "de.json", "ar.json", "ja.json", "ko.json", "zh.json",
-    "arabic", "spanish", "french", "german", "korean", "hindi", "japanese",
-    "chinese", "portuguese", "italian", "dutch", "russian", "turkish",
-    "phrase", "strings", "string file", "translations", "multi-language",
-    "international", "internationalization", "i18next", "formatjs", "intl",
-    "polyglot", "globalize", "messageformat"
-]
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
-BOT_PATTERNS = [
-    "[bot]", "dependabot", "github-actions", "renovate", "greenkeeper",
-    "snyk-bot", "codecov", "semantic-release", "auto-merge"
-]
 
-LOCALIZATION_DIRS = [
-    "locales/", "locale/", "i18n/", "l10n/", "translations/", "lang/",
-    "languages/", "res/values-", "strings/", "messages/", "intl/"
-]
-
-LOCALIZATION_FILE_PATTERNS = [
-    ".json", ".yaml", ".yml", ".properties", ".po", ".pot", ".xliff",
-    ".strings", ".resx", ".arb"
-]
-
-LANGUAGE_CODES = [
-    "ar", "zh", "cs", "da", "nl", "fi", "fr", "de", "el", "he", "hi",
-    "hu", "id", "it", "ja", "ko", "ms", "no", "pl", "pt", "pt-br",
-    "ro", "ru", "sk", "es", "sv", "th", "tr", "uk", "vi", "bn", "ta",
-    "te", "mr", "gu", "kn", "ml", "pa", "sw", "zu", "af", "sq", "am",
-    "hy", "az", "eu", "be", "bs", "bg", "ca", "hr", "et", "fil", "gl",
-    "ka", "is", "lv", "lt", "mk", "mt", "mn", "ne", "fa", "sr", "si", "sl"
-]
-
-DATA_DIR = "monitoring_data"
-LAST_COMMITS_FILE = os.path.join(DATA_DIR, "last_commits.json")
-SEEN_RSS_FILE = os.path.join(DATA_DIR, "seen_rss.json")
-DOC_HASHES_FILE = os.path.join(DATA_DIR, "doc_hashes.json")
-PLAY_STORE_LANGS_FILE = os.path.join(DATA_DIR, "play_store_langs.json")
-PREVIOUS_TEXTS_DIR = os.path.join(DATA_DIR, "previous_texts")
-WEBHOOKS_FILE = os.path.join(DATA_DIR, "webhooks.json")
-
-REQUEST_DELAY = 1
-GITHUB_RATE_LIMIT_SLEEP = 60
 
 _github_connection_cache = {"settings": None, "expires_at": None}
 
@@ -61,7 +27,9 @@ def get_timestamp() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def log(message: str, level: str = "INFO") -> None:
-    print(f"[{get_timestamp()}] [{level}] {message}")
+    """Legacy log function wrapper around logging module."""
+    lvl = getattr(logging, level.upper(), logging.INFO)
+    logger.log(lvl, message)
 
 def alert(message: str) -> None:
     print(f"\n{'='*60}")
@@ -69,7 +37,7 @@ def alert(message: str) -> None:
     print(message)
     print(f"{'='*60}\n")
     
-    slack_webhook = os.environ.get("SLACK_WEBHOOK")
+    slack_webhook = config.SLACK_WEBHOOK
     if slack_webhook:
         try:
             payload = {
@@ -82,8 +50,8 @@ def alert(message: str) -> None:
             log(f"Failed to send Slack notification: {e}", "WARNING")
 
 def ensure_directories() -> None:
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(PREVIOUS_TEXTS_DIR, exist_ok=True)
+    os.makedirs(config.DATA_DIR, exist_ok=True)
+    os.makedirs(config.PREVIOUS_TEXTS_DIR, exist_ok=True)
 
 def load_json(filepath: str) -> Dict:
     if os.path.exists(filepath):
@@ -103,18 +71,18 @@ def save_json(filepath: str, data: Dict) -> None:
 
 def contains_keywords(text: str, keywords: List[str] = None) -> List[str]:
     if keywords is None:
-        keywords = KEYWORDS
+        keywords = config.KEYWORDS
     text_lower = text.lower()
     return [kw for kw in keywords if kw.lower() in text_lower]
 
 def is_bot_author(author: str) -> bool:
     author_lower = author.lower()
-    return any(bot.lower() in author_lower for bot in BOT_PATTERNS)
+    return any(bot.lower() in author_lower for bot in config.BOT_PATTERNS)
 
 def is_localization_file(filepath: str) -> bool:
     filepath_lower = filepath.lower()
-    in_l10n_dir = any(dir_pattern in filepath_lower for dir_pattern in LOCALIZATION_DIRS)
-    has_l10n_ext = any(filepath_lower.endswith(ext) for ext in LOCALIZATION_FILE_PATTERNS)
+    in_l10n_dir = any(dir_pattern in filepath_lower for dir_pattern in config.LOCALIZATION_DIRS)
+    has_l10n_ext = any(filepath_lower.endswith(ext) for ext in config.LOCALIZATION_FILE_PATTERNS)
     return in_l10n_dir and has_l10n_ext
 
 def extract_language_from_file(filepath: str) -> Optional[str]:
@@ -122,7 +90,7 @@ def extract_language_from_file(filepath: str) -> Optional[str]:
     filename = os.path.basename(filepath_lower)
     name_without_ext = os.path.splitext(filename)[0]
     
-    for code in LANGUAGE_CODES:
+    for code in config.LANGUAGE_CODES:
         if name_without_ext == code or name_without_ext.endswith(f"_{code}") or name_without_ext.endswith(f"-{code}"):
             return code
         if f"/{code}/" in filepath_lower or f"/{code}." in filepath_lower:

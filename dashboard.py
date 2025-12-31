@@ -8,6 +8,7 @@ import os
 import csv
 import io
 import yaml
+import config
 from datetime import datetime, timezone
 
 def friendly_time(dt):
@@ -48,31 +49,29 @@ except Exception:
     ai_summary = None
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+app.config['SECRET_KEY'] = config.SECRET_KEY
 
 storage.init_database()
 
-COMPANIES_FILE = "companies.yaml"
-
 def load_companies_yaml():
     """Load companies from YAML config file."""
-    if not os.path.exists(COMPANIES_FILE):
+    if not os.path.exists(config.COMPANIES_FILE):
         return []
     try:
-        with open(COMPANIES_FILE, 'r') as f:
-            config = yaml.safe_load(f)
-        return config.get('companies', [])
+        with open(config.COMPANIES_FILE, 'r') as f:
+            yaml_config = yaml.safe_load(f)
+        return yaml_config.get('companies', [])
     except Exception:
         return []
 
 def save_companies_yaml(companies):
     """Save companies to YAML config file."""
     try:
-        config = {'companies': companies}
-        with open(COMPANIES_FILE, 'w') as f:
+        yaml_config = {'companies': companies}
+        with open(config.COMPANIES_FILE, 'w') as f:
             f.write("# Localization Monitor - Company Configuration\n")
             f.write("# Edit this file or use the dashboard admin panel to add/remove companies\n\n")
-            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            yaml.dump(yaml_config, f, default_flow_style=False, sort_keys=False)
         return True
     except Exception:
         return False
@@ -82,11 +81,15 @@ def index():
     """Main dashboard page."""
     source_filter = request.args.get('source', '')
     company_filter = request.args.get('company', '')
+    search_query = request.args.get('search', '')
+    signal_type_filter = request.args.get('signal_type', '')
     
     alerts = storage.get_alerts(
-        limit=100,
+        limit=500,
         source=source_filter if source_filter else None,
-        company=company_filter if company_filter else None
+        company=company_filter if company_filter else None,
+        search=search_query if search_query else None,
+        signal_type=signal_type_filter if signal_type_filter else None
     )
     
     for alert in alerts:

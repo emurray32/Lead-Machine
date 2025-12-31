@@ -1,437 +1,610 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Localization Monitor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --phrase-green: #03EAB3;
-            --phrase-black: #181818;
-            --phrase-dark-green: #027361;
-            --phrase-light-gray: #F4F4F4;
-            --phrase-blue: #1080FC;
-            --phrase-red: #E84831;
-            --phrase-gray-200: #E0E0E0;
-            --phrase-blue-light: #EAF2F9;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--phrase-black);
-            min-height: 100vh;
-            padding: 24px;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-        
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 36px;
-        }
-        
-        header h1 { 
-            font-size: 48px; 
-            font-weight: 700;
-            margin-bottom: 12px; 
-            letter-spacing: -0.5px;
-        }
-        
-        @media (min-width: 768px) {
-            header h1 { font-size: 64px; }
-        }
-        
-        header p { 
-            opacity: 0.8; 
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
             font-size: 14px;
         }
-        
-        .nav-links { margin-top: 20px; }
-        
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            margin: 0 6px;
-            font-size: 12px;
-            font-weight: 600;
-            transition: background 0.2s;
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
         }
-        
-        .nav-links a:hover { background: rgba(255,255,255,0.2); }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-        
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-900);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--gray-600);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Main */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card */
         .card {
             background: white;
             border-radius: 12px;
-            padding: 28px;
-            border: 1px solid var(--phrase-gray-200);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
         }
-        
-        .card h2 {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.25px;
-            color: var(--phrase-black);
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--phrase-green);
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
         }
-        
-        .form-group { margin-bottom: 20px; }
-        
-        .form-group label {
-            display: block;
-            font-weight: 700;
-            color: var(--phrase-black);
-            margin-bottom: 8px;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--phrase-gray-200);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
-        
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--phrase-blue);
-        }
-        
-        .form-group small {
-            color: #666;
-            font-size: 10px;
-            margin-top: 6px;
-            display: block;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-        
-        .btn:active { transform: scale(0.98); }
-        
-        .btn-primary {
-            background: var(--phrase-green);
-            color: var(--phrase-black);
-        }
-        
-        .btn-primary:hover { 
-            background: var(--phrase-dark-green);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: var(--phrase-blue);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            opacity: 0.9;
-        }
-        
-        .btn-danger {
-            background: var(--phrase-red);
-            color: white;
-            padding: 8px 16px;
-            font-size: 11px;
-        }
-        
-        .btn-danger:hover {
-            opacity: 0.9;
-        }
-        
-        .btn-group { display: flex; gap: 12px; margin-top: 12px; }
-        
-        .company-list { max-height: 400px; overflow-y: auto; }
-        
-        .company-item {
-            padding: 18px;
-            border: 1px solid var(--phrase-gray-200);
-            border-radius: 10px;
-            margin-bottom: 14px;
-            background: white;
-            transition: box-shadow 0.2s;
-        }
-        
-        .company-item:hover {
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        
-        .company-item h3 {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--phrase-black);
-            margin-bottom: 10px;
-        }
-        
-        .company-item .meta {
-            font-size: 10px;
-            color: #555;
-        }
-        
-        .company-item .meta span {
-            display: inline-block;
-            background: var(--phrase-light-gray);
-            padding: 4px 10px;
-            border-radius: 4px;
-            margin: 3px 6px 3px 0;
+
+        .card-title {
+            font-size: 16px;
             font-weight: 600;
+            color: var(--gray-900);
         }
-        
-        .company-item .actions { margin-top: 14px; }
-        
+
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 0.375rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 13px;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        /* Company List */
+        .company-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .company-item {
+            padding: 1.25rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .company-item:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--gray-300);
+        }
+
+        .company-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+        }
+
+        .company-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            background: var(--gray-100);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+
+        /* Scan Results */
         .scan-results {
             display: none;
-            margin-top: 24px;
-            padding: 20px;
-            background: var(--phrase-blue-light);
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: var(--primary-light);
             border-radius: 10px;
-            border-left: 4px solid var(--phrase-blue);
+            border: 1px solid var(--primary);
         }
-        
-        .scan-results.show { display: block; }
-        
-        .scan-results h4 { 
-            margin-bottom: 14px; 
-            color: var(--phrase-black);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+
+        .scan-results.show {
+            display: block;
         }
-        
-        .scan-item {
-            padding: 12px 14px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-        }
-        
-        .scan-item.success { 
-            background: #ECFDF5; 
-            border: 1px solid #A7F3D0; 
-            color: #065F46;
-        }
-        
-        .scan-item.error { 
-            background: #FEF2F2; 
-            border: 1px solid #FECACA; 
-            color: #991B1B;
-        }
-        
-        .scan-item.info { 
-            background: var(--phrase-blue-light); 
-            border: 1px solid #BAE6FD; 
-            color: #0C4A6E;
-        }
-        
-        .signal-guide {
-            margin-top: 36px;
-        }
-        
-        .signal-card {
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 14px;
-            border: 1px solid var(--phrase-gray-200);
-        }
-        
-        .signal-card.high { 
-            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); 
-            border-color: #A7F3D0;
-        }
-        
-        .signal-card.low { 
-            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); 
-            border-color: #FCD34D;
-        }
-        
-        .signal-card h4 { 
-            margin-bottom: 8px; 
+
+        .scan-title {
             font-size: 14px;
-            font-weight: 700;
-            color: var(--phrase-black);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
         }
-        
-        .signal-card .value-badge {
+
+        .scan-item {
+            padding: 0.875rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .scan-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .scan-item.success {
+            background: var(--success-light);
+            color: #065f46;
+            border: 1px solid var(--success);
+        }
+
+        .scan-item.error {
+            background: var(--danger-light);
+            color: #991b1b;
+            border: 1px solid var(--danger);
+        }
+
+        .scan-item.info {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        /* Signal Guide */
+        .signal-card {
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .signal-card.high {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: var(--success);
+        }
+
+        .signal-card.low {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: var(--warning);
+        }
+
+        .signal-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .signal-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 0.25rem 0.625rem;
             border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-left: 8px;
+            margin-left: 0.5rem;
         }
-        
-        .signal-card .value-badge.high { 
-            background: var(--phrase-green); 
-            color: var(--phrase-black); 
+
+        .signal-badge.high {
+            background: var(--success);
+            color: white;
         }
-        
-        .signal-card .value-badge.low { 
-            background: #FCD34D; 
-            color: var(--phrase-black); 
+
+        .signal-badge.low {
+            background: var(--warning);
+            color: white;
         }
-        
-        .loading { opacity: 0.6; pointer-events: none; }
-        
+
+        .signal-desc {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .signal-meaning {
+            font-size: 13px;
+            color: var(--gray-900);
+        }
+
+        /* Toast */
         .toast {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 16px 28px;
-            background: var(--phrase-black);
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--gray-900);
             color: white;
             border-radius: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-lg);
             z-index: 1000;
             display: none;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
         }
-        
-        .toast.success { background: var(--phrase-dark-green); }
-        .toast.error { background: var(--phrase-red); }
-        .toast.show { display: block; animation: slideIn 0.3s ease; }
-        
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.show {
+            display: block;
+        }
+
         @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>Admin Panel</h1>
-            <p>Manage companies and understand signals</p>
-            <div class="nav-links">
-                <a href="/">Dashboard</a>
-                <a href="/admin">Admin</a>
-            </div>
-        </header>
-        
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">L</div>
+                Localization Monitor
+            </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/admin" class="nav-link active">Admin</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Admin Panel</h1>
+            <p class="page-subtitle">Manage companies and understand signal types</p>
+        </div>
+
         <div class="grid">
+            <!-- Add Company Form -->
             <div class="card">
-                <h2>Add New Company</h2>
+                <div class="card-header">
+                    <h2 class="card-title">Add New Company</h2>
+                    <p class="card-subtitle">Configure monitoring for a new company</p>
+                </div>
+
                 <form id="addCompanyForm">
                     <div class="form-group">
-                        <label>Company Name *</label>
-                        <input type="text" id="companyName" required placeholder="e.g., Adobe">
+                        <label class="form-label">Company Name *</label>
+                        <input type="text" id="companyName" class="form-input" required placeholder="e.g., Adobe">
                     </div>
+
                     <div class="form-group">
-                        <label>GitHub Organization</label>
-                        <input type="text" id="githubOrg" placeholder="e.g., adobe">
-                        <small>The organization name from github.com/organization</small>
+                        <label class="form-label">GitHub Organization</label>
+                        <input type="text" id="githubOrg" class="form-input" placeholder="e.g., adobe">
+                        <div class="form-hint">Organization name from github.com/organization</div>
                     </div>
+
                     <div class="form-group">
-                        <label>GitHub Repos (optional)</label>
-                        <input type="text" id="githubRepos" placeholder="e.g., react-spectrum, brackets">
-                        <small>Comma-separated list. Leave empty to monitor all public repos.</small>
+                        <label class="form-label">GitHub Repos (optional)</label>
+                        <input type="text" id="githubRepos" class="form-input"
+                            placeholder="e.g., react-spectrum, brackets">
+                        <div class="form-hint">Comma-separated list. Leave empty to monitor all public repos.</div>
                     </div>
+
                     <div class="form-group">
-                        <label>Play Store Package ID</label>
-                        <input type="text" id="playPackage" placeholder="e.g., com.adobe.reader">
-                        <small>Android app package name (find it in the Play Store URL)</small>
+                        <label class="form-label">Play Store Package ID</label>
+                        <input type="text" id="playPackage" class="form-input" placeholder="e.g., com.adobe.reader">
+                        <div class="form-hint">Android app package name (find it in the Play Store URL)</div>
                     </div>
+
                     <div class="form-group">
-                        <label>Documentation URLs</label>
-                        <textarea id="docUrls" rows="2" placeholder="e.g., https://developer.adobe.com/docs"></textarea>
-                        <small>Comma-separated list of doc pages to monitor for regional versions</small>
+                        <label class="form-label">Documentation URLs</label>
+                        <textarea id="docUrls" class="form-textarea"
+                            placeholder="e.g., https://developer.adobe.com/docs"></textarea>
+                        <div class="form-hint">Comma-separated list of doc pages to monitor</div>
                     </div>
+
                     <div class="btn-group">
                         <button type="button" class="btn btn-secondary" onclick="quickScan()">Quick Scan</button>
                         <button type="submit" class="btn btn-primary">Add Company</button>
                     </div>
                 </form>
-                
+
                 <div id="scanResults" class="scan-results">
-                    <h4>Quick Scan Results</h4>
+                    <div class="scan-title">Quick Scan Results</div>
                     <div id="scanResultsContent"></div>
-                    <button class="btn btn-primary" style="margin-top: 14px;" onclick="addFromScan()">Add This Company</button>
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="addFromScan()">Add This
+                        Company</button>
                 </div>
             </div>
-            
+
+            <!-- Company List -->
             <div class="card">
-                <h2>Monitored Companies ({{ companies|length }})</h2>
-                <div class="company-list" id="companyList">
+                <div class="card-header">
+                    <h2 class="card-title">Monitored Companies ({{ companies|length }})</h2>
+                    <p class="card-subtitle">Currently tracking {{ companies|length }} companies</p>
+                </div>
+
+                <div class="company-list">
                     {% for company in companies %}
                     <div class="company-item">
-                        <h3>{{ company.name }}</h3>
-                        <div class="meta">
+                        <div class="company-name">{{ company.name }}</div>
+                        <div class="company-meta">
                             {% if company.github_org %}
-                            <span>GitHub: {{ company.github_org }}</span>
+                            <span class="meta-badge">GitHub: {{ company.github_org }}</span>
                             {% endif %}
                             {% if company.play_package %}
-                            <span>Play: {{ company.play_package }}</span>
+                            <span class="meta-badge">Play: {{ company.play_package }}</span>
                             {% endif %}
                             {% if company.doc_urls %}
-                            <span>Docs: {{ company.doc_urls|length }} URL(s)</span>
+                            <span class="meta-badge">Docs: {{ company.doc_urls|length }} URL(s)</span>
                             {% endif %}
                         </div>
-                        <div class="actions">
-                            <button class="btn btn-danger" onclick="deleteCompany('{{ company.name }}')">Remove</button>
-                        </div>
+                        <button class="btn btn-danger" onclick="deleteCompany('{{ company.name }}')">Remove</button>
                     </div>
                     {% else %}
-                    <p style="color: #888; text-align: center; padding: 48px;">No companies configured yet.</p>
+                    <div class="empty-state">
+                        <p>No companies configured yet.</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
-        
-        <div class="signal-guide card" style="margin-top: 24px;">
-            <h2>Understanding Signal Types</h2>
-            <p style="color: #555; margin-bottom: 24px; font-size: 12px;">These are the types of alerts you'll see. High-value signals indicate actual expansion, while low-value signals are hints that need investigation.</p>
-            
+
+        <!-- Signal Guide -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Understanding Signal Types</h2>
+                <p class="card-subtitle">High-value signals indicate actual expansion, while low-value signals need
+                    investigation</p>
+            </div>
+
             <div class="grid">
                 {% for key, signal in signal_explanations.items() %}
                 <div class="signal-card {{ signal.value|lower }}">
-                    <h4>
+                    <div class="signal-title">
                         {{ signal.title }}
-                        <span class="value-badge {{ signal.value|lower }}">{{ signal.value }} VALUE</span>
-                    </h4>
-                    <p style="color: #555; font-size: 12px; margin: 10px 0; line-height: 1.5;">{{ signal.description }}</p>
-                    <p style="color: var(--phrase-black); font-size: 12px;"><strong>What it means:</strong> {{ signal.meaning }}</p>
+                        <span class="signal-badge {{ signal.value|lower }}">{{ signal.value }}</span>
+                    </div>
+                    <p class="signal-desc">{{ signal.description }}</p>
+                    <p class="signal-meaning"><strong>What it means:</strong> {{ signal.meaning }}</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-    
+
     <div id="toast" class="toast"></div>
-    
+
     <script>
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -439,10 +612,10 @@
             toast.className = 'toast ' + type + ' show';
             setTimeout(() => { toast.className = 'toast'; }, 3000);
         }
-        
-        document.getElementById('addCompanyForm').addEventListener('submit', async function(e) {
+
+        document.getElementById('addCompanyForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const data = {
                 name: document.getElementById('companyName').value,
                 github_org: document.getElementById('githubOrg').value,
@@ -450,7 +623,7 @@
                 play_package: document.getElementById('playPackage').value,
                 doc_urls: document.getElementById('docUrls').value
             };
-            
+
             try {
                 const resp = await fetch('/api/companies', {
                     method: 'POST',
@@ -458,7 +631,7 @@
                     body: JSON.stringify(data)
                 });
                 const result = await resp.json();
-                
+
                 if (result.success) {
                     showToast('Company added successfully!');
                     setTimeout(() => location.reload(), 1000);
@@ -469,16 +642,16 @@
                 showToast('Error adding company', 'error');
             }
         });
-        
+
         async function deleteCompany(name) {
             if (!confirm('Remove ' + name + ' from monitoring?')) return;
-            
+
             try {
                 const resp = await fetch('/api/companies/' + encodeURIComponent(name), {
                     method: 'DELETE'
                 });
                 const result = await resp.json();
-                
+
                 if (result.success) {
                     showToast('Company removed');
                     setTimeout(() => location.reload(), 1000);
@@ -489,7 +662,7 @@
                 showToast('Error removing company', 'error');
             }
         }
-        
+
         async function quickScan() {
             const data = {
                 name: document.getElementById('companyName').value || 'Test',
@@ -497,15 +670,15 @@
                 play_package: document.getElementById('playPackage').value,
                 doc_urls: document.getElementById('docUrls').value
             };
-            
+
             if (!data.github_org && !data.play_package && !data.doc_urls) {
                 showToast('Please fill in at least one field to scan', 'error');
                 return;
             }
-            
+
             document.getElementById('scanResults').classList.add('show');
-            document.getElementById('scanResultsContent').innerHTML = '<p>Scanning...</p>';
-            
+            document.getElementById('scanResultsContent').innerHTML = '<p class="scan-item info">Scanning...</p>';
+
             try {
                 const resp = await fetch('/api/quick-scan', {
                     method: 'POST',
@@ -513,9 +686,9 @@
                     body: JSON.stringify(data)
                 });
                 const result = await resp.json();
-                
+
                 let html = '';
-                
+
                 if (result.github) {
                     if (result.github.status === 'found') {
                         html += '<div class="scan-item success"><strong>GitHub:</strong> Found org "' + result.github.org + '"';
@@ -527,7 +700,7 @@
                         html += '<div class="scan-item error"><strong>GitHub:</strong> ' + (result.github.error || 'Not found') + '</div>';
                     }
                 }
-                
+
                 if (result.playstore) {
                     if (result.playstore.status === 'found') {
                         html += '<div class="scan-item success"><strong>Play Store:</strong> Found "' + result.playstore.title + '" by ' + result.playstore.developer + '</div>';
@@ -535,7 +708,7 @@
                         html += '<div class="scan-item error"><strong>Play Store:</strong> ' + (result.playstore.error || 'Not found') + '</div>';
                     }
                 }
-                
+
                 if (result.docs && result.docs.length > 0) {
                     for (const doc of result.docs) {
                         if (doc.status === 'accessible') {
@@ -549,21 +722,22 @@
                         }
                     }
                 }
-                
+
                 if (!html) {
                     html = '<div class="scan-item info">No results to show</div>';
                 }
-                
+
                 document.getElementById('scanResultsContent').innerHTML = html;
-                
+
             } catch (err) {
                 document.getElementById('scanResultsContent').innerHTML = '<div class="scan-item error">Scan failed: ' + err.message + '</div>';
             }
         }
-        
+
         function addFromScan() {
             document.getElementById('addCompanyForm').dispatchEvent(new Event('submit'));
         }
     </script>
 </body>
+
 </html>

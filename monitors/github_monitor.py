@@ -8,9 +8,9 @@ import time
 import requests
 from typing import Dict, List, Optional
 
+import config
 from .common import (
     log, alert, load_json, save_json, get_headers,
-    LAST_COMMITS_FILE, REQUEST_DELAY, GITHUB_RATE_LIMIT_SLEEP,
     is_bot_author, is_localization_file, extract_language_from_file,
     contains_keywords
 )
@@ -52,7 +52,7 @@ def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> 
         if response.status_code == 403:
             remaining = response.headers.get("X-RateLimit-Remaining", "unknown")
             log(f"GitHub rate limit hit (remaining: {remaining}). Sleeping...", "WARNING")
-            time.sleep(GITHUB_RATE_LIMIT_SLEEP)
+            time.sleep(config.GITHUB_RATE_LIMIT_SLEEP)
             return 0
         
         if response.status_code == 404:
@@ -247,7 +247,7 @@ def check_github_prs(company: str, org: str, repo: str) -> int:
 def check_all_github(targets: List[Dict]) -> int:
     """Check all configured GitHub repositories."""
     log("Starting GitHub checks...")
-    last_commits = load_json(LAST_COMMITS_FILE)
+    last_commits = load_json(config.LAST_COMMITS_FILE)
     total_alerts = 0
     repos_checked = 0
     
@@ -264,8 +264,8 @@ def check_all_github(targets: List[Dict]) -> int:
             pr_alerts = check_github_prs(company, org, repo)
             total_alerts += alerts + pr_alerts
             repos_checked += 1
-            time.sleep(REQUEST_DELAY)
+            time.sleep(config.REQUEST_DELAY)
     
-    save_json(LAST_COMMITS_FILE, last_commits)
+    save_json(config.LAST_COMMITS_FILE, last_commits)
     log(f"GitHub checks complete. Checked {repos_checked} repos, found {total_alerts} alerts.")
     return total_alerts

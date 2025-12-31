@@ -10,9 +10,10 @@ import requests
 from bs4 import BeautifulSoup
 from typing import Dict, List, Optional, Set, Tuple
 
+import config
 from .common import (
     log, alert, load_json, save_json, sanitize_filename,
-    DOC_HASHES_FILE, PREVIOUS_TEXTS_DIR, KEYWORDS, contains_keywords
+    contains_keywords
 )
 
 try:
@@ -146,7 +147,7 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict, prev_hreflangs: Dict
             
             alert_count += 1
     elif content_hash != previous_hash:
-        prev_text_file = os.path.join(PREVIOUS_TEXTS_DIR, f"{url_key}.txt")
+        prev_text_file = os.path.join(config.PREVIOUS_TEXTS_DIR, f"{url_key}.txt")
         previous_text = ""
         if os.path.exists(prev_text_file):
             try:
@@ -200,8 +201,8 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict, prev_hreflangs: Dict
 def check_all_docs(targets: List[Dict]) -> int:
     """Check all configured documentation URLs."""
     log("Starting documentation checks...")
-    doc_hashes = load_json(DOC_HASHES_FILE)
-    prev_hreflangs = load_json(DOC_HASHES_FILE.replace('.json', '_hreflangs.json'))
+    doc_hashes = load_json(config.DOC_HASHES_FILE)
+    prev_hreflangs = load_json(config.DOC_HASHES_FILE.replace('.json', '_hreflangs.json'))
     total_alerts = 0
     urls_checked = 0
     
@@ -214,7 +215,7 @@ def check_all_docs(targets: List[Dict]) -> int:
             total_alerts += alerts
             urls_checked += 1
     
-    save_json(DOC_HASHES_FILE, doc_hashes)
-    save_json(DOC_HASHES_FILE.replace('.json', '_hreflangs.json'), prev_hreflangs)
+    save_json(config.DOC_HASHES_FILE, doc_hashes)
+    save_json(config.DOC_HASHES_FILE.replace('.json', '_hreflangs.json'), prev_hreflangs)
     log(f"Documentation checks complete. Checked {urls_checked} URLs, found {total_alerts} alerts.")
     return total_alerts

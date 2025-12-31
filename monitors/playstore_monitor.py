@@ -6,9 +6,9 @@ Detects new language support added to apps.
 import time
 from typing import Dict, List, Optional
 
+import config
 from .common import (
-    log, alert, load_json, save_json,
-    PLAY_STORE_LANGS_FILE, LANGUAGE_CODES
+    log, alert, load_json, save_json
 )
 
 try:
@@ -113,7 +113,7 @@ def check_all_play_store(targets: List[Dict]) -> int:
         return 0
     
     log("Starting Play Store checks...")
-    stored_langs = load_json(PLAY_STORE_LANGS_FILE)
+    stored_langs = load_json(config.PLAY_STORE_LANGS_FILE)
     total_alerts = 0
     packages_checked = 0
     
@@ -128,6 +128,6 @@ def check_all_play_store(targets: List[Dict]) -> int:
         total_alerts += alerts
         packages_checked += 1
     
-    save_json(PLAY_STORE_LANGS_FILE, stored_langs)
+    save_json(config.PLAY_STORE_LANGS_FILE, stored_langs)
     log(f"Play Store checks complete. Checked {packages_checked} packages, found {total_alerts} alerts.")
     return total_alerts

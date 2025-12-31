@@ -10,7 +10,9 @@ from psycopg2.extras import RealDictCursor, Json
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+import config
+
+DATABASE_URL = config.DATABASE_URL
 
 def get_connection():
     """Get a database connection."""
@@ -71,7 +73,8 @@ def save_alert(source: str, company: str, title: str, message: str,
     return alert_id
 
 def get_alerts(limit: int = 100, source: Optional[str] = None, 
-               company: Optional[str] = None) -> List[Dict]:
+               company: Optional[str] = None, search: Optional[str] = None,
+               signal_type: Optional[str] = None) -> List[Dict]:
     """Get alerts with optional filtering."""
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -86,6 +89,15 @@ def get_alerts(limit: int = 100, source: Optional[str] = None,
     if company:
         query += " AND company = %s"
         params.append(company)
+    
+    if search:
+        query += " AND (company ILIKE %s OR title ILIKE %s OR message ILIKE %s OR keywords ILIKE %s)"
+        search_pattern = f"%{search}%"
+        params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
+    
+    if signal_type:
+        query += " AND metadata->>'signal_type' = %s"
+        params.append(signal_type)
     
     query += " ORDER BY created_at DESC LIMIT %s"
     params.append(limit)
