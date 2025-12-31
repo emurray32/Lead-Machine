@@ -20,7 +20,10 @@ Run continuously or on-demand. Free-tier friendly but ready for "Always On".
 import os
 import time
 import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from typing import Any, Dict, List
+
 import config
 from monitors.common import (
     log, ensure_directories, load_json, save_json
@@ -68,7 +71,7 @@ def load_companies() -> List[Dict[str, Any]]:
         log(f"Loaded {len(targets)} companies from {config.COMPANIES_FILE}")
         return targets
     except Exception as e:
-        log(f"Error loading {COMPANIES_FILE}: {e}", "ERROR")
+        log(f"Error loading {config.COMPANIES_FILE}: {e}", "ERROR")
         return []
 
 
