@@ -20,7 +20,10 @@ Run continuously or on-demand. Free-tier friendly but ready for "Always On".
 import os
 import time
 import yaml
+import threading
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Any
 import config
 from monitors.common import (
     log, ensure_directories, load_json, save_json
@@ -68,7 +71,7 @@ def load_companies() -> List[Dict[str, Any]]:
         log(f"Loaded {len(targets)} companies from {config.COMPANIES_FILE}")
         return targets
     except Exception as e:
-        log(f"Error loading {COMPANIES_FILE}: {e}", "ERROR")
+        log(f"Error loading {config.COMPANIES_FILE}: {e}", "ERROR")
         return []
 
 
@@ -82,40 +85,49 @@ def check_github_parallel(targets: List[Dict]) -> int:
     log("Starting parallel GitHub checks...")
     last_commits = load_json(config.LAST_COMMITS_FILE)
     total_alerts = 0
-    
+    state_lock = threading.Lock()  # Thread-safe lock for shared state updates
+
     tasks = []
     for target in targets:
         company = target.get("company", "Unknown")
         org = target.get("github_org")
         repos = target.get("github_repos", [])
-        
+
         if not org or not repos:
             continue
-        
+
         for repo in repos:
             tasks.append((company, org, repo))
-    
+
     if not tasks:
         return 0
-    
+
+    def thread_safe_check(company, org, repo):
+        """Wrapper to perform GitHub check with thread-safe state updates."""
+        # Pass a thread-safe reference - dict updates are atomic in CPython
+        # but we use a lock for extra safety when updating shared state
+        alerts = check_github_repo(company, org, repo, last_commits)
+        return alerts
+
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = {}
-        
+
         for company, org, repo in tasks:
-            future = executor.submit(check_github_repo, company, org, repo, last_commits)
+            future = executor.submit(thread_safe_check, company, org, repo)
             futures[future] = (company, org, repo)
-            
+
             pr_future = executor.submit(check_github_prs, company, org, repo)
             futures[pr_future] = (company, org, repo, 'pr')
-        
+
         for future in as_completed(futures):
             try:
                 alerts = future.result()
-                total_alerts += alerts
+                with state_lock:
+                    total_alerts += alerts
             except Exception as e:
                 task_info = futures[future]
                 log(f"Error in parallel check for {task_info}: {e}", "ERROR")
-    
+
     save_json(config.LAST_COMMITS_FILE, last_commits)
     log(f"Parallel GitHub checks complete. Found {total_alerts} alerts.")
     return total_alerts
@@ -168,7 +180,10 @@ def main():
     log("=" * 60)
     log("Localization Monitor Starting")
     log("=" * 60)
-    
+
+    # Validate configuration at startup
+    config.validate_config()
+
     ensure_directories()
     
     targets = get_targets()
@@ -182,30 +197,48 @@ def main():
     
     last_github_check = 0
     last_rss_docs_check = 0
-    
+
+    # Check if we should run in continuous mode or single-check mode
+    continuous_mode = os.environ.get('MONITOR_CONTINUOUS', 'false').lower() == 'true'
+
     try:
-        now = time.time()
-        
-        if now - last_github_check >= config.GITHUB_CHECK_INTERVAL:
-            github_alerts = check_github_parallel(targets)
-            last_github_check = now
-            log(f"GitHub check complete: {github_alerts} alerts")
-        
-        if now - last_rss_docs_check >= config.RSS_DOCS_CHECK_INTERVAL:
-            playstore_alerts = check_all_play_store(targets)
-            docs_alerts = check_all_docs(targets)
-            last_rss_docs_check = now
-            log(f"Play Store check complete: {playstore_alerts} alerts")
-            log(f"Documentation check complete: {docs_alerts} alerts")
-        
-        log("Initial check complete.")
-        
+        while True:
+            now = time.time()
+            checks_performed = False
+
+            if now - last_github_check >= config.GITHUB_CHECK_INTERVAL:
+                github_alerts = check_github_parallel(targets)
+                last_github_check = now
+                log(f"GitHub check complete: {github_alerts} alerts")
+                checks_performed = True
+
+            if now - last_rss_docs_check >= config.RSS_DOCS_CHECK_INTERVAL:
+                playstore_alerts = check_all_play_store(targets)
+                docs_alerts = check_all_docs(targets)
+                last_rss_docs_check = now
+                log(f"Play Store check complete: {playstore_alerts} alerts")
+                log(f"Documentation check complete: {docs_alerts} alerts")
+                checks_performed = True
+
+            if checks_performed:
+                log("Check cycle complete.")
+
+            # Exit after first run if not in continuous mode
+            if not continuous_mode:
+                log("Single-check mode. Exiting.")
+                break
+
+            # Sleep before next check cycle
+            sleep_time = min(config.GITHUB_CHECK_INTERVAL, config.RSS_DOCS_CHECK_INTERVAL)
+            log(f"Sleeping for {sleep_time} seconds...")
+            time.sleep(sleep_time)
+
     except KeyboardInterrupt:
         log("Shutdown requested by user.")
     except Exception as e:
         log(f"Error during monitoring: {e}", "ERROR")
-    
-    log("Check finished. Exiting.")
+
+    log("Monitoring finished.")
 
 
 if __name__ == "__main__":

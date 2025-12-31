@@ -23,10 +23,6 @@ except:
     DB_AVAILABLE = False
 
 
-def sanitize_filename(name: str) -> str:
-    return "".join(c if c.isalnum() or c in '-_' else '_' for c in name)
-
-
 def fetch_doc_page(url: str) -> Tuple[Optional[str], Optional[str], Set[str]]:
     """
     Fetch a documentation page and extract text content, hash, and hreflang values.
