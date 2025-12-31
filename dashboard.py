@@ -85,7 +85,7 @@ def index():
     signal_type_filter = request.args.get('signal_type', '')
     
     alerts = storage.get_alerts(
-        limit=500,
+        limit=config.MAX_ALERTS_DASHBOARD,
         source=source_filter if source_filter else None,
         company=company_filter if company_filter else None,
         search=search_query if search_query else None,
@@ -126,7 +126,6 @@ def api_stats():
     """API endpoint for statistics."""
     return jsonify(storage.get_alert_stats())
 
-HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR']
 
 def filter_high_value_alerts(alerts: list) -> list:
     """Filter alerts to only include high-value signals."""
@@ -135,7 +134,7 @@ def filter_high_value_alerts(alerts: list) -> list:
         metadata = alert.get('metadata', {})
         if isinstance(metadata, dict):
             signal_type = metadata.get('signal_type', '')
-            if signal_type in HIGH_VALUE_SIGNALS:
+            if signal_type in config.HIGH_VALUE_SIGNALS:
                 filtered.append(alert)
     return filtered
 
