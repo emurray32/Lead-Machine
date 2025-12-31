@@ -168,10 +168,25 @@ def check_github_repo(company: str, org: str, repo: str, last_commits: Dict) -> 
     return alert_count
 
 
+def get_pr_reviewers(org: str, repo: str, pr_number: int) -> List[str]:
+    """Fetch reviewers assigned to a PR."""
+    try:
+        url = f"https://api.github.com/repos/{org}/{repo}/pulls/{pr_number}/requested_reviewers"
+        response = requests.get(url, headers=get_headers(), timeout=15)
+        if response.status_code == 200:
+            data = response.json()
+            reviewers = [u.get("login") for u in data.get("users", []) if u.get("login")]
+            return reviewers
+    except Exception as e:
+        log(f"Error fetching PR reviewers: {e}", "WARNING")
+    return []
+
+
 def check_github_prs(company: str, org: str, repo: str) -> int:
     """
     Check open Pull Requests for localization signals.
     PRs titled with translation/localization keywords indicate intent before merge.
+    Also fetches PR reviewers as potential sales contacts.
     Returns the number of alerts generated.
     """
     alert_count = 0
@@ -213,10 +228,13 @@ def check_github_prs(company: str, org: str, repo: str) -> int:
             if title_matches:
                 signal_type = "OPEN_PR"
                 
+                reviewers = get_pr_reviewers(org, repo, pr_number)
+                
                 alert_msg = (
                     f"GITHUB [{signal_type}] [{company}] {org}/{repo}:\n"
                     f"  PR #{pr_number}: {pr.get('title', 'No title')}\n"
                     f"  Author: {author}\n"
+                    f"  Reviewers: {', '.join(reviewers) if reviewers else 'None assigned'}\n"
                     f"  Keywords: {', '.join(title_matches)}\n"
                     f"  URL: {pr_url}"
                 )
@@ -231,7 +249,13 @@ def check_github_prs(company: str, org: str, repo: str) -> int:
                             message=f"Open pull request by {author} - early localization signal",
                             keywords=title_matches,
                             url=pr_url,
-                            metadata={"pr_number": pr_number, "author": author, "signal_type": signal_type}
+                            metadata={
+                                "pr_number": pr_number, 
+                                "author": author, 
+                                "signal_type": signal_type,
+                                "reviewers": reviewers,
+                                "detected_languages": title_matches
+                            }
                         )
                     except Exception as e:
                         log(f"Failed to save PR alert: {e}", "WARNING")

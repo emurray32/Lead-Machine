@@ -665,7 +665,9 @@
                             data-company="{{ alert.company }}"
                             data-title="{{ (alert.title or '')|e }}"
                             data-message="{{ (alert.message or '')|e }}"
-                            data-keywords="{{ alert.keywords or '' }}">
+                            data-keywords="{{ alert.keywords or '' }}"
+                            data-signal-type="{{ alert.metadata.signal_type if alert.metadata and alert.metadata.signal_type else '' }}"
+                            data-metadata="{{ (alert.metadata|tojson|e) if alert.metadata else '{}' }}">
                             <td class="time-cell">{{ alert.friendly_time }}</td>
                             <td class="company-cell">{{ alert.company }}</td>
                             <td>
@@ -723,11 +725,11 @@
         </div>
     </div>
     
-    <!-- AI Explanation Modal -->
+    <!-- AI Sales Narrative Modal -->
     <div id="aiModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">AI Explanation</h3>
+                <h3 class="modal-title">Sales Intelligence</h3>
             </div>
             <div class="modal-body" id="aiModalBody">
                 <p style="color: var(--gray-500);">Loading...</p>
@@ -739,7 +741,7 @@
     </div>
     
     <script>
-        // AI Explanation
+        // AI Explanation with full context
         document.querySelectorAll('.explain-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const row = this.closest('tr');
@@ -747,7 +749,14 @@
                 const modalBody = document.getElementById('aiModalBody');
                 
                 modal.classList.add('show');
-                modalBody.innerHTML = '<p style="color: var(--gray-500);">Loading explanation...</p>';
+                modalBody.innerHTML = '<p style="color: var(--gray-500);">Generating sales narrative...</p>';
+                
+                let metadata = {};
+                try {
+                    metadata = JSON.parse(row.dataset.metadata || '{}');
+                } catch (e) {
+                    metadata = {};
+                }
                 
                 try {
                     const response = await fetch('/api/summarize', {
@@ -758,14 +767,16 @@
                             company: row.dataset.company,
                             title: row.dataset.title,
                             message: row.dataset.message,
-                            keywords: row.dataset.keywords ? row.dataset.keywords.split(', ') : []
+                            keywords: row.dataset.keywords ? row.dataset.keywords.split(', ') : [],
+                            signal_type: row.dataset.signalType || metadata.signal_type || null,
+                            metadata: metadata
                         })
                     });
                     
                     const result = await response.json();
                     
                     if (result.summary) {
-                        modalBody.innerHTML = `<p style="line-height: 1.6;">${result.summary}</p>`;
+                        modalBody.innerHTML = `<p style="line-height: 1.8; font-size: 15px;">${result.summary}</p>`;
                     } else {
                         modalBody.innerHTML = `<p style="color: var(--danger);">${result.error || 'Could not generate summary'}</p>`;
                     }

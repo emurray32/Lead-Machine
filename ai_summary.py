@@ -1,7 +1,7 @@
 """
 AI Summary Service for Localization Alerts
-Uses Gemini Pro to generate plain-English explanations of alerts.
-Enhanced with company language context for richer summaries.
+Uses Gemini to generate sales-oriented narratives about localization signals.
+Enhanced with geo-market context and language inventory tracking.
 """
 
 import os
@@ -30,6 +30,86 @@ except Exception as e:
     GEMINI_AVAILABLE = False
     client = None
 
+LANGUAGE_TO_MARKETS = {
+    'fr': ['France', 'Canada (Quebec)', 'Belgium', 'Switzerland'],
+    'french': ['France', 'Canada (Quebec)', 'Belgium', 'Switzerland'],
+    'es': ['Spain', 'Latin America', 'Mexico', 'US Hispanic market'],
+    'spanish': ['Spain', 'Latin America', 'Mexico', 'US Hispanic market'],
+    'de': ['Germany', 'Austria', 'Switzerland'],
+    'german': ['Germany', 'Austria', 'Switzerland'],
+    'pt': ['Portugal', 'Brazil'],
+    'pt-br': ['Brazil'],
+    'portuguese': ['Portugal', 'Brazil'],
+    'zh': ['China', 'Taiwan', 'Singapore'],
+    'chinese': ['China', 'Taiwan', 'Singapore'],
+    'ja': ['Japan'],
+    'japanese': ['Japan'],
+    'ko': ['South Korea'],
+    'korean': ['South Korea'],
+    'ar': ['Middle East', 'North Africa', 'UAE', 'Saudi Arabia'],
+    'arabic': ['Middle East', 'North Africa', 'UAE', 'Saudi Arabia'],
+    'hi': ['India'],
+    'hindi': ['India'],
+    'it': ['Italy', 'Switzerland'],
+    'italian': ['Italy', 'Switzerland'],
+    'nl': ['Netherlands', 'Belgium'],
+    'dutch': ['Netherlands', 'Belgium'],
+    'ru': ['Russia', 'Eastern Europe', 'CIS countries'],
+    'russian': ['Russia', 'Eastern Europe', 'CIS countries'],
+    'tr': ['Turkey'],
+    'turkish': ['Turkey'],
+    'pl': ['Poland'],
+    'polish': ['Poland'],
+    'vi': ['Vietnam'],
+    'vietnamese': ['Vietnam'],
+    'th': ['Thailand'],
+    'thai': ['Thailand'],
+    'id': ['Indonesia'],
+    'indonesian': ['Indonesia'],
+    'ms': ['Malaysia', 'Singapore'],
+    'malay': ['Malaysia', 'Singapore'],
+    'sv': ['Sweden'],
+    'swedish': ['Sweden'],
+    'no': ['Norway'],
+    'norwegian': ['Norway'],
+    'da': ['Denmark'],
+    'danish': ['Denmark'],
+    'fi': ['Finland'],
+    'finnish': ['Finland'],
+    'he': ['Israel'],
+    'hebrew': ['Israel'],
+    'uk': ['Ukraine'],
+    'ukrainian': ['Ukraine'],
+    'cs': ['Czech Republic'],
+    'czech': ['Czech Republic'],
+    'ro': ['Romania'],
+    'romanian': ['Romania'],
+    'hu': ['Hungary'],
+    'hungarian': ['Hungary'],
+    'el': ['Greece'],
+    'greek': ['Greece'],
+    'bn': ['Bangladesh', 'India (Bengal)'],
+    'bengali': ['Bangladesh', 'India (Bengal)'],
+    'ta': ['India (Tamil Nadu)', 'Sri Lanka', 'Singapore'],
+    'tamil': ['India (Tamil Nadu)', 'Sri Lanka', 'Singapore'],
+}
+
+def get_market_context(languages: List[str]) -> str:
+    """Get geographic market context for detected languages."""
+    if not languages:
+        return ""
+    
+    markets = []
+    for lang in languages:
+        lang_lower = lang.lower().strip()
+        if lang_lower in LANGUAGE_TO_MARKETS:
+            markets.extend(LANGUAGE_TO_MARKETS[lang_lower])
+    
+    if markets:
+        unique_markets = list(dict.fromkeys(markets))
+        return f"Target markets: {', '.join(unique_markets[:4])}"
+    return ""
+
 SIGNAL_CONTEXT = {
     'NEW_LANG_FILE': 'A new translation file was added to the codebase, indicating the company is actively translating their product.',
     'NEW_HREFLANG': 'A new regional website version was detected via hreflang tags, showing expansion to a new market.',
@@ -48,29 +128,33 @@ def generate_alert_summary(
     message: str,
     keywords: list,
     signal_type: str = None,
-    language_context: Dict = None
+    language_context: Dict = None,
+    reviewers: List[str] = None
 ) -> Optional[str]:
     """
-    Generate a plain-English summary of an alert using Gemini Pro.
+    Generate a sales-oriented narrative about a localization alert.
     
     Args:
         source: Alert source (github, playstore, docs)
         company: Company name
         title: Alert title
         message: Alert message
-        keywords: Detected keywords
+        keywords: Detected keywords (often language codes or names)
         signal_type: Type of signal detected
         language_context: Optional dict with 'current_count', 'previous_count', 'new_languages'
+        reviewers: Optional list of PR reviewer usernames (potential contacts)
     
     Returns:
-        Summary string or None if unavailable
+        Sales narrative string or None if unavailable
     """
     if not GEMINI_AVAILABLE or not client:
         return None
     
     signal_info = ""
     if signal_type and signal_type in SIGNAL_CONTEXT:
-        signal_info = f"Signal type context: {SIGNAL_CONTEXT[signal_type]}"
+        signal_info = f"Signal type: {signal_type} - {SIGNAL_CONTEXT[signal_type]}"
+    
+    market_context = get_market_context(keywords)
     
     language_info = ""
     if language_context:
@@ -78,36 +162,49 @@ def generate_alert_summary(
         previous = language_context.get('previous_count', 0)
         new_langs = language_context.get('new_languages', [])
         
-        if current and previous:
+        if current and previous and new_langs:
+            lang_list = ', '.join(new_langs[:3])
             if current > 20:
-                language_info = f"\nContext: This company already supports {previous} languages and just added {len(new_langs)} more ({', '.join(new_langs)}). With {current} languages, this is a mature global operation - this addition could be targeting a specific niche market."
+                language_info = f"Language inventory: This company already supports {previous} languages and just added {lang_list}. With {current} total languages, they're a mature global operation - this addition likely targets a specific high-value market."
             elif current > 10:
-                language_info = f"\nContext: This company now supports {current} languages (up from {previous}). They're in active expansion mode - new languages indicate growing international revenue potential."
+                language_info = f"Language inventory: Now at {current} languages (was {previous}), adding {lang_list}. Active expansion phase - strong localization investment appetite."
             else:
-                language_info = f"\nContext: This company is early in their localization journey with {current} languages. Each new language is a significant investment signal."
+                language_info = f"Language inventory: Growing from {previous} to {current} languages with {lang_list}. Early-stage internationalization - each new language is a significant commitment."
+        elif new_langs:
+            language_info = f"New languages detected: {', '.join(new_langs[:3])}"
+    
+    reviewer_info = ""
+    if reviewers and len(reviewers) > 0:
+        reviewer_info = f"Potential contacts: {', '.join(reviewers[:3])} (PR reviewers who can discuss localization needs)"
     
     is_high_value = signal_type in HIGH_VALUE_SIGNALS
-    priority_note = "\nThis is a HIGH-VALUE signal indicating concrete localization action." if is_high_value else ""
+    priority_note = "PRIORITY: High-value signal - concrete action, not just discussion." if is_high_value else ""
     
-    prompt = f"""You are helping a business development person understand localization monitoring alerts.
+    prompt = f"""You are a sales intelligence analyst helping a localization services salesperson understand market expansion signals.
 
-Explain this alert in 1-2 simple sentences. Focus on what it means for their business - is this company expanding to new markets? Is this a sales opportunity?
+Generate a 2-3 sentence sales narrative about this alert. Be specific about:
+1. What the company is doing (adding French translation, expanding to Japan, etc.)
+2. What markets this suggests they're targeting
+3. Why this is a sales opportunity
 
-Alert details:
-- Company: {company}
-- Source: {source}
-- Title: {title}
-- Details: {message}
-- Keywords detected: {', '.join(keywords) if keywords else 'none'}
+Company: {company}
+Source: {source}
+Alert: {title}
+Details: {message}
+Languages/Keywords: {', '.join(keywords) if keywords else 'unknown'}
 {signal_info}
+{market_context}
 {language_info}
+{reviewer_info}
 {priority_note}
 
-Write a brief, actionable explanation (1-2 sentences) of what this means and why it matters for a salesperson tracking localization opportunities."""
+Write a compelling 2-3 sentence narrative like: "{company} already supports X languages and has just added [language], signaling expansion into [specific markets]. This indicates [business insight]. [Call to action or opportunity assessment]."
+
+Be specific and actionable. Use the language and market data provided."""
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=prompt
         )
         
@@ -133,12 +230,35 @@ def get_company_language_context(company: str, metadata: Dict = None) -> Dict:
         context['current_count'] = metadata.get('total_langs', 0)
     if 'previous_lang_count' in metadata:
         context['previous_count'] = metadata.get('previous_lang_count', 0)
+    if 'lang_count' in metadata:
+        context['current_count'] = metadata.get('lang_count', 0)
     if 'new_langs' in metadata:
         context['new_languages'] = metadata.get('new_langs', [])
     elif 'new_hreflangs' in metadata:
         context['new_languages'] = metadata.get('new_hreflangs', [])
+    elif 'detected_languages' in metadata:
+        context['new_languages'] = metadata.get('detected_languages', [])
     
     return context
+
+
+def get_reviewers_from_metadata(metadata: Dict = None) -> List[str]:
+    """
+    Extract reviewer usernames from alert metadata.
+    """
+    if not metadata:
+        return []
+    
+    reviewers = []
+    
+    if 'reviewers' in metadata:
+        reviewers = metadata.get('reviewers', [])
+    if 'author' in metadata and metadata.get('author'):
+        author = metadata.get('author')
+        if author not in reviewers:
+            reviewers.append(author)
+    
+    return reviewers
 
 
 def generate_batch_summaries(alerts: list) -> dict:
@@ -160,6 +280,7 @@ def generate_batch_summaries(alerts: list) -> dict:
         keywords = alert.get('keywords', '').split(', ') if alert.get('keywords') else []
         
         language_context = get_company_language_context(alert.get('company'), metadata)
+        reviewers = get_reviewers_from_metadata(metadata)
         
         summary = generate_alert_summary(
             source=alert.get('source', ''),
@@ -168,7 +289,8 @@ def generate_batch_summaries(alerts: list) -> dict:
             message=alert.get('message', ''),
             keywords=keywords,
             signal_type=signal_type,
-            language_context=language_context
+            language_context=language_context,
+            reviewers=reviewers
         )
         
         if summary:

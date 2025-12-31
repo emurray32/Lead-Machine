@@ -57,7 +57,27 @@ Access at `/admin` to:
 - **Remove companies** from monitoring
 - **Signal explanations** - Understand each signal type
 
-## New Features (v2.0)
+## New Features (v2.1)
+
+### Sales Intelligence Narratives
+AI-powered "Explain" button generates rich sales narratives:
+- "Walmart already supports 10 languages and just added French, signaling expansion into France or Canada"
+- Includes geographic market context (language → target markets mapping)
+- Shows PR reviewers as potential sales contacts
+- Uses Gemini 2.5 Flash for contextual business intelligence
+
+### Geo-Market Mapping
+Automatic language-to-market inference:
+- French → France, Canada (Quebec), Belgium, Switzerland
+- Spanish → Spain, Latin America, Mexico, US Hispanic market
+- Arabic → Middle East, North Africa, UAE, Saudi Arabia
+- 40+ language mappings for accurate market targeting
+
+### PR Reviewer Tracking
+Captures PR reviewers as potential sales leads:
+- Fetches assigned reviewers from GitHub API
+- Shows reviewers in alert metadata
+- AI narratives mention contacts by name
 
 ### Enhanced AI Context
 AI summaries now include language count context:
@@ -112,6 +132,10 @@ register_webhook(
 - **Localization Monitor**: Runs monitoring checks
 
 ## Recent Changes
+- 2025-12-31: Enhanced AI "Explain" to generate sales intelligence narratives
+- 2025-12-31: Added geo-market mapping (40+ languages → target markets)
+- 2025-12-31: Added PR reviewer tracking as potential sales contacts
+- 2025-12-31: Updated AI model to Gemini 2.5 Flash
 - 2025-12-28: Refactored monitors into modular `monitors/` directory
 - 2025-12-28: Added parallel processing with concurrent.futures
 - 2025-12-28: Added PR monitoring for early localization signals

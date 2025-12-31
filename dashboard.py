@@ -374,7 +374,7 @@ def api_signal_explanations():
 
 @app.route('/api/summarize', methods=['POST'])
 def api_summarize():
-    """Generate AI summary for an alert."""
+    """Generate AI summary for an alert with full context."""
     if not AI_AVAILABLE or not ai_summary:
         return jsonify({'error': 'AI summaries not available', 'available': False}), 503
     
@@ -383,13 +383,24 @@ def api_summarize():
         return jsonify({'error': 'No data provided'}), 400
     
     try:
+        metadata = data.get('metadata', {}) or {}
+        
+        language_context = ai_summary.get_company_language_context(
+            data.get('company', ''),
+            metadata
+        )
+        
+        reviewers = ai_summary.get_reviewers_from_metadata(metadata)
+        
         summary = ai_summary.generate_alert_summary(
             source=data.get('source', ''),
             company=data.get('company', ''),
             title=data.get('title', ''),
             message=data.get('message', ''),
             keywords=data.get('keywords', []),
-            signal_type=data.get('signal_type')
+            signal_type=data.get('signal_type'),
+            language_context=language_context,
+            reviewers=reviewers
         )
         
         if summary:
