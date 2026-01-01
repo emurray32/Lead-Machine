@@ -335,3 +335,203 @@ def get_all_companies_summary() -> List[Dict]:
     conn.close()
 
     return companies
+
+
+def get_all_contributors(company: Optional[str] = None, sort_by: str = 'commits',
+                         sort_order: str = 'desc', limit: int = 100) -> List[Dict]:
+    """
+    Get aggregated contributor data across all companies.
+
+    Args:
+        company: Optional filter by company name
+        sort_by: 'commits', 'company', 'last_active', 'languages'
+        sort_order: 'asc' or 'desc'
+        limit: Max contributors to return
+
+    Returns:
+        List of contributor dicts with aggregated stats
+    """
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    # Build query to aggregate contributor data
+    query = """
+        WITH contributor_data AS (
+            SELECT
+                metadata->>'author' as username,
+                company,
+                COUNT(*) as commit_count,
+                COUNT(CASE WHEN metadata->>'signal_type' = 'NEW_LANG_FILE' THEN 1 END) as lang_file_commits,
+                COUNT(CASE WHEN metadata->>'signal_type' = 'OPEN_PR' THEN 1 END) as pr_count,
+                MIN(created_at) as first_seen,
+                MAX(created_at) as last_active,
+                ARRAY_AGG(DISTINCT metadata->>'signal_type') FILTER (WHERE metadata->>'signal_type' IS NOT NULL) as signal_types
+            FROM alerts
+            WHERE source = 'github'
+                AND metadata->>'author' IS NOT NULL
+                AND metadata->>'author' != ''
+    """
+
+    params = []
+    if company:
+        query += " AND company = %s"
+        params.append(company)
+
+    query += """
+            GROUP BY metadata->>'author', company
+        ),
+        contributor_languages AS (
+            SELECT
+                metadata->>'author' as username,
+                company,
+                ARRAY_AGG(DISTINCT lang) FILTER (WHERE lang IS NOT NULL) as languages
+            FROM alerts,
+                LATERAL (
+                    SELECT jsonb_array_elements_text(
+                        COALESCE(metadata->'new_langs', metadata->'detected_languages', '[]'::jsonb)
+                    ) as lang
+                ) langs
+            WHERE source = 'github'
+                AND metadata->>'author' IS NOT NULL
+    """
+
+    if company:
+        query += " AND company = %s"
+        params.append(company)
+
+    query += """
+            GROUP BY metadata->>'author', company
+        )
+        SELECT
+            cd.username,
+            cd.company,
+            cd.commit_count,
+            cd.lang_file_commits,
+            cd.pr_count,
+            cd.first_seen,
+            cd.last_active,
+            cd.signal_types,
+            COALESCE(cl.languages, ARRAY[]::text[]) as languages
+        FROM contributor_data cd
+        LEFT JOIN contributor_languages cl
+            ON cd.username = cl.username AND cd.company = cl.company
+    """
+
+    # Add sorting
+    order_dir = "DESC" if sort_order.lower() == 'desc' else "ASC"
+    if sort_by == 'commits':
+        query += f" ORDER BY cd.commit_count {order_dir}"
+    elif sort_by == 'company':
+        query += f" ORDER BY cd.company {order_dir}, cd.commit_count DESC"
+    elif sort_by == 'last_active':
+        query += f" ORDER BY cd.last_active {order_dir}"
+    elif sort_by == 'languages':
+        query += f" ORDER BY COALESCE(array_length(cl.languages, 1), 0) {order_dir}"
+    else:
+        query += f" ORDER BY cd.commit_count {order_dir}"
+
+    query += " LIMIT %s"
+    params.append(limit)
+
+    cur.execute(query, params)
+    contributors = [dict(row) for row in cur.fetchall()]
+
+    cur.close()
+    conn.close()
+
+    return contributors
+
+
+def get_contributor_stats() -> Dict:
+    """Get overall contributor statistics."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    cur.execute("""
+        SELECT
+            COUNT(DISTINCT metadata->>'author') as total_contributors,
+            COUNT(DISTINCT company) as total_companies,
+            COUNT(*) as total_commits
+        FROM alerts
+        WHERE source = 'github'
+            AND metadata->>'author' IS NOT NULL
+            AND metadata->>'author' != ''
+    """)
+
+    result = cur.fetchone()
+    stats = dict(result) if result else {
+        'total_contributors': 0,
+        'total_companies': 0,
+        'total_commits': 0
+    }
+
+    cur.close()
+    conn.close()
+
+    return stats
+
+
+def get_contributor_details(username: str) -> Dict:
+    """Get detailed information about a specific contributor."""
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    # Get all alerts for this contributor
+    cur.execute("""
+        SELECT
+            company,
+            title,
+            message,
+            url,
+            created_at,
+            metadata
+        FROM alerts
+        WHERE source = 'github'
+            AND metadata->>'author' = %s
+        ORDER BY created_at DESC
+        LIMIT 50
+    """, (username,))
+
+    alerts = [dict(row) for row in cur.fetchall()]
+
+    # Aggregate by company
+    companies = {}
+    all_languages = set()
+
+    for alert in alerts:
+        company = alert['company']
+        if company not in companies:
+            companies[company] = {
+                'commit_count': 0,
+                'languages': set(),
+                'last_active': None
+            }
+        companies[company]['commit_count'] += 1
+        if not companies[company]['last_active'] or alert['created_at'] > companies[company]['last_active']:
+            companies[company]['last_active'] = alert['created_at']
+
+        metadata = alert.get('metadata') or {}
+        if metadata.get('new_langs'):
+            langs = metadata['new_langs'] if isinstance(metadata['new_langs'], list) else []
+            companies[company]['languages'].update(langs)
+            all_languages.update(langs)
+        if metadata.get('detected_languages'):
+            langs = metadata['detected_languages'] if isinstance(metadata['detected_languages'], list) else []
+            companies[company]['languages'].update(langs)
+            all_languages.update(langs)
+
+    # Convert sets to lists
+    for company in companies:
+        companies[company]['languages'] = sorted(list(companies[company]['languages']))
+
+    cur.close()
+    conn.close()
+
+    return {
+        'username': username,
+        'companies': companies,
+        'total_commits': len(alerts),
+        'total_companies': len(companies),
+        'all_languages': sorted(list(all_languages)),
+        'recent_alerts': alerts[:10]
+    }

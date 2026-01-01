@@ -463,3 +463,122 @@ Write an insightful narrative that tells the story of their internationalization
     except Exception as e:
         print(f"Error generating i18n journey narrative: {e}")
         return None
+
+
+def generate_contributor_outreach_summary(
+    username: str,
+    company: str,
+    commit_count: int,
+    languages: List[str],
+    signal_types: List[str],
+    lang_file_commits: int = 0,
+    pr_count: int = 0
+) -> Optional[str]:
+    """
+    Generate an AI summary explaining why this contributor would be good to reach out to.
+
+    Args:
+        username: GitHub username
+        company: Company name
+        commit_count: Total number of commits
+        languages: Languages they've worked on
+        signal_types: Types of signals (NEW_LANG_FILE, OPEN_PR, KEYWORD)
+        lang_file_commits: Number of commits adding new language files
+        pr_count: Number of i18n PRs opened
+
+    Returns:
+        Outreach summary string or None if unavailable
+    """
+    if not GEMINI_AVAILABLE or not client:
+        return None
+
+    market_context = get_market_context(languages)
+
+    # Determine contributor profile
+    if lang_file_commits > 3 or pr_count > 2:
+        profile = "Active i18n champion - regularly adds new language support"
+    elif lang_file_commits > 0 or pr_count > 0:
+        profile = "Contributing to i18n initiatives - involved in language expansion"
+    elif commit_count > 5:
+        profile = "Frequent contributor to i18n-related code"
+    else:
+        profile = "Contributor with i18n exposure"
+
+    # Build activity summary
+    activity_parts = []
+    if lang_file_commits > 0:
+        activity_parts.append(f"{lang_file_commits} new language file(s)")
+    if pr_count > 0:
+        activity_parts.append(f"{pr_count} i18n PR(s)")
+    activity_parts.append(f"{commit_count} total i18n commit(s)")
+    activity_summary = ", ".join(activity_parts)
+
+    prompt = f"""You are a sales intelligence analyst helping craft personalized outreach for localization services.
+
+Generate a 2-3 sentence summary explaining why this GitHub contributor would be a good person to reach out to for localization services or partnership. Be specific and actionable.
+
+Contributor Data:
+- GitHub Username: {username}
+- Company: {company}
+- Profile: {profile}
+- Activity: {activity_summary}
+- Languages Worked On: {', '.join(languages) if languages else 'Various'}
+- {market_context}
+- Signal Types: {', '.join(signal_types) if signal_types else 'General i18n'}
+
+Write a brief, compelling summary like: "@{username} at {company} has been actively [specific activity]. They appear to be [role/influence]. This makes them a good contact because [reason]."
+
+Be specific about their activity and why they'd be receptive to outreach about localization services."""
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        if response and response.text:
+            return response.text.strip()
+        return None
+
+    except Exception as e:
+        print(f"Error generating contributor summary: {e}")
+        return None
+
+
+def generate_batch_contributor_summaries(contributors: List[Dict]) -> Dict[str, str]:
+    """
+    Generate outreach summaries for a batch of contributors.
+
+    Args:
+        contributors: List of contributor dicts with keys: username, company, commit_count, languages, signal_types
+
+    Returns:
+        Dict mapping "username:company" to summary string
+    """
+    if not GEMINI_AVAILABLE:
+        return {}
+
+    summaries = {}
+    for contributor in contributors[:15]:  # Limit to 15 to avoid rate limits
+        username = contributor.get('username', '')
+        company = contributor.get('company', '')
+
+        if not username or not company:
+            continue
+
+        key = f"{username}:{company}"
+
+        summary = generate_contributor_outreach_summary(
+            username=username,
+            company=company,
+            commit_count=contributor.get('commit_count', 0),
+            languages=contributor.get('languages', []),
+            signal_types=contributor.get('signal_types', []),
+            lang_file_commits=contributor.get('lang_file_commits', 0),
+            pr_count=contributor.get('pr_count', 0)
+        )
+
+        if summary:
+            summaries[key] = summary
+
+    return summaries
