@@ -1,6 +1,7 @@
 """
 Flask Web Dashboard for GitHub i18n Timeline Intelligence
 Focused on tracking company internationalization journeys through GitHub activity.
+Features discovery engine for proactive company suggestions.
 """
 
 from flask import Flask, render_template, jsonify, request, Response
@@ -11,6 +12,7 @@ import io
 import yaml
 import config
 from datetime import datetime, timezone
+from monitors import discovery
 
 def friendly_time(dt):
     """Convert datetime to friendly format like '2 hours ago' or 'Dec 27'."""
@@ -501,6 +503,172 @@ def api_company_journey(company_name):
         return jsonify({'error': 'Failed to generate narrative', 'available': True}), 500
     except Exception as e:
         return jsonify({'error': str(e), 'available': True}), 500
+
+
+# ============================================================
+# DISCOVERY & SUGGESTIONS ROUTES
+# ============================================================
+
+@app.route('/discover')
+def discover_page():
+    """Discovery page with company suggestions."""
+    companies = load_companies_yaml()
+    cached = discovery.get_cached_suggestions()
+
+    # Get quick suggestions
+    suggestions = discovery.get_quick_suggestions(companies, limit=30)
+
+    return render_template('discover.html',
+                         suggestions=suggestions,
+                         cached_data=cached,
+                         companies_count=len(companies))
+
+
+@app.route('/api/discover/suggestions')
+def api_discover_suggestions():
+    """Get discovery suggestions."""
+    companies = load_companies_yaml()
+    limit = request.args.get('limit', 20, type=int)
+    category = request.args.get('category', '')
+
+    suggestions = discovery.get_quick_suggestions(companies, limit=limit)
+
+    if category:
+        suggestions = [s for s in suggestions if s.get('category') == category]
+
+    return jsonify({
+        'suggestions': suggestions,
+        'count': len(suggestions)
+    })
+
+
+@app.route('/api/discover/refresh', methods=['POST'])
+def api_discover_refresh():
+    """Run full discovery scan and refresh suggestions."""
+    companies = load_companies_yaml()
+
+    try:
+        results = discovery.run_full_discovery(companies)
+        return jsonify({
+            'success': True,
+            'trending': len(results.get('trending', [])),
+            'similar': len(results.get('similar', [])),
+            'pr_firehose': len(results.get('pr_firehose', [])),
+            'expansions': len(results.get('expansions', [])),
+            'dependencies': len(results.get('dependencies', [])),
+            'last_updated': results.get('last_updated')
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/discover/enrich/<org>')
+def api_discover_enrich(org):
+    """Auto-enrich company data for one-click follow."""
+    try:
+        enriched = discovery.enrich_company_data(org)
+        return jsonify(enriched)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/discover/search')
+def api_discover_search():
+    """Smart search for companies."""
+    query = request.args.get('q', '')
+    limit = request.args.get('limit', 20, type=int)
+
+    if not query or len(query) < 2:
+        return jsonify({'results': [], 'suggestions': []})
+
+    results = discovery.search_companies(query, limit=limit)
+    suggestions = discovery.get_ai_search_suggestions(query)
+
+    return jsonify({
+        'results': results,
+        'suggestions': suggestions,
+        'query': query
+    })
+
+
+@app.route('/api/discover/trending')
+def api_discover_trending():
+    """Get trending i18n repos."""
+    cached = discovery.get_cached_suggestions()
+    trending = cached.get('trending', [])
+
+    return jsonify({
+        'trending': trending[:20],
+        'count': len(trending)
+    })
+
+
+@app.route('/api/discover/firehose')
+def api_discover_firehose():
+    """Get recent i18n PRs from the firehose."""
+    cached = discovery.get_cached_suggestions()
+    firehose = cached.get('pr_firehose', [])
+
+    return jsonify({
+        'prs': firehose[:30],
+        'count': len(firehose)
+    })
+
+
+@app.route('/api/discover/similar/<company>')
+def api_discover_similar(company):
+    """Get similar company suggestions."""
+    similar = discovery.get_similar_companies(company)
+
+    return jsonify({
+        'company': company,
+        'similar': similar,
+        'count': len(similar)
+    })
+
+
+@app.route('/api/follow', methods=['POST'])
+def api_follow_company():
+    """One-click follow a suggested company."""
+    data = request.get_json()
+    if not data or not data.get('github_org'):
+        return jsonify({'error': 'GitHub organization required'}), 400
+
+    # Auto-enrich the company data
+    enriched = discovery.enrich_company_data(data['github_org'])
+
+    company = {
+        'name': data.get('company_name') or enriched.get('company_name') or data['github_org'],
+        'github_org': data['github_org']
+    }
+
+    # Add repos if discovered
+    if enriched.get('github_repos'):
+        company['github_repos'] = enriched['github_repos'][:5]
+    elif data.get('repo_name'):
+        company['github_repos'] = [data['repo_name']]
+
+    # Add doc URLs if discovered
+    if enriched.get('doc_urls'):
+        company['doc_urls'] = enriched['doc_urls']
+
+    # Load existing companies and check for duplicates
+    companies = load_companies_yaml()
+    existing_orgs = [c.get('github_org', '').lower() for c in companies]
+
+    if company['github_org'].lower() in existing_orgs:
+        return jsonify({'error': 'Company already being followed', 'exists': True}), 409
+
+    companies.append(company)
+
+    if save_companies_yaml(companies):
+        return jsonify({
+            'success': True,
+            'company': company,
+            'enriched': enriched
+        })
+
+    return jsonify({'error': 'Failed to save'}), 500
 
 
 if __name__ == '__main__':

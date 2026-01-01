@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover - GitHub i18n Timeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-900);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--gray-600);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 13px;
+        }
+
+        /* Search Bar */
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.25rem 1rem 3rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+
+        .search-suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+
+        .suggestion-item:hover {
+            background: var(--gray-50);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .suggestion-reason {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--gray-200);
+            background: white;
+            color: var(--gray-600);
+            transition: all 0.2s;
+        }
+
+        .category-tab:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+        }
+
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .category-badge {
+            background: var(--gray-200);
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 0.5rem;
+        }
+
+        .category-tab.active .category-badge {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Suggestions Grid */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .suggestion-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .suggestion-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .card-org {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        .card-badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-trending {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-similar {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-firehose {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-expansion {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-dependency {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--gray-100);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+
+        .card-reason {
+            font-size: 12px;
+            color: var(--gray-500);
+            font-style: italic;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 6px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .card-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--gray-500);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--gray-900);
+            color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.show { display: block; }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 768px) {
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="logo">
+                    <div class="logo-icon">i18n</div>
+                    GitHub i18n Timeline
+                </a>
+                <nav class="header-nav">
+                    <a href="/" class="nav-link">Dashboard</a>
+                    <a href="/discover" class="nav-link active">Discover</a>
+                    <a href="/admin" class="nav-link">Admin</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Discover Companies</h1>
+                <p class="page-subtitle">Find companies with i18n activity to follow. Click "Follow" to add them automatically.</p>
+            </div>
+            <button class="btn btn-primary" onclick="refreshDiscovery()" id="refreshBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 11-2.2-5.9M21 3v6h-6"/>
+                </svg>
+                Refresh Suggestions
+            </button>
+        </div>
+
+        <!-- Smart Search -->
+        <div class="search-section">
+            <div class="search-container">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" class="search-input"
+                       placeholder="Search companies by name or industry (e.g., fintech, e-commerce, Stripe...)">
+                <div id="searchSuggestions" class="search-suggestions"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div>
+                    <div class="stat-value">{{ companies_count }}</div>
+                    <div class="stat-label">Following</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div>
+                    <div class="stat-value" id="suggestionsCount">{{ suggestions|length }}</div>
+                    <div class="stat-label">Suggestions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-category="all">
+                All
+                <span class="category-badge" id="count-all">{{ suggestions|length }}</span>
+            </button>
+            <button class="category-tab" data-category="trending">
+                Trending
+                <span class="category-badge" id="count-trending">{{ cached_data.get('trending', [])|length }}</span>
+            </button>
+            <button class="category-tab" data-category="similar">
+                Similar Companies
+                <span class="category-badge" id="count-similar">{{ cached_data.get('similar', [])|length }}</span>
+            </button>
+            <button class="category-tab" data-category="pr_firehose">
+                Recent PRs
+                <span class="category-badge" id="count-firehose">{{ cached_data.get('pr_firehose', [])|length }}</span>
+            </button>
+            <button class="category-tab" data-category="expansions">
+                Expanding
+                <span class="category-badge" id="count-expansions">{{ cached_data.get('expansions', [])|length }}</span>
+            </button>
+        </div>
+
+        <!-- Suggestions Grid -->
+        <div id="suggestionsGrid" class="suggestions-grid">
+            {% if suggestions %}
+                {% for suggestion in suggestions %}
+                <div class="suggestion-card" data-category="{{ suggestion.category or suggestion.source }}" data-org="{{ suggestion.github_org }}">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">{{ suggestion.company_name }}</div>
+                            <div class="card-org">github.com/{{ suggestion.github_org }}</div>
+                        </div>
+                        <span class="card-badge badge-{{ suggestion.category or suggestion.source }}">
+                            {% if suggestion.category == 'trending' or suggestion.source == 'trending' %}
+                                Trending
+                            {% elif suggestion.category == 'similar' or suggestion.source == 'similar' %}
+                                Similar
+                            {% elif suggestion.category == 'pr_firehose' or suggestion.source == 'pr_firehose' %}
+                                Active PR
+                            {% elif suggestion.category == 'expansions' or suggestion.source == 'expansion' %}
+                                Expanding
+                            {% elif suggestion.source == 'dependency' %}
+                                Library User
+                            {% else %}
+                                Suggested
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if suggestion.description %}
+                    <p class="card-description">{{ suggestion.description }}</p>
+                    {% endif %}
+
+                    <div class="card-meta">
+                        {% if suggestion.stars %}
+                        <span class="meta-item">{{ suggestion.stars }} stars</span>
+                        {% endif %}
+                        {% if suggestion.languages_detected %}
+                        <span class="meta-item">{{ suggestion.languages_detected|length }} languages</span>
+                        {% endif %}
+                        {% if suggestion.industry %}
+                        <span class="meta-item">{{ suggestion.industry }}</span>
+                        {% endif %}
+                        {% if suggestion.i18n_library %}
+                        <span class="meta-item">Uses {{ suggestion.i18n_library }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if suggestion.reason %}
+                    <div class="card-reason">{{ suggestion.reason }}</div>
+                    {% endif %}
+
+                    <div class="card-actions">
+                        <button class="btn btn-success btn-sm" onclick="followCompany('{{ suggestion.github_org }}', '{{ suggestion.company_name }}', '{{ suggestion.repo_name or '' }}')">
+                            Follow
+                        </button>
+                        <a href="{{ suggestion.url or 'https://github.com/' + suggestion.github_org }}" target="_blank" class="btn btn-secondary btn-sm">
+                            View GitHub
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <h3>No suggestions yet</h3>
+                <p>Click "Refresh Suggestions" to discover companies with i18n activity.</p>
+                <button class="btn btn-primary" onclick="refreshDiscovery()">Refresh Suggestions</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => { toast.className = 'toast'; }, 3000);
+        }
+
+        // Category filtering
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const category = this.dataset.category;
+                filterByCategory(category);
+            });
+        });
+
+        function filterByCategory(category) {
+            const cards = document.querySelectorAll('.suggestion-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Smart Search
+        let searchTimeout;
+        const searchInput = document.getElementById('searchInput');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchSuggestions.classList.remove('show');
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                searchCompanies(query);
+            }, 300);
+        });
+
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => searchSuggestions.classList.remove('show'), 200);
+        });
+
+        async function searchCompanies(query) {
+            try {
+                const resp = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}`);
+                const data = await resp.json();
+
+                if (data.results.length > 0 || data.suggestions.length > 0) {
+                    let html = '';
+
+                    // Show search suggestions
+                    if (data.suggestions.length > 0) {
+                        html += '<div style="padding: 0.5rem 1rem; background: var(--gray-50); font-size: 11px; color: var(--gray-500); text-transform: uppercase;">Suggestions</div>';
+                        data.suggestions.forEach(s => {
+                            html += `<div class="suggestion-item" onclick="searchInput.value='${s}'; searchCompanies('${s}')">
+                                <span class="suggestion-name">${s}</span>
+                            </div>`;
+                        });
+                    }
+
+                    // Show company results
+                    if (data.results.length > 0) {
+                        html += '<div style="padding: 0.5rem 1rem; background: var(--gray-50); font-size: 11px; color: var(--gray-500); text-transform: uppercase;">Companies</div>';
+                        data.results.forEach(r => {
+                            html += `<div class="suggestion-item" onclick="followCompany('${r.github_org}', '${r.company_name}', '')">
+                                <div>
+                                    <div class="suggestion-name">${r.company_name}</div>
+                                    <div class="suggestion-reason">${r.reason || ''}</div>
+                                </div>
+                                <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); followCompany('${r.github_org}', '${r.company_name}', '')">Follow</button>
+                            </div>`;
+                        });
+                    }
+
+                    searchSuggestions.innerHTML = html;
+                    searchSuggestions.classList.add('show');
+                } else {
+                    searchSuggestions.classList.remove('show');
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+            }
+        }
+
+        // Follow company
+        async function followCompany(org, name, repoName) {
+            try {
+                const resp = await fetch('/api/follow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        github_org: org,
+                        company_name: name,
+                        repo_name: repoName
+                    })
+                });
+
+                const result = await resp.json();
+
+                if (result.success) {
+                    showToast(`Now following ${result.company.name}!`);
+
+                    // Remove the card from the grid
+                    const card = document.querySelector(`.suggestion-card[data-org="${org}"]`);
+                    if (card) {
+                        card.style.opacity = '0.5';
+                        card.style.pointerEvents = 'none';
+                        setTimeout(() => card.remove(), 500);
+                    }
+
+                    // Update count
+                    const countEl = document.getElementById('suggestionsCount');
+                    countEl.textContent = parseInt(countEl.textContent) - 1;
+                } else if (result.exists) {
+                    showToast('Already following this company', 'error');
+                } else {
+                    showToast(result.error || 'Failed to follow', 'error');
+                }
+            } catch (err) {
+                showToast('Error following company', 'error');
+            }
+        }
+
+        // Refresh discovery
+        async function refreshDiscovery() {
+            const btn = document.getElementById('refreshBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:0.5rem"></span> Scanning...';
+
+            try {
+                const resp = await fetch('/api/discover/refresh', { method: 'POST' });
+                const result = await resp.json();
+
+                if (result.success) {
+                    const total = result.trending + result.similar + result.pr_firehose + result.expansions;
+                    showToast(`Found ${total} suggestions!`);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(result.error || 'Refresh failed', 'error');
+                }
+            } catch (err) {
+                showToast('Error refreshing suggestions', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-2.2-5.9M21 3v6h-6"/></svg> Refresh Suggestions';
+            }
+        }
+    </script>
+</body>
+</html>
