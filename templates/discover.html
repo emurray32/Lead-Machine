@@ -316,45 +316,77 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Suggestions Grid */
-        .suggestions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.25rem;
+        /* Suggestions List (Row Layout) */
+        .suggestions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        .suggestion-card {
+        .suggestion-row {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--gray-200);
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .suggestion-card:hover {
+        .suggestion-row:hover {
             box-shadow: var(--shadow-md);
             border-color: var(--primary);
-            transform: translateY(-2px);
         }
 
-        .card-header {
+        .row-checkbox {
+            flex-shrink: 0;
+        }
+
+        .row-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .row-main {
+            flex: 1;
+            min-width: 0;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            align-items: center;
+            gap: 1.5rem;
         }
 
-        .card-title {
-            font-size: 18px;
+        .row-company {
+            min-width: 180px;
+            max-width: 220px;
+        }
+
+        .row-title {
+            font-size: 15px;
             font-weight: 600;
             color: var(--gray-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .card-org {
-            font-size: 13px;
+        .row-org {
+            font-size: 12px;
             color: var(--gray-500);
-            margin-top: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .row-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            flex: 1;
+            align-items: center;
         }
 
         .card-badge {
@@ -363,6 +395,7 @@
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
+            flex-shrink: 0;
         }
 
         .badge-trending {
@@ -390,23 +423,6 @@
             color: var(--gray-600);
         }
 
-        .card-description {
-            font-size: 13px;
-            color: var(--gray-600);
-            margin-bottom: 1rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .card-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
         .meta-item {
             display: inline-flex;
             align-items: center;
@@ -418,24 +434,68 @@
             color: var(--gray-600);
         }
 
-        .card-reason {
+        .row-reason {
             font-size: 12px;
             color: var(--gray-500);
             font-style: italic;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            background: var(--gray-50);
-            border-radius: 6px;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
         }
 
-        .card-actions {
+        .row-actions {
             display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Follow All Section */
+        .follow-all-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .follow-all-left {
+            display: flex;
+            align-items: center;
             gap: 0.75rem;
         }
 
-        .card-actions .btn {
-            flex: 1;
-            justify-content: center;
+        .follow-all-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .follow-all-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+
+        .selected-count {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-left: 0.5rem;
+        }
+
+        .follow-all-btn {
+            display: none;
+        }
+
+        .follow-all-btn.show {
+            display: inline-flex;
         }
 
         /* Empty State */
@@ -532,13 +592,25 @@
         }
 
         @media (max-width: 768px) {
-            .suggestions-grid {
-                grid-template-columns: 1fr;
+            .suggestion-row {
+                flex-wrap: wrap;
+            }
+
+            .row-main {
+                flex-wrap: wrap;
+            }
+
+            .row-reason {
+                max-width: 100%;
             }
 
             .page-header {
                 flex-direction: column;
                 gap: 1rem;
+            }
+
+            .follow-all-section {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -627,57 +699,64 @@
             </button>
         </div>
 
-        <!-- Suggestions Grid -->
-        <div id="suggestionsGrid" class="suggestions-grid">
+        <!-- Follow All Section -->
+        {% if suggestions %}
+        <div class="follow-all-section">
+            <div class="follow-all-left">
+                <input type="checkbox" id="selectAllCheckbox" class="follow-all-checkbox" onchange="toggleSelectAll()">
+                <label for="selectAllCheckbox" class="follow-all-label">Select All</label>
+                <span id="selectedCount" class="selected-count"></span>
+            </div>
+            <button id="followAllBtn" class="btn btn-success follow-all-btn" onclick="followAllSelected()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <line x1="20" y1="8" x2="20" y2="14"/>
+                    <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                Follow All Selected
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Suggestions List -->
+        <div id="suggestionsList" class="suggestions-list">
             {% if suggestions %}
                 {% for suggestion in suggestions %}
-                <div class="suggestion-card" data-category="{{ suggestion.category or suggestion.source }}" data-org="{{ suggestion.github_org }}">
-                    <div class="card-header">
-                        <div>
-                            <div class="card-title">{{ suggestion.company_name }}</div>
-                            <div class="card-org">github.com/{{ suggestion.github_org }}</div>
+                <div class="suggestion-row" data-category="{{ suggestion.category or suggestion.source }}" data-org="{{ suggestion.github_org }}" data-name="{{ suggestion.company_name }}" data-repo="{{ suggestion.repo_name or '' }}">
+                    <div class="row-checkbox">
+                        <input type="checkbox" class="row-select" onchange="updateSelectedCount()">
+                    </div>
+                    <div class="row-main">
+                        <div class="row-company">
+                            <div class="row-title">{{ suggestion.company_name }}</div>
+                            <div class="row-org">github.com/{{ suggestion.github_org }}</div>
                         </div>
-                        <span class="card-badge badge-{{ suggestion.category or suggestion.source }}">
-                            {% if suggestion.category == 'trending' or suggestion.source == 'trending' %}
-                                Trending
-                            {% elif suggestion.category == 'similar' or suggestion.source == 'similar' %}
-                                Similar
-                            {% elif suggestion.category == 'pr_firehose' or suggestion.source == 'pr_firehose' %}
-                                Active PR
-                            {% elif suggestion.category == 'expansions' or suggestion.source == 'expansion' %}
-                                Expanding
-                            {% elif suggestion.source == 'dependency' %}
-                                Library User
-                            {% else %}
-                                Suggested
+                        <div class="row-meta">
+                            <span class="card-badge badge-{{ suggestion.category or suggestion.source }}">
+                                {% if suggestion.category == 'trending' or suggestion.source == 'trending' %}
+                                    Trending
+                                {% elif suggestion.category == 'similar' or suggestion.source == 'similar' %}
+                                    Similar
+                                {% elif suggestion.category == 'pr_firehose' or suggestion.source == 'pr_firehose' %}
+                                    Active PR
+                                {% elif suggestion.category == 'expansions' or suggestion.source == 'expansion' %}
+                                    Expanding
+                                {% elif suggestion.source == 'dependency' %}
+                                    Library User
+                                {% else %}
+                                    Suggested
+                                {% endif %}
+                            </span>
+                            {% if suggestion.industry %}
+                            <span class="meta-item">{{ suggestion.industry }}</span>
                             {% endif %}
-                        </span>
+                            {% if suggestion.reason %}
+                            <span class="row-reason" title="{{ suggestion.reason }}">{{ suggestion.reason }}</span>
+                            {% endif %}
+                        </div>
                     </div>
-
-                    {% if suggestion.description %}
-                    <p class="card-description">{{ suggestion.description }}</p>
-                    {% endif %}
-
-                    <div class="card-meta">
-                        {% if suggestion.stars %}
-                        <span class="meta-item">{{ suggestion.stars }} stars</span>
-                        {% endif %}
-                        {% if suggestion.languages_detected %}
-                        <span class="meta-item">{{ suggestion.languages_detected|length }} languages</span>
-                        {% endif %}
-                        {% if suggestion.industry %}
-                        <span class="meta-item">{{ suggestion.industry }}</span>
-                        {% endif %}
-                        {% if suggestion.i18n_library %}
-                        <span class="meta-item">Uses {{ suggestion.i18n_library }}</span>
-                        {% endif %}
-                    </div>
-
-                    {% if suggestion.reason %}
-                    <div class="card-reason">{{ suggestion.reason }}</div>
-                    {% endif %}
-
-                    <div class="card-actions">
+                    <div class="row-actions">
                         <button class="btn btn-success btn-sm" onclick="followCompany('{{ suggestion.github_org }}', '{{ suggestion.company_name }}', '{{ suggestion.repo_name or '' }}')">
                             Follow
                         </button>
@@ -688,7 +767,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-            <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state">
                 <h3>No suggestions yet</h3>
                 <p>Click "Refresh Suggestions" to discover companies with i18n activity.</p>
                 <button class="btn btn-primary" onclick="refreshDiscovery()">Refresh Suggestions</button>
@@ -720,14 +799,122 @@
         });
 
         function filterByCategory(category) {
-            const cards = document.querySelectorAll('.suggestion-card');
-            cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'block';
+            const rows = document.querySelectorAll('.suggestion-row');
+            rows.forEach(row => {
+                if (category === 'all' || row.dataset.category === category) {
+                    row.style.display = 'flex';
                 } else {
-                    card.style.display = 'none';
+                    row.style.display = 'none';
                 }
             });
+            // Reset selections when filtering
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            document.querySelectorAll('.row-select').forEach(cb => cb.checked = false);
+            updateSelectedCount();
+        }
+
+        // Select All functionality
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (!selectAllCheckbox) return;
+            const visibleRows = document.querySelectorAll('.suggestion-row:not([style*="display: none"])');
+            visibleRows.forEach(row => {
+                const checkbox = row.querySelector('.row-select');
+                if (checkbox) checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const selectedCount = document.querySelectorAll('.row-select:checked').length;
+            const countEl = document.getElementById('selectedCount');
+            const followAllBtn = document.getElementById('followAllBtn');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+            if (!countEl || !followAllBtn) return;
+
+            if (selectedCount > 0) {
+                countEl.textContent = `(${selectedCount} selected)`;
+                followAllBtn.classList.add('show');
+            } else {
+                countEl.textContent = '';
+                followAllBtn.classList.remove('show');
+            }
+
+            // Update select all checkbox state
+            if (selectAllCheckbox) {
+                const visibleRows = document.querySelectorAll('.suggestion-row:not([style*="display: none"])');
+                const visibleCheckboxes = Array.from(visibleRows).map(r => r.querySelector('.row-select')).filter(Boolean);
+                const allChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+            }
+        }
+
+        // Follow All Selected
+        async function followAllSelected() {
+            const selectedRows = document.querySelectorAll('.suggestion-row:has(.row-select:checked)');
+            if (selectedRows.length === 0) return;
+
+            const followAllBtn = document.getElementById('followAllBtn');
+            followAllBtn.disabled = true;
+            followAllBtn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;margin-right:0.5rem"></span> Following...';
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const row of selectedRows) {
+                const org = row.dataset.org;
+                const name = row.dataset.name;
+                const repo = row.dataset.repo || '';
+
+                try {
+                    const resp = await fetch('/api/follow', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            github_org: org,
+                            company_name: name,
+                            repo_name: repo
+                        })
+                    });
+
+                    const result = await resp.json();
+                    if (result.success) {
+                        successCount++;
+                        row.style.opacity = '0.5';
+                        row.style.pointerEvents = 'none';
+                        setTimeout(() => row.remove(), 300);
+                    } else if (result.exists) {
+                        row.style.opacity = '0.5';
+                        row.style.pointerEvents = 'none';
+                        setTimeout(() => row.remove(), 300);
+                    } else {
+                        failCount++;
+                    }
+                } catch (err) {
+                    failCount++;
+                }
+            }
+
+            // Update counts
+            const countEl = document.getElementById('suggestionsCount');
+            countEl.textContent = Math.max(0, parseInt(countEl.textContent) - successCount);
+
+            if (successCount > 0) {
+                showToast(`Successfully followed ${successCount} companies!`);
+            }
+            if (failCount > 0) {
+                showToast(`Failed to follow ${failCount} companies`, 'error');
+            }
+
+            // Reset button
+            followAllBtn.disabled = false;
+            followAllBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Follow All Selected';
+
+            // Reset selection state
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateSelectedCount();
         }
 
         // Smart Search
@@ -813,17 +1000,18 @@
                 if (result.success) {
                     showToast(`Now following ${result.company.name}!`);
 
-                    // Remove the card from the grid
-                    const card = document.querySelector(`.suggestion-card[data-org="${org}"]`);
-                    if (card) {
-                        card.style.opacity = '0.5';
-                        card.style.pointerEvents = 'none';
-                        setTimeout(() => card.remove(), 500);
+                    // Remove the row from the list
+                    const row = document.querySelector(`.suggestion-row[data-org="${org}"]`);
+                    if (row) {
+                        row.style.opacity = '0.5';
+                        row.style.pointerEvents = 'none';
+                        setTimeout(() => row.remove(), 500);
                     }
 
                     // Update count
                     const countEl = document.getElementById('suggestionsCount');
                     countEl.textContent = parseInt(countEl.textContent) - 1;
+                    updateSelectedCount();
                 } else if (result.exists) {
                     showToast('Already following this company', 'error');
                 } else {
