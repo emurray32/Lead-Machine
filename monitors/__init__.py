@@ -7,10 +7,11 @@ from .github_monitor import check_github_repo, check_github_prs, check_all_githu
 from .playstore_monitor import check_play_store_package, check_all_play_store
 from .docs_monitor import check_doc_url, check_all_docs
 from .webhooks import send_webhook, register_webhook, get_webhooks, send_alert_to_webhooks
+from . import discovery
 
 __all__ = [
     'check_github_repo',
-    'check_github_prs', 
+    'check_github_prs',
     'check_all_github',
     'check_play_store_package',
     'check_all_play_store',
@@ -19,5 +20,6 @@ __all__ = [
     'send_webhook',
     'register_webhook',
     'get_webhooks',
-    'send_alert_to_webhooks'
+    'send_alert_to_webhooks',
+    'discovery'
 ]
