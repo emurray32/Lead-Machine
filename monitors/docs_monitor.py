@@ -19,7 +19,8 @@ from .common import (
 try:
     import storage
     DB_AVAILABLE = True
-except:
+except Exception as e:
+    print(f"[WARNING] Database not available in docs_monitor: {e}")
     DB_AVAILABLE = False
 
 
@@ -149,7 +150,8 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict, prev_hreflangs: Dict
             try:
                 with open(prev_text_file, 'r') as f:
                     previous_text = f.read()
-            except:
+            except (FileNotFoundError, IOError, OSError) as e:
+                log(f"Could not read previous text file {prev_text_file}: {e}", "DEBUG")
                 pass
         
         prev_keywords = set(contains_keywords(previous_text)) if previous_text else set()
@@ -186,7 +188,8 @@ def check_doc_url(company: str, url: str, doc_hashes: Dict, prev_hreflangs: Dict
         try:
             with open(prev_text_file, 'w') as f:
                 f.write(text)
-        except:
+        except (IOError, OSError) as e:
+            log(f"Could not write previous text file {prev_text_file}: {e}", "WARNING")
             pass
     
     doc_hashes[url_key] = content_hash

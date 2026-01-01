@@ -17,9 +17,10 @@ import os
 import time
 import yaml
 import threading
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Dict, Any
+from datetime import datetime
+from typing import Any, Dict, List
+
 import config
 from monitors.common import (
     log, ensure_directories, load_json, save_json

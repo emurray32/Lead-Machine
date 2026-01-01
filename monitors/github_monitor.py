@@ -18,7 +18,8 @@ from .common import (
 try:
     import storage
     DB_AVAILABLE = True
-except:
+except Exception as e:
+    print(f"[WARNING] Database not available in github_monitor: {e}")
     DB_AVAILABLE = False
 
 

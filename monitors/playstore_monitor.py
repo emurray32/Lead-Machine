@@ -20,7 +20,8 @@ except ImportError:
 try:
     import storage
     DB_AVAILABLE = True
-except:
+except Exception as e:
+    print(f"[WARNING] Database not available in playstore_monitor: {e}")
     DB_AVAILABLE = False
 
 
@@ -55,7 +56,8 @@ def check_play_store_package(company: str, package_id: str, stored_langs: Dict) 
                 if lang_app and lang_app.get('description'):
                     current_langs.add(lang)
                 time.sleep(0.3)
-            except:
+            except Exception as e:
+                log(f"Could not fetch Play Store app for {package_id} in {lang}: {e}", "DEBUG")
                 pass
         
         new_langs = current_langs - previous_langs

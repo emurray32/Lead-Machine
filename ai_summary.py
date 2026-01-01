@@ -118,8 +118,6 @@ SIGNAL_CONTEXT = {
     'KEYWORD': 'Localization-related keywords were found in code or documentation.'
 }
 
-HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR']
-
 
 def generate_alert_summary(
     source: str,
@@ -176,8 +174,8 @@ def generate_alert_summary(
     reviewer_info = ""
     if reviewers and len(reviewers) > 0:
         reviewer_info = f"Potential contacts: {', '.join(reviewers[:3])} (PR reviewers who can discuss localization needs)"
-    
-    is_high_value = signal_type in HIGH_VALUE_SIGNALS
+
+    is_high_value = signal_type in config.HIGH_VALUE_SIGNALS
     priority_note = "PRIORITY: High-value signal - concrete action, not just discussion." if is_high_value else ""
     
     prompt = f"""You are a sales intelligence analyst helping a localization services salesperson understand market expansion signals.
@@ -270,7 +268,7 @@ def generate_batch_summaries(alerts: list) -> dict:
         return {}
     
     summaries = {}
-    for alert in alerts[:10]:
+    for alert in alerts[:config.MAX_ALERTS_AI_SUMMARY]:
         alert_id = alert.get('id')
         if not alert_id:
             continue
@@ -301,7 +299,7 @@ def generate_batch_summaries(alerts: list) -> dict:
 
 def is_high_value_signal(signal_type: str) -> bool:
     """Check if a signal type is considered high-value."""
-    return signal_type in HIGH_VALUE_SIGNALS
+    return signal_type in config.HIGH_VALUE_SIGNALS
 
 
 def is_available() -> bool:
@@ -349,7 +347,7 @@ def generate_company_profile(company: str, alerts: List[Dict], metrics: Dict) ->
     else:
         maturity_assessment = "Early stage in localization journey."
 
-    high_value_count = sum(1 for a in alerts if a.get('metadata', {}).get('signal_type') in HIGH_VALUE_SIGNALS)
+    high_value_count = sum(1 for a in alerts if a.get('metadata', {}).get('signal_type') in config.HIGH_VALUE_SIGNALS)
 
     prompt = f"""You are a sales intelligence analyst helping understand a company's internationalization journey based on their GitHub activity.
 

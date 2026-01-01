@@ -128,7 +128,8 @@ def get_github_access_token() -> Optional[str]:
         try:
             if datetime.fromisoformat(cached["expires_at"].replace("Z", "+00:00")) > datetime.now():
                 return cached["settings"].get("access_token")
-        except:
+        except (ValueError, AttributeError, KeyError) as e:
+            log(f"Error parsing cached token expiry: {e}", "DEBUG")
             pass
     
     try:

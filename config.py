@@ -60,6 +60,13 @@ LANGUAGE_CODES = [
     "ka", "is", "lv", "lt", "mk", "mt", "mn", "ne", "fa", "sr", "si", "sl"
 ]
 
+# High-value signal types that indicate strong localization intent
+HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR']
+
+# UI and API limits
+MAX_ALERTS_DASHBOARD = 500  # Maximum alerts to fetch for dashboard display
+MAX_ALERTS_AI_SUMMARY = 10  # Maximum alerts to generate AI summaries for
+
 
 def validate_config() -> bool:
     """
