@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 """
-Unified Localization/Phrase-String Intent Monitoring Application
-================================================================
-This application monitors multiple target companies for early localization
-and phrase-string intent signals across three integrated sources:
-1. Public GitHub repositories (commits and PRs)
-2. Google Play App Store updates
-3. Public API/Developer Documentation pages
+GitHub i18n Timeline Intelligence
+==================================
+This application monitors target companies for internationalization signals
+through their public GitHub repositories (commits and PRs).
 
 Features:
 - Parallel processing for faster checks
-- Modular monitor architecture
-- Generic webhook support for Zapier/Make.com
 - PR monitoring for early signals
+- Webhook support for Zapier/Make.com
 
-Run continuously or on-demand. Free-tier friendly but ready for "Always On".
+Run continuously or on-demand.
 """
 
 import os
@@ -29,8 +25,6 @@ from monitors.common import (
     log, ensure_directories, load_json, save_json
 )
 from monitors.github_monitor import check_all_github, check_github_repo, check_github_prs
-from monitors.playstore_monitor import check_all_play_store
-from monitors.docs_monitor import check_all_docs
 from monitors.webhooks import send_alert_to_webhooks
 
 try:
@@ -61,10 +55,7 @@ def load_companies() -> List[Dict[str, Any]]:
             target = {
                 "company": company.get('name', 'Unknown'),
                 "github_org": company.get('github_org'),
-                "github_repos": company.get('github_repos', []),
-                "play_package": company.get('play_package'),
-                "rss_url": None,
-                "doc_urls": company.get('doc_urls', [])
+                "github_repos": company.get('github_repos', [])
             }
             targets.append(target)
         
@@ -134,30 +125,16 @@ def check_github_parallel(targets: List[Dict]) -> int:
 
 
 def check_all_sources_parallel(targets: List[Dict]) -> Dict[str, int]:
-    """Run all source checks in parallel."""
-    log("Starting parallel monitoring across all sources...")
-    results = {"github": 0, "playstore": 0, "docs": 0}
-    
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        github_future = executor.submit(check_github_parallel, targets)
-        playstore_future = executor.submit(check_all_play_store, targets)
-        docs_future = executor.submit(check_all_docs, targets)
-        
-        futures = {
-            github_future: "github",
-            playstore_future: "playstore",
-            docs_future: "docs"
-        }
-        
-        for future in as_completed(futures):
-            source = futures[future]
-            try:
-                results[source] = future.result()
-            except Exception as e:
-                log(f"Error in {source} checks: {e}", "ERROR")
-    
-    total = sum(results.values())
-    log(f"All checks complete. Total alerts: {total} (GitHub: {results['github']}, Play Store: {results['playstore']}, Docs: {results['docs']})")
+    """Run GitHub monitoring (the only source we track)."""
+    log("Starting GitHub monitoring...")
+    results = {"github": 0}
+
+    try:
+        results["github"] = check_github_parallel(targets)
+    except Exception as e:
+        log(f"Error in GitHub checks: {e}", "ERROR")
+
+    log(f"GitHub check complete. Total alerts: {results['github']}")
     return results
 
 
@@ -196,7 +173,6 @@ def main():
         return
     
     last_github_check = 0
-    last_rss_docs_check = 0
 
     # Check if we should run in continuous mode or single-check mode
     continuous_mode = os.environ.get('MONITOR_CONTINUOUS', 'false').lower() == 'true'
@@ -212,14 +188,6 @@ def main():
                 log(f"GitHub check complete: {github_alerts} alerts")
                 checks_performed = True
 
-            if now - last_rss_docs_check >= config.RSS_DOCS_CHECK_INTERVAL:
-                playstore_alerts = check_all_play_store(targets)
-                docs_alerts = check_all_docs(targets)
-                last_rss_docs_check = now
-                log(f"Play Store check complete: {playstore_alerts} alerts")
-                log(f"Documentation check complete: {docs_alerts} alerts")
-                checks_performed = True
-
             if checks_performed:
                 log("Check cycle complete.")
 
@@ -229,7 +197,7 @@ def main():
                 break
 
             # Sleep before next check cycle
-            sleep_time = min(config.GITHUB_CHECK_INTERVAL, config.RSS_DOCS_CHECK_INTERVAL)
+            sleep_time = config.GITHUB_CHECK_INTERVAL
             log(f"Sleeping for {sleep_time} seconds...")
             time.sleep(sleep_time)
 

@@ -129,7 +129,7 @@ def api_stats():
     """API endpoint for statistics."""
     return jsonify(storage.get_alert_stats())
 
-HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'NEW_HREFLANG', 'NEW_APP_LANG', 'OPEN_PR']
+HIGH_VALUE_SIGNALS = ['NEW_LANG_FILE', 'OPEN_PR']
 
 def filter_high_value_alerts(alerts: list) -> list:
     """Filter alerts to only include high-value signals."""
@@ -220,23 +220,17 @@ SIGNAL_EXPLANATIONS = {
         'value': 'HIGH',
         'meaning': 'The company is actively translating their product into a new language. This is strong evidence of expansion plans.'
     },
-    'NEW_HREFLANG': {
-        'title': 'New Regional Site',
-        'description': 'A new regional website version was detected',
+    'OPEN_PR': {
+        'title': 'i18n Pull Request',
+        'description': 'An open PR with localization keywords in the title',
         'value': 'HIGH',
-        'meaning': 'The company created a localized version of their website for a new region. This shows they are expanding into that market.'
-    },
-    'NEW_APP_LANG': {
-        'title': 'New App Language',
-        'description': 'A new language was added to their mobile app',
-        'value': 'HIGH',
-        'meaning': 'Their Android app now supports a new language. This means they are targeting users who speak that language.'
+        'meaning': 'Early signal of upcoming language support - PRs show intent before changes are merged.'
     },
     'KEYWORD': {
         'title': 'Keyword Match',
-        'description': 'Localization-related keywords were found',
+        'description': 'Localization-related keywords were found in commits',
         'value': 'LOW',
-        'meaning': 'Someone mentioned localization in their code or docs. This could mean they are planning to expand, but it could also be routine maintenance.'
+        'meaning': 'Someone mentioned localization in their code. This could mean they are planning to expand, but it could also be routine maintenance.'
     }
 }
 
@@ -260,7 +254,7 @@ def api_add_company():
     data = request.get_json()
     if not data or not data.get('name'):
         return jsonify({'error': 'Company name is required'}), 400
-    
+
     company = {
         'name': data['name']
     }
@@ -270,16 +264,10 @@ def api_add_company():
         repos = [r.strip() for r in data['github_repos'].split(',') if r.strip()]
         if repos:
             company['github_repos'] = repos
-    if data.get('play_package'):
-        company['play_package'] = data['play_package']
-    if data.get('doc_urls'):
-        urls = [u.strip() for u in data['doc_urls'].split(',') if u.strip()]
-        if urls:
-            company['doc_urls'] = urls
-    
+
     companies = load_companies_yaml()
     companies.append(company)
-    
+
     if save_companies_yaml(companies):
         return jsonify({'success': True, 'company': company})
     return jsonify({'error': 'Failed to save'}), 500
@@ -296,21 +284,18 @@ def api_delete_company(name):
 
 @app.route('/api/quick-scan', methods=['POST'])
 def api_quick_scan():
-    """Run a quick scan for a company without saving."""
+    """Run a quick scan to verify a GitHub organization."""
     data = request.get_json()
     if not data:
         return jsonify({'error': 'No data provided'}), 400
-    
+
     results = {
         'company': data.get('name', 'Unknown'),
-        'github': None,
-        'playstore': None,
-        'docs': None,
-        'signals': []
+        'github': None
     }
-    
+
     import requests as http_requests
-    
+
     if data.get('github_org'):
         try:
             org = data['github_org']
@@ -324,50 +309,10 @@ def api_quick_scan():
                     'recent_repos': [r['name'] for r in repos[:5]]
                 }
             else:
-                results['github'] = {'status': 'not_found', 'error': f'Org not found or private'}
+                results['github'] = {'status': 'not_found', 'error': 'Org not found or private'}
         except Exception as e:
             results['github'] = {'status': 'error', 'error': str(e)}
-    
-    if data.get('play_package'):
-        try:
-            from google_play_scraper import app as gplay_app
-            package = data['play_package']
-            app_info = gplay_app(package, lang='en', country='us')
-            languages = app_info.get('descriptionTranslations', [])
-            results['playstore'] = {
-                'status': 'found',
-                'title': app_info.get('title', 'Unknown'),
-                'developer': app_info.get('developer', 'Unknown'),
-                'languages_detected': len(languages) if languages else 'Unknown'
-            }
-        except Exception as e:
-            results['playstore'] = {'status': 'not_found', 'error': str(e)}
-    
-    if data.get('doc_urls'):
-        urls = [u.strip() for u in data['doc_urls'].split(',') if u.strip()]
-        doc_results = []
-        for url in urls[:3]:
-            try:
-                resp = http_requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
-                if resp.status_code == 200:
-                    from bs4 import BeautifulSoup
-                    soup = BeautifulSoup(resp.text, 'html.parser')
-                    hreflangs = []
-                    for link in soup.find_all('link', rel='alternate'):
-                        hl = link.get('hreflang')
-                        if hl:
-                            hreflangs.append(hl)
-                    doc_results.append({
-                        'url': url,
-                        'status': 'accessible',
-                        'hreflangs': hreflangs[:10]
-                    })
-                else:
-                    doc_results.append({'url': url, 'status': 'error', 'code': resp.status_code})
-            except Exception as e:
-                doc_results.append({'url': url, 'status': 'error', 'error': str(e)})
-        results['docs'] = doc_results
-    
+
     return jsonify(results)
 
 @app.route('/api/signal-explanations')
@@ -647,10 +592,6 @@ def api_follow_company():
         company['github_repos'] = enriched['github_repos'][:5]
     elif data.get('repo_name'):
         company['github_repos'] = [data['repo_name']]
-
-    # Add doc URLs if discovered
-    if enriched.get('doc_urls'):
-        company['doc_urls'] = enriched['doc_urls']
 
     # Load existing companies and check for duplicates
     companies = load_companies_yaml()
