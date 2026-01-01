@@ -240,11 +240,12 @@ SIGNAL_EXPLANATIONS = {
     }
 }
 
-@app.route('/admin')
-def admin():
-    """Admin panel for managing companies."""
+@app.route('/following')
+@app.route('/admin')  # Keep for backwards compatibility
+def following():
+    """Companies you're following."""
     companies = load_companies_yaml()
-    return render_template('admin.html', 
+    return render_template('admin.html',
                          companies=companies,
                          signal_explanations=SIGNAL_EXPLANATIONS)
 
