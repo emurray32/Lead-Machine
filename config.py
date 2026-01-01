@@ -1,5 +1,5 @@
 """
-Centralized configuration for the Localization Monitor.
+Centralized configuration for the GitHub i18n Timeline Monitor.
 """
 import os
 import sys
@@ -14,7 +14,6 @@ SLACK_WEBHOOK = os.environ.get("SLACK_WEBHOOK")
 
 # Monitoring Intervals (in seconds)
 GITHUB_CHECK_INTERVAL = 6 * 60 * 60
-RSS_DOCS_CHECK_INTERVAL = 24 * 60 * 60
 MAIN_LOOP_SLEEP = 60
 GITHUB_RATE_LIMIT_SLEEP = 60
 REQUEST_DELAY = 1
@@ -22,10 +21,6 @@ REQUEST_DELAY = 1
 # Files and Directories
 DATA_DIR = "monitoring_data"
 LAST_COMMITS_FILE = os.path.join(DATA_DIR, "last_commits.json")
-SEEN_RSS_FILE = os.path.join(DATA_DIR, "seen_rss.json")
-DOC_HASHES_FILE = os.path.join(DATA_DIR, "doc_hashes.json")
-PLAY_STORE_LANGS_FILE = os.path.join(DATA_DIR, "play_store_langs.json")
-PREVIOUS_TEXTS_DIR = os.path.join(DATA_DIR, "previous_texts")
 WEBHOOKS_FILE = os.path.join(DATA_DIR, "webhooks.json")
 COMPANIES_FILE = "companies.yaml"
 

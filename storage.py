@@ -1,5 +1,5 @@
 """
-Database storage layer for persisting alerts.
+Database storage layer for persisting GitHub i18n alerts.
 Uses PostgreSQL via psycopg2.
 """
 
@@ -124,24 +124,23 @@ def get_companies() -> List[str]:
     return companies
 
 def get_alert_stats() -> Dict:
-    """Get alert statistics."""
+    """Get alert statistics (GitHub only)."""
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
+
     cur.execute("""
-        SELECT 
+        SELECT
             COUNT(*) as total,
-            COUNT(CASE WHEN source = 'github' THEN 1 END) as github_count,
-            COUNT(CASE WHEN source = 'playstore' OR source = 'rss' THEN 1 END) as playstore_count,
-            COUNT(CASE WHEN source = 'docs' THEN 1 END) as docs_count
+            COUNT(CASE WHEN source = 'github' THEN 1 END) as github_count
         FROM alerts
+        WHERE source = 'github'
     """)
     result = cur.fetchone()
-    stats = dict(result) if result else {"total": 0, "github_count": 0, "playstore_count": 0, "docs_count": 0}
-    
+    stats = dict(result) if result else {"total": 0, "github_count": 0}
+
     cur.close()
     conn.close()
-    
+
     return stats
 
 def prune_old_alerts(days: int = 90) -> int:
