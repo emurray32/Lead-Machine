@@ -612,6 +612,178 @@ def api_follow_company():
     return jsonify({'error': 'Failed to save'}), 500
 
 
+# ============================================================
+# CONTRIBUTORS ROUTES
+# ============================================================
+
+@app.route('/contributors')
+def contributors_page():
+    """Contributors page - people to reach out to for conversations."""
+    company_filter = request.args.get('company', '')
+    sort_by = request.args.get('sort', 'commits')
+    sort_order = request.args.get('order', 'desc')
+
+    contributors = storage.get_all_contributors(
+        company=company_filter if company_filter else None,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=200
+    )
+
+    # Add friendly time formatting
+    for contributor in contributors:
+        contributor['last_active_friendly'] = friendly_time(contributor.get('last_active'))
+        contributor['first_seen_friendly'] = friendly_time(contributor.get('first_seen'))
+
+    stats = storage.get_contributor_stats()
+    companies = storage.get_companies()
+
+    return render_template('contributors.html',
+                          contributors=contributors,
+                          stats=stats,
+                          companies=companies,
+                          current_company=company_filter,
+                          current_sort=sort_by,
+                          current_order=sort_order,
+                          ai_available=AI_AVAILABLE)
+
+
+@app.route('/api/contributors')
+def api_contributors():
+    """API endpoint for contributors with filtering and sorting."""
+    company = request.args.get('company')
+    sort_by = request.args.get('sort', 'commits')
+    sort_order = request.args.get('order', 'desc')
+    limit = request.args.get('limit', 100, type=int)
+
+    contributors = storage.get_all_contributors(
+        company=company if company else None,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        limit=limit
+    )
+
+    # Convert datetime objects for JSON
+    for contributor in contributors:
+        if contributor.get('first_seen'):
+            contributor['first_seen'] = contributor['first_seen'].isoformat()
+        if contributor.get('last_active'):
+            contributor['last_active'] = contributor['last_active'].isoformat()
+
+    return jsonify({
+        'contributors': contributors,
+        'count': len(contributors)
+    })
+
+
+@app.route('/api/contributors/stats')
+def api_contributor_stats():
+    """API endpoint for contributor statistics."""
+    return jsonify(storage.get_contributor_stats())
+
+
+@app.route('/api/contributor/<username>/summary')
+def api_contributor_summary(username):
+    """Generate AI outreach summary for a contributor."""
+    if not AI_AVAILABLE or not ai_summary:
+        return jsonify({'error': 'AI not available', 'available': False}), 503
+
+    company = request.args.get('company', '')
+
+    # Get contributor details
+    details = storage.get_contributor_details(username)
+    if not details or details['total_commits'] == 0:
+        return jsonify({'error': 'Contributor not found'}), 404
+
+    # If company specified, use that; otherwise use first company
+    if company and company in details['companies']:
+        company_data = details['companies'][company]
+        languages = company_data.get('languages', [])
+    else:
+        # Use the company with most commits
+        company = max(details['companies'].keys(),
+                     key=lambda c: details['companies'][c]['commit_count'])
+        company_data = details['companies'][company]
+        languages = details['all_languages']
+
+    try:
+        summary = ai_summary.generate_contributor_outreach_summary(
+            username=username,
+            company=company,
+            commit_count=company_data['commit_count'],
+            languages=languages,
+            signal_types=[],  # Could be enhanced to track per-contributor
+            lang_file_commits=0,
+            pr_count=0
+        )
+
+        if summary:
+            return jsonify({'summary': summary, 'available': True})
+        return jsonify({'error': 'Failed to generate summary', 'available': True}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'available': True}), 500
+
+
+@app.route('/api/contributor/<username>')
+def api_contributor_details(username):
+    """Get detailed information about a specific contributor."""
+    details = storage.get_contributor_details(username)
+
+    if not details or details['total_commits'] == 0:
+        return jsonify({'error': 'Contributor not found'}), 404
+
+    # Convert datetime objects for JSON
+    for company, data in details['companies'].items():
+        if data.get('last_active'):
+            data['last_active'] = data['last_active'].isoformat()
+
+    for alert in details.get('recent_alerts', []):
+        if alert.get('created_at'):
+            alert['created_at'] = alert['created_at'].isoformat()
+
+    return jsonify(details)
+
+
+@app.route('/export/contributors/csv')
+def export_contributors_csv():
+    """Export contributors as CSV file."""
+    company = request.args.get('company')
+    sort_by = request.args.get('sort', 'commits')
+
+    contributors = storage.get_all_contributors(
+        company=company if company else None,
+        sort_by=sort_by,
+        limit=10000
+    )
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow(['Username', 'Company', 'Commits', 'Lang Files Added', 'PRs', 'Languages', 'Last Active', 'GitHub Profile'])
+
+    for c in contributors:
+        writer.writerow([
+            c.get('username', ''),
+            c.get('company', ''),
+            c.get('commit_count', 0),
+            c.get('lang_file_commits', 0),
+            c.get('pr_count', 0),
+            ', '.join(c.get('languages', [])),
+            c.get('last_active', '').strftime('%Y-%m-%d') if c.get('last_active') else '',
+            f"https://github.com/{c.get('username', '')}"
+        ])
+
+    output.seek(0)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'contributors_{timestamp}.csv'
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={filename}'}
+    )
+
+
 if __name__ == '__main__':
     debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     app.run(host='0.0.0.0', port=5000, debug=debug_mode)
