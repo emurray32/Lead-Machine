@@ -239,45 +239,95 @@
         }
 
         .company-card {
-            background: var(--gray-50);
-            border-radius: 10px;
-            padding: 1.25rem;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
             cursor: pointer;
             transition: all 0.2s;
-            border: 1px solid transparent;
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .company-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gray-300);
+        }
+
+        .company-card.hot::before {
+            background: linear-gradient(90deg, #ef4444, #f97316);
+        }
+
+        .company-card.warm::before {
+            background: var(--warning);
         }
 
         .company-card:hover {
-            background: white;
-            border-color: var(--primary);
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
+            border-color: var(--primary);
         }
 
         .company-card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            gap: 1rem;
         }
 
         .company-name {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             color: var(--gray-900);
+            flex: 1;
+        }
+
+        .signal-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .signal-indicator.hot {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: white;
+        }
+
+        .signal-indicator.warm {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .signal-indicator.cool {
+            background: var(--primary-light);
+            color: var(--primary);
         }
 
         .company-stats {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
         }
 
         .mini-stat {
             background: var(--primary-light);
             color: var(--primary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 11px;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
         }
 
@@ -292,16 +342,75 @@
         }
 
         .company-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            font-size: 13px;
+            color: var(--gray-600);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .meta-item {
             display: flex;
-            gap: 1rem;
-            font-size: 12px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-label {
             color: var(--gray-500);
+            font-size: 12px;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: var(--gray-800);
         }
 
         .company-link {
             text-decoration: none;
             color: inherit;
             display: block;
+        }
+
+        .card-action {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-card {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            flex: 1;
+        }
+
+        .btn-view {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-reach {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-reach:hover {
+            opacity: 0.9;
         }
 
         .recent-activity {
@@ -453,26 +562,24 @@
         <div class="header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <div class="logo-icon">i18n</div>
-                    GitHub i18n Timeline
+                    <div class="logo-icon">LM</div>
+                    Lead Machine
                 </a>
                 <nav class="header-nav">
                     <a href="/" class="nav-link active">Dashboard</a>
-                    <a href="/discover" class="nav-link">Discover</a>
-                    <a href="/contributors" class="nav-link">Contributors</a>
-                    <a href="/admin" class="nav-link">Admin</a>
+                    <a href="/admin" class="nav-link">Settings</a>
                 </nav>
             </div>
             <div class="header-actions">
-                <a href="/export/csv" class="btn btn-secondary btn-sm">Export CSV</a>
+                <a href="/export/csv?high_value=true" class="btn btn-secondary btn-sm">Export Leads</a>
             </div>
         </div>
     </div>
 
     <div class="main-content">
         <div class="page-header">
-            <h1 class="page-title">i18n Intelligence Dashboard</h1>
-            <p class="page-subtitle">Track company internationalization journeys through their GitHub activity</p>
+            <h1 class="page-title">This Week's Hot Leads</h1>
+            <p class="page-subtitle">Companies showing strong intent signals from their code repository activity</p>
         </div>
 
         <div class="stats-bar">
@@ -493,31 +600,43 @@
         {% if companies_summary %}
         <div class="companies-section">
             <div class="section-header">
-                <h2 class="section-title">Companies with i18n Activity</h2>
+                <h2 class="section-title">Lead Ranking (by Signal Strength)</h2>
             </div>
             <div class="companies-grid">
                 {% for company in companies_summary %}
-                <a href="/company/{{ company.company }}" class="company-link">
-                    <div class="company-card">
+                <div class="company-link">
+                    <div class="company-card {% if company.total_signals >= 10 %}hot{% elif company.total_signals >= 5 %}warm{% endif %}">
                         <div class="company-card-header">
-                            <span class="company-name">{{ company.company }}</span>
-                            <div class="company-stats">
-                                {% if company.lang_files > 0 %}
-                                <span class="mini-stat success">{{ company.lang_files }} files</span>
-                                {% endif %}
-                                {% if company.open_prs > 0 %}
-                                <span class="mini-stat warning">{{ company.open_prs }} PRs</span>
-                                {% endif %}
+                            <div>
+                                <span class="company-name">{{ company.company }}</span>
+                                <div class="company-stats">
+                                    {% if company.lang_files > 0 %}
+                                    <span class="mini-stat success">{{ company.lang_files }} lang files</span>
+                                    {% endif %}
+                                    {% if company.open_prs > 0 %}
+                                    <span class="mini-stat warning">{{ company.open_prs }} PRs</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="signal-indicator {% if company.total_signals >= 10 %}hot{% elif company.total_signals >= 5 %}warm{% else %}cool{% endif %}">
+                                {{ company.total_signals }}
                             </div>
                         </div>
                         <div class="company-meta">
-                            <span>{{ company.total_signals }} signals</span>
-                            {% if company.last_activity %}
-                            <span>Last: {{ company.last_activity.strftime('%b %d') if company.last_activity else 'N/A' }}</span>
-                            {% endif %}
+                            <div class="meta-item">
+                                <span class="meta-label">Total Signals</span>
+                                <span class="meta-value">{{ company.total_signals }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Last Activity</span>
+                                <span class="meta-value">{{ company.last_activity.strftime('%m/%d') if company.last_activity else 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <div class="card-action">
+                            <a href="/company/{{ company.company }}" class="btn-card btn-view">View Details</a>
                         </div>
                     </div>
-                </a>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -525,8 +644,8 @@
 
         <div class="recent-activity">
             <div class="section-header">
-                <h2 class="section-title">Recent i18n Activity</h2>
-                <span style="color: var(--gray-500); font-size: 13px;">{{ alerts|length }} events</span>
+                <h2 class="section-title">High-Value Signals This Week</h2>
+                <span style="color: var(--gray-500); font-size: 13px;">Latest activity</span>
             </div>
 
             {% if alerts %}
