@@ -9,15 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #eef2ff;
+            --primary: #03EAB3;
+            --primary-dark: #02c591;
+            --primary-light: #e0faf5;
+            --black: #181818;
             --success: #10b981;
             --success-light: #d1fae5;
             --warning: #f59e0b;
             --warning-light: #fef3c7;
             --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
+            --gray-100: #f4f4f4;
             --gray-200: #e5e7eb;
             --gray-300: #d1d5db;
             --gray-400: #9ca3af;
@@ -232,8 +233,8 @@
         }
 
         .companies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
             padding: 1.5rem;
         }
@@ -245,63 +246,39 @@
             cursor: pointer;
             transition: all 0.2s;
             border: 1px solid var(--gray-200);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .company-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gray-300);
-        }
-
-        .company-card.hot::before {
-            background: linear-gradient(90deg, #ef4444, #f97316);
-        }
-
-        .company-card.warm::before {
-            background: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
         }
 
         .company-card:hover {
             box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
             border-color: var(--primary);
+            background: var(--gray-100);
         }
 
-        .company-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            gap: 1rem;
+        .company-card.hot {
+            border-left: 4px solid #ef4444;
         }
 
-        .company-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--gray-900);
-            flex: 1;
+        .company-card.warm {
+            border-left: 4px solid var(--warning);
         }
 
         .signal-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            font-size: 14px;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            font-size: 24px;
             font-weight: 700;
             flex-shrink: 0;
         }
 
         .signal-indicator.hot {
-            background: linear-gradient(135deg, #ef4444, #f97316);
+            background: #ef4444;
             color: white;
         }
 
@@ -315,11 +292,30 @@
             color: var(--primary);
         }
 
+        .company-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .company-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            gap: 1rem;
+        }
+
+        .company-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--black);
+        }
+
         .company-stats {
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
         }
 
         .mini-stat {
@@ -342,19 +338,15 @@
         }
 
         .company-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            display: flex;
+            gap: 1.5rem;
             font-size: 13px;
             color: var(--gray-600);
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--gray-100);
         }
 
         .meta-item {
             display: flex;
-            justify-content: space-between;
+            gap: 0.5rem;
             align-items: center;
         }
 
@@ -371,18 +363,21 @@
         .company-link {
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            width: 100%;
+            gap: 1.5rem;
         }
 
         .card-action {
             display: flex;
             gap: 0.5rem;
+            flex-shrink: 0;
         }
 
         .btn-card {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 13px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             border: none;
@@ -391,8 +386,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
-            flex: 1;
+            white-space: nowrap;
         }
 
         .btn-view {
@@ -402,15 +396,6 @@
 
         .btn-view:hover {
             background: var(--primary-dark);
-        }
-
-        .btn-reach {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-
-        .btn-reach:hover {
-            opacity: 0.9;
         }
 
         .recent-activity {
@@ -604,39 +589,33 @@
             </div>
             <div class="companies-grid">
                 {% for company in companies_summary %}
-                <div class="company-link">
-                    <div class="company-card {% if company.total_signals >= 10 %}hot{% elif company.total_signals >= 5 %}warm{% endif %}">
+                <a href="/company/{{ company.company }}" class="company-link">
+                    <div class="signal-indicator {% if company.total_signals >= 10 %}hot{% elif company.total_signals >= 5 %}warm{% else %}cool{% endif %}">
+                        {{ company.total_signals }}
+                    </div>
+                    <div class="company-info">
                         <div class="company-card-header">
-                            <div>
-                                <span class="company-name">{{ company.company }}</span>
-                                <div class="company-stats">
-                                    {% if company.lang_files > 0 %}
-                                    <span class="mini-stat success">{{ company.lang_files }} lang files</span>
-                                    {% endif %}
-                                    {% if company.open_prs > 0 %}
-                                    <span class="mini-stat warning">{{ company.open_prs }} PRs</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="signal-indicator {% if company.total_signals >= 10 %}hot{% elif company.total_signals >= 5 %}warm{% else %}cool{% endif %}">
-                                {{ company.total_signals }}
-                            </div>
+                            <span class="company-name">{{ company.company }}</span>
+                        </div>
+                        <div class="company-stats">
+                            {% if company.lang_files > 0 %}
+                            <span class="mini-stat success">{{ company.lang_files }} lang files</span>
+                            {% endif %}
+                            {% if company.open_prs > 0 %}
+                            <span class="mini-stat warning">{{ company.open_prs }} PRs</span>
+                            {% endif %}
                         </div>
                         <div class="company-meta">
                             <div class="meta-item">
-                                <span class="meta-label">Total Signals</span>
-                                <span class="meta-value">{{ company.total_signals }}</span>
+                                <span class="meta-label">Last Activity:</span>
+                                <span class="meta-value">{{ company.last_activity.strftime('%b %d') if company.last_activity else 'N/A' }}</span>
                             </div>
-                            <div class="meta-item">
-                                <span class="meta-label">Last Activity</span>
-                                <span class="meta-value">{{ company.last_activity.strftime('%m/%d') if company.last_activity else 'N/A' }}</span>
-                            </div>
-                        </div>
-                        <div class="card-action">
-                            <a href="/company/{{ company.company }}" class="btn-card btn-view">View Details</a>
                         </div>
                     </div>
-                </div>
+                    <div class="card-action" style="pointer-events: none;">
+                        <button class="btn-card btn-view" onclick="event.preventDefault()">View Details →</button>
+                    </div>
+                </a>
                 {% endfor %}
             </div>
         </div>
