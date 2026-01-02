@@ -539,6 +539,70 @@
             display: inline-block;
             font-family: monospace;
         }
+
+        .contributors-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .contributors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contributor-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .contributor-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .contributor-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .contributor-actions {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+            margin-top: 0.75rem;
+        }
+
+        .btn-linkedin {
+            flex: 1;
+            background: #0a66c2;
+            color: white;
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-linkedin:hover {
+            background: #053b7b;
+        }
     </style>
 </head>
 <body>
@@ -755,6 +819,26 @@
                 </div>
             </div>
         </div>
+
+        {% if metrics.contributors %}
+        <div class="contributors-section">
+            <h2 class="section-title">Team Members Involved in Localization</h2>
+            <p style="color: var(--gray-500); font-size: 13px; margin-top: 0.5rem; margin-bottom: 1rem;">
+                These developers are actively working on international expansion. Find them on LinkedIn or GitHub to personalize your outreach.
+            </p>
+            <div class="contributors-grid">
+                {% for contributor in metrics.contributors %}
+                <div class="contributor-card">
+                    <div class="contributor-name">{{ contributor }}</div>
+                    <div class="contributor-actions">
+                        <a href="https://www.linkedin.com/search/results/people/?keywords={{ contributor }}&origin=GLOBAL_SEARCH_HEADER"
+                           target="_blank" class="btn-linkedin">Find on LinkedIn</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         {% endif %}
     </main>
