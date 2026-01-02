@@ -9,15 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #eef2ff;
+            --primary: #03EAB3;
+            --primary-dark: #02c591;
+            --primary-light: #e0faf5;
+            --black: #181818;
             --success: #10b981;
             --success-light: #d1fae5;
             --warning: #f59e0b;
             --warning-light: #fef3c7;
             --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
+            --gray-100: #f4f4f4;
             --gray-200: #e5e7eb;
             --gray-300: #d1d5db;
             --gray-400: #9ca3af;
@@ -177,6 +178,7 @@
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            color: var(--black);
         }
 
         .company-subtitle {
@@ -539,6 +541,70 @@
             display: inline-block;
             font-family: monospace;
         }
+
+        .contributors-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .contributors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contributor-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .contributor-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .contributor-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .contributor-actions {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+            margin-top: 0.75rem;
+        }
+
+        .btn-linkedin {
+            flex: 1;
+            background: #0a66c2;
+            color: white;
+            padding: 0.4rem 0.5rem;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-linkedin:hover {
+            background: #053b7b;
+        }
     </style>
 </head>
 <body>
@@ -546,18 +612,16 @@
         <div class="header-content">
             <div class="header-left">
                 <a href="/" class="logo">
-                    <span class="logo-icon">i18n</span>
-                    GitHub i18n Timeline
+                    <span class="logo-icon">LM</span>
+                    Lead Machine
                 </a>
                 <nav class="header-nav">
                     <a href="/" class="nav-link">Dashboard</a>
-                    <a href="/discover" class="nav-link">Discover</a>
-                    <a href="/contributors" class="nav-link">Contributors</a>
-                    <a href="/admin" class="nav-link">Admin</a>
+                    <a href="/admin" class="nav-link">Settings</a>
                 </nav>
             </div>
             <div>
-                <a href="/?company={{ company_name }}" class="btn btn-secondary">View in Dashboard</a>
+                <a href="/" class="btn btn-secondary">← Back to Leads</a>
             </div>
         </div>
     </header>
@@ -582,41 +646,41 @@
         <div class="company-header">
             <h1 class="company-title">{{ company_name }}</h1>
             <p class="company-subtitle">
-                Internationalization Timeline
+                International Expansion Signals
                 {% if metrics.journey_duration %}
-                | Journey: {{ metrics.journey_duration }}
+                • Active for {{ metrics.journey_duration }}
                 {% endif %}
                 {% if metrics.last_activity_friendly %}
-                | Last activity: {{ metrics.last_activity_friendly }}
+                • Updated {{ metrics.last_activity_friendly }}
                 {% endif %}
             </p>
 
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value">{{ timeline|length }}</div>
-                    <div class="stat-label">Total Events</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ metrics.new_lang_files or 0 }}</div>
-                    <div class="stat-label">Language Files</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ metrics.open_prs or 0 }}</div>
-                    <div class="stat-label">i18n PRs</div>
+                    <div class="stat-label">Expansion Events</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ metrics.detected_languages|length if metrics.detected_languages else 0 }}</div>
-                    <div class="stat-label">Languages</div>
+                    <div class="stat-label">Markets Targeted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ metrics.new_lang_files or 0 }}</div>
+                    <div class="stat-label">New Translations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ metrics.open_prs or 0 }}</div>
+                    <div class="stat-label">Active PRs</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ metrics.contributors|length if metrics.contributors else 0 }}</div>
-                    <div class="stat-label">Contributors</div>
+                    <div class="stat-label">Team Members</div>
                 </div>
             </div>
 
             {% if metrics.detected_languages %}
             <div class="languages-section">
-                <div class="section-label">Languages Detected</div>
+                <div class="section-label">Markets Being Localized For</div>
                 <div class="languages-list">
                     {% for lang in metrics.detected_languages[:20] %}
                     <span class="lang-tag">{{ lang }}</span>
@@ -629,11 +693,14 @@
             {% endif %}
 
             {% if metrics.contributors %}
-            <div class="section-label" style="margin-top: 1rem;">Key Contributors</div>
+            <div class="section-label" style="margin-top: 1.5rem;">Team Members to Contact</div>
             <div class="contributors-list">
-                {% for contributor in metrics.contributors[:10] %}
+                {% for contributor in metrics.contributors[:15] %}
                 <span class="contributor-tag">{{ contributor }}</span>
                 {% endfor %}
+                {% if metrics.contributors|length > 15 %}
+                <span class="contributor-tag">+{{ metrics.contributors|length - 15 }} more</span>
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -642,9 +709,9 @@
             <div class="timeline-section">
                 <div class="section-header">
                     <h2 class="section-title">
-                        i18n Timeline
+                        International Expansion Timeline
                     </h2>
-                    <span class="event-count">{{ timeline|length }} events</span>
+                    <span class="event-count">{{ timeline|length }} milestones</span>
                 </div>
 
                 <div class="timeline">
@@ -656,17 +723,17 @@
                             <div class="event-header">
                                 <span class="event-type {{ event_class }}">
                                     {% if event.signal_type == 'NEW_LANG_FILE' %}
-                                        New Language File
+                                        New Market Added
                                     {% elif event.signal_type == 'OPEN_PR' %}
-                                        i18n Pull Request
+                                        Active Localization
                                     {% else %}
-                                        i18n Activity
+                                        Expansion Activity
                                     {% endif %}
                                 </span>
                                 <span class="event-date">{{ event.friendly_time }}</span>
                             </div>
 
-                            <div class="event-title">{{ event.title or 'i18n commit' }}</div>
+                            <div class="event-title">{{ event.title or 'Localization update' }}</div>
 
                             {% if event.message %}
                             <div class="event-details">{{ event.message[:150] }}{% if event.message|length > 150 %}...{% endif %}</div>
@@ -713,7 +780,7 @@
             <div class="sidebar">
                 <div class="sidebar-card">
                     <div class="sidebar-title">
-                        i18n Journey Narrative
+                        Expansion Strategy
                         {% if ai_available %}
                         <button class="btn btn-secondary" onclick="refreshJourney()" id="journey-btn" style="padding: 0.25rem 0.5rem; font-size: 12px;">Refresh</button>
                         {% endif %}
@@ -722,11 +789,11 @@
                         {% if ai_available %}
                         <div class="loading" id="journey-loading">
                             <div class="spinner"></div>
-                            <span>Analyzing journey...</span>
+                            <span>Analyzing strategy...</span>
                         </div>
                         {% else %}
                         <p style="color: var(--gray-500);">
-                            AI analysis not available. Connect Gemini AI to enable journey narratives.
+                            AI analysis not available. Connect Gemini AI to generate insights.
                         </p>
                         {% endif %}
                     </div>
@@ -734,7 +801,7 @@
 
                 <div class="sidebar-card">
                     <div class="sidebar-title">
-                        Company Analysis
+                        Outreach Copy
                         {% if ai_available %}
                         <button class="btn btn-secondary" onclick="refreshProfile()" id="profile-btn" style="padding: 0.25rem 0.5rem; font-size: 12px;">Refresh</button>
                         {% endif %}
@@ -743,7 +810,7 @@
                         {% if ai_available %}
                         <div class="loading" id="profile-loading">
                             <div class="spinner"></div>
-                            <span>Generating analysis...</span>
+                            <span>Generating copy...</span>
                         </div>
                         {% else %}
                         <p style="color: var(--gray-500);">
@@ -754,6 +821,26 @@
                 </div>
             </div>
         </div>
+
+        {% if metrics.contributors %}
+        <div class="contributors-section">
+            <h2 class="section-title">Team Members Involved in Localization</h2>
+            <p style="color: var(--gray-500); font-size: 13px; margin-top: 0.5rem; margin-bottom: 1rem;">
+                These developers are actively working on international expansion. Find them on LinkedIn or GitHub to personalize your outreach.
+            </p>
+            <div class="contributors-grid">
+                {% for contributor in metrics.contributors %}
+                <div class="contributor-card">
+                    <div class="contributor-name">{{ contributor }}</div>
+                    <div class="contributor-actions">
+                        <a href="https://www.linkedin.com/search/results/people/?keywords={{ contributor }}&origin=GLOBAL_SEARCH_HEADER"
+                           target="_blank" class="btn-linkedin">Find on LinkedIn</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
 
         {% endif %}
     </main>
